@@ -1,10 +1,12 @@
 pragma solidity ^0.5.16;
 
 contract metaCoin {
-    mapping (address => uint)  public balances;
+    uint public constant totalSupply = 10000;
     
-    constructor () public {
-		balances[msg.sender] = 10000;
+    mapping (address => uint)  public balances;
+	
+	constructor (address account) public {
+		balances[account] = totalSupply;
 	}
 	
 	function sendCoin(address receiver, uint amount) public returns(bool sufficient) {
