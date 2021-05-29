@@ -9,21 +9,16 @@ contract metaCoin {
 		balances[account] = totalSupply;
 	}
 	
-	function sendCoin(address receiver, uint amount) public returns(bool sufficient) {
-		if (balances[msg.sender] < amount) return false;
-		
-		balances[msg.sender] -= amount;
-		balances[receiver] += amount;
-		
-		return true;
+	function sendCoin(address receiver, uint amount) public returns(int8 result) {
+		return sendCoin(msg.sender, receiver, amount);
 	}
 	
-	function sendCoin(address sender, address receiver, uint amount) public returns(bool sufficient) {
-		if (balances[sender] < amount) return false;
+	function sendCoin(address sender, address receiver, uint amount) public returns(int8 result) {
+		if (balances[sender] < amount) return 0;
 		
 		balances[sender] -= amount;
 		balances[receiver] += amount;
 		
-		return true;
+		return 1;
 	}
 }
