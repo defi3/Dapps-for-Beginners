@@ -1,11 +1,11 @@
 pragma solidity ^0.5.16;
 
-import "./metaCoin.sol";
+import "./MetaCoin.sol";
 
-contract coinCaller {
-    function sendCoin(address coinContractAddress, address receiver, uint amount) public returns(bool) {
-		metaCoin m = metaCoin(coinContractAddress);
+contract CoinCaller {
+    function transfer(address coinContractAddress, address receiver, uint amount) public returns(bool) {
+		MetaCoin mc = MetaCoin(coinContractAddress);
 		
-		return m.sendCoin(msg.sender, receiver, amount);
+		return mc.transfer(msg.sender, receiver, amount);
 	}
 }
