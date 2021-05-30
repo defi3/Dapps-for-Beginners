@@ -33,7 +33,7 @@ contract MetaCoin {
 		return true;
 	}
 	
-	function transfer(address _from, address _to, uint amount) public returns(bool) {
+	function transfer2(address _from, address _to, uint amount) public returns(bool) {
 	    require(_to != address(0));
 	    
 		require(balances[_from] >= amount, "MetaCoin::transfer: _from does not have enough amount");

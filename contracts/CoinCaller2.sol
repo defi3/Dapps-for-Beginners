@@ -1,15 +1,33 @@
-pragma solidity ^0.5.16;
+pragma solidity ^0.6.0;
 
-import "./MetaCoin.sol";
-
-contract CoinCaller2 {
-    MetaCoin internal mc;
+contract CoinCallerAbi {
+    address internal mc;
     
-    constructor(address coinContractAddress) public {
-        mc = MetaCoin(coinContractAddress);
+    constructor(address _address) public {
+        mc = _address;
     }
     
     function transfer(address receiver, uint amount) public returns(bool) {
-		return mc.transfer(msg.sender, receiver, amount);
+        (bool success, bytes memory result) = mc.call(abi.encodeWithSignature("transfer(address,uint256)", receiver, amount));
+        
+        require(success, "fail to call transfer");
+        
+		return abi.decode(result, (bool));
+	}
+    
+    function transfer2(address receiver, uint amount) public returns(bool) {
+        (bool success, bytes memory result) = mc.call(abi.encodeWithSignature("transfer2(address,address,uint256)", msg.sender, receiver, amount));
+        
+        require(success, "fail to call transfer");
+        
+		return abi.decode(result, (bool));
+	}
+	
+	function balanceOf(address account) public returns (uint) {
+        (bool success, bytes memory result) = mc.call(abi.encodeWithSignature("balanceOf(address)", account));
+        
+        require(success, "fail to call balanceOf");
+        
+		return abi.decode(result, (uint));
 	}
 }
