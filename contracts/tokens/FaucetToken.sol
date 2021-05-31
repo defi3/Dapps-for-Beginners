@@ -1,4 +1,8 @@
-pragma solidity ^0.5.16;
+/**
+ *   Source: https://github.com/ajlopez/DeFiProt/blob/master/contracts/test/FaucetToken.sol
+ * 
+ */
+pragma solidity >=0.5.0 <0.9.0;
 
 import "./StandardToken.sol";
 

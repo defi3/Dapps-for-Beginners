@@ -1,8 +1,11 @@
-pragma solidity ^0.5.16;
-
+/**
+ *   Source: https://github.com/ajlopez/DeFiProt/blob/master/contracts/test/BasicToken.sol
+ * 
+ */
+pragma solidity >=0.5.0 <0.9.0;
 
 import "./ERC20Basic.sol";
-import "../utils/SafeMath.sol";
+import "./Balance.sol";
 
 
 /**
@@ -10,9 +13,9 @@ import "../utils/SafeMath.sol";
  * @dev Basic version of StandardToken, with no allowances.
  */
 contract BasicToken is ERC20Basic {
-    using SafeMath for uint256;
 
     mapping(address => uint256) internal balances;
+    using Balances for *;
 
     uint256 internal totalSupply_;
 
@@ -25,16 +28,14 @@ contract BasicToken is ERC20Basic {
 
     /**
     * @dev Transfer token for a specified address
-    * @param _to The address to transfer to.
-    * @param _value The amount to be transferred.
+    * @param to The address to transfer to.
+    * @param amount The amount to be transferred.
     */
-    function transfer(address _to, uint256 _value) public returns (bool) {
-        require(_to != address(0));
-        require(_value <= balances[msg.sender]);
-
-        balances[msg.sender] = balances[msg.sender].sub(_value);
-        balances[_to] = balances[_to].add(_value);
-        emit Transfer(msg.sender, _to, _value);
+    function transfer(address to, uint256 amount) public returns (bool) {
+        balances.move(msg.sender, to, amount);
+        
+        emit Transfer(msg.sender, to, amount);
+        
         return true;
     }
 
