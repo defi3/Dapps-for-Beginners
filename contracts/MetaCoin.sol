@@ -21,7 +21,7 @@ contract MetaCoin is StandardToken {
     string public constant symbol = "MC";
     
     /// @notice Total number of tokens in circulation
-    uint public constant totalSupply__ = 10000;
+    uint public constant initialSupply = 10000;
     
     /// @notice EIP-20 token decimals for this token
     uint8 public constant decimals = 2;
@@ -30,7 +30,7 @@ contract MetaCoin is StandardToken {
 	constructor (address account) public {
 	    require(msg.sender == account, "MetaCoin::constructor: only the specific account can create a new contract");
 		
-		totalSupply_ = totalSupply__;
-        balances[account] = totalSupply__;
+		totalSupply_ = initialSupply;
+        balances[account] = initialSupply;
 	}
 }
