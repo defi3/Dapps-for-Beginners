@@ -1,4 +1,4 @@
-pragma solidity ^0.5.12;
+pragma solidity ^0.5.16;
 
 
 /**
@@ -8,7 +8,8 @@ pragma solidity ^0.5.12;
  */
 contract ERC20Basic {
     function totalSupply() public view returns (uint256);
-    function balanceOf(address who) public view returns (uint256);
-    function transfer(address to, uint256 value) public returns (bool);
-    event Transfer(address indexed from, address indexed to, uint256 value);
+    function balanceOf(address account) public view returns (uint256);
+    function transfer(address to, uint256 amount) public returns (bool);
+    
+    event Transfer(address indexed from, address indexed to, uint256 amount);
 }

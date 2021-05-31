@@ -1,4 +1,4 @@
-pragma solidity ^0.5.12;
+pragma solidity ^0.5.16;
 
 import "./StandardToken.sol";
 
@@ -12,20 +12,13 @@ contract FaucetToken is StandardToken {
     string public symbol;
     uint8 public decimals;
 
-    constructor(uint256 _initialAmount, string memory _tokenName, uint8 _decimalUnits, string memory _tokenSymbol) public {
-        totalSupply_ = _initialAmount;
-        balances[msg.sender] = _initialAmount;
-        name = _tokenName;
-        symbol = _tokenSymbol;
-        decimals = _decimalUnits;
-    }
-
-    /**
-      * @dev Arbitrarily adds tokens to any account
-      */
-    function allocateTo(address _owner, uint256 value) public {
-        balances[_owner] += value;
-        totalSupply_ += value;
-        emit Transfer(address(this), _owner, value);
+    constructor(string memory _name, string memory _symbol, uint256 _amount, uint8 _decimals) public {
+        name = _name;
+        symbol = _symbol;
+        
+        totalSupply_ = _amount;
+        balances[msg.sender] = _amount;
+        
+        decimals = _decimals;
     }
 }

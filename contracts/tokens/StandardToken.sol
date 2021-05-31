@@ -1,4 +1,4 @@
-pragma solidity ^0.5.12;
+pragma solidity ^0.5.16;
 
 import "./BasicToken.sol";
 import "./ERC20.sol";
@@ -13,7 +13,7 @@ import "./ERC20.sol";
  */
 contract StandardToken is ERC20, BasicToken {
 
-    mapping (address => mapping (address => uint256)) internal allowed;
+    mapping (address => mapping (address => uint256)) internal allowances;
 
 
     /**
@@ -22,22 +22,17 @@ contract StandardToken is ERC20, BasicToken {
      * @param _to address The address which you want to transfer to
      * @param _value uint256 the amount of tokens to be transferred
      */
-    function transferFrom(
-        address _from,
-        address _to,
-        uint256 _value
-    )
-        public
-        returns (bool)
-    {
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
         require(_to != address(0));
         require(_value <= balances[_from]);
-        require(_value <= allowed[_from][msg.sender]);
+        require(_value <= allowances[_from][msg.sender]);
 
         balances[_from] = balances[_from].sub(_value);
         balances[_to] = balances[_to].add(_value);
-        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+        allowances[_from][msg.sender] = allowances[_from][msg.sender].sub(_value);
+        
         emit Transfer(_from, _to, _value);
+        
         return true;
     }
 
@@ -51,8 +46,10 @@ contract StandardToken is ERC20, BasicToken {
      * @param _value The amount of tokens to be spent.
      */
     function approve(address _spender, uint256 _value) public returns (bool) {
-        allowed[msg.sender][_spender] = _value;
+        allowances[msg.sender][_spender] = _value;
+        
         emit Approval(msg.sender, _spender, _value);
+        
         return true;
     }
 
@@ -62,63 +59,7 @@ contract StandardToken is ERC20, BasicToken {
      * @param _spender address The address which will spend the funds.
      * @return A uint256 specifying the amount of tokens still available for the spender.
      */
-    function allowance(
-        address _owner,
-        address _spender
-     )
-        public
-        view
-        returns (uint256)
-    {
-        return allowed[_owner][_spender];
+    function allowance(address _owner, address _spender) public view returns (uint256) {
+        return allowances[_owner][_spender];
     }
-
-    /**
-     * @dev Increase the amount of tokens that an owner allowed to a spender.
-     * approve should be called when allowed[_spender] == 0. To increment
-     * allowed value is better to use this function to avoid 2 calls (and wait until
-     * the first transaction is mined)
-     * From MonolithDAO Token.sol
-     * @param _spender The address which will spend the funds.
-     * @param _addedValue The amount of tokens to increase the allowance by.
-     */
-    function increaseApproval(
-        address _spender,
-        uint256 _addedValue
-    )
-        public
-        returns (bool)
-    {
-        allowed[msg.sender][_spender] = (
-            allowed[msg.sender][_spender].add(_addedValue));
-        emit Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
-        return true;
-    }
-
-    /**
-     * @dev Decrease the amount of tokens that an owner allowed to a spender.
-     * approve should be called when allowed[_spender] == 0. To decrement
-     * allowed value is better to use this function to avoid 2 calls (and wait until
-     * the first transaction is mined)
-     * From MonolithDAO Token.sol
-     * @param _spender The address which will spend the funds.
-     * @param _subtractedValue The amount of tokens to decrease the allowance by.
-     */
-    function decreaseApproval(
-        address _spender,
-        uint256 _subtractedValue
-    )
-        public
-        returns (bool)
-    {
-        uint256 oldValue = allowed[msg.sender][_spender];
-        if (_subtractedValue > oldValue) {
-            allowed[msg.sender][_spender] = 0;
-        } else {
-            allowed[msg.sender][_spender] = oldValue.sub(_subtractedValue);
-        }
-        emit Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
-        return true;
-    }
-
 }

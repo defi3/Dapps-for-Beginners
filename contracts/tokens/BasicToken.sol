@@ -1,4 +1,4 @@
-pragma solidity ^0.5.12;
+pragma solidity ^0.5.16;
 
 
 import "./ERC20Basic.sol";
@@ -12,9 +12,9 @@ import "../utils/SafeMath.sol";
 contract BasicToken is ERC20Basic {
     using SafeMath for uint256;
 
-    mapping(address => uint256) balances;
+    mapping(address => uint256) internal balances;
 
-    uint256 totalSupply_;
+    uint256 internal totalSupply_;
 
     /**
     * @dev Total number of tokens in existence
@@ -40,11 +40,10 @@ contract BasicToken is ERC20Basic {
 
     /**
     * @dev Gets the balance of the specified address.
-    * @param _owner The address to query the the balance of.
+    * @param account The address to query the the balance of.
     * @return An uint256 representing the amount owned by the passed address.
     */
-    function balanceOf(address _owner) public view returns (uint256) {
-        return balances[_owner];
+    function balanceOf(address account) public view returns (uint256) {
+        return balances[account];
     }
-
 }
