@@ -15,8 +15,8 @@ contract CoinCallerAbi {
 		return abi.decode(result, (bool));
 	}
     
-    function transfer2(address receiver, uint amount) public returns(bool) {
-        (bool success, bytes memory result) = mc.call(abi.encodeWithSignature("transfer2(address,address,uint256)", msg.sender, receiver, amount));
+    function transferFrom(address receiver, uint amount) public returns(bool) {
+        (bool success, bytes memory result) = mc.call(abi.encodeWithSignature("transferFrom(address,address,uint256)", msg.sender, receiver, amount));
         
         require(success, "fail to call transfer");
         

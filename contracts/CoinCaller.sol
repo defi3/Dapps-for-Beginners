@@ -6,7 +6,7 @@ contract CoinCaller {
     function transfer(address _address, address receiver, uint amount) public returns(bool) {
 		MetaCoin mc = MetaCoin(_address);
 		
-		return mc.transfer(msg.sender, receiver, amount);
+		return mc.transferFrom(msg.sender, receiver, amount);
 	}
 }
 
@@ -19,6 +19,6 @@ contract CoinCaller2 {
     }
     
     function transfer(address receiver, uint amount) public returns(bool) {
-		return mc.transfer(msg.sender, receiver, amount);
+		return mc.transferFrom(msg.sender, receiver, amount);
 	}
 }
