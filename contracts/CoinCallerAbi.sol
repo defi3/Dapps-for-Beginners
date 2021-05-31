@@ -16,15 +16,7 @@ contract CoinCallerAbi {
 		return abi.decode(result, (bool));
 	}
     
-    function transfer2(address receiver, uint amount) public returns(bool) {
-        (bool success, bytes memory result) = mc.call(abi.encodeWithSignature("transferFrom(address,address,uint256)", msg.sender, receiver, amount));
-        
-        require(success, "CoinCallerAbi::transfer2: fail to call transferFrom");
-        
-		return abi.decode(result, (bool));
-	}
-	
-	function transfer3(address sender, address receiver, uint amount) public returns(bool) {
+	function transferFrom(address sender, address receiver, uint amount) public returns(bool) {
         (bool success, bytes memory result) = mc.call(abi.encodeWithSignature("transferFrom(address,address,uint256)", sender, receiver, amount));
         
         require(success, "CoinCallerAbi::transfer3: fail to call transferFrom");
