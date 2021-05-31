@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.8.0;
 
 contract CoinCallerAbi {
     address internal mc;
@@ -7,18 +7,27 @@ contract CoinCallerAbi {
         mc = _address;
     }
     
+    /// sender is contract itself
     function transfer(address receiver, uint amount) public returns(bool) {
         (bool success, bytes memory result) = mc.call(abi.encodeWithSignature("transfer(address,uint256)", receiver, amount));
         
-        require(success, "fail to call transfer");
+        require(success, "CoinCallerAbi::transfer: fail to call transfer");
         
 		return abi.decode(result, (bool));
 	}
     
-    function transferFrom(address receiver, uint amount) public returns(bool) {
+    function transfer2(address receiver, uint amount) public returns(bool) {
         (bool success, bytes memory result) = mc.call(abi.encodeWithSignature("transferFrom(address,address,uint256)", msg.sender, receiver, amount));
         
-        require(success, "fail to call transfer");
+        require(success, "CoinCallerAbi::transfer2: fail to call transferFrom");
+        
+		return abi.decode(result, (bool));
+	}
+	
+	function transfer3(address sender, address receiver, uint amount) public returns(bool) {
+        (bool success, bytes memory result) = mc.call(abi.encodeWithSignature("transferFrom(address,address,uint256)", sender, receiver, amount));
+        
+        require(success, "CoinCallerAbi::transfer3: fail to call transferFrom");
         
 		return abi.decode(result, (bool));
 	}
@@ -26,7 +35,7 @@ contract CoinCallerAbi {
 	function balanceOf(address account) public returns (uint) {
         (bool success, bytes memory result) = mc.call(abi.encodeWithSignature("balanceOf(address)", account));
         
-        require(success, "fail to call balanceOf");
+        require(success, "CoinCallerAbi::balanceOf: fail to call balanceOf");
         
 		return abi.decode(result, (uint));
 	}
