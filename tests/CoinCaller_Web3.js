@@ -1,13 +1,13 @@
 
-/// include metaCoin_Web3.js
+/// Starting from MetaCoin_Web3.js
 
-const abi_coinCaller = [
+const abi_cc = [
 	{
 		"constant": false,
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "coinContractAddress",
+				"name": "_address",
 				"type": "address"
 			},
 			{
@@ -21,12 +21,12 @@ const abi_coinCaller = [
 				"type": "uint256"
 			}
 		],
-		"name": "sendCoin",
+		"name": "transfer",
 		"outputs": [
 			{
-				"internalType": "int8",
-				"name": "result",
-				"type": "int8"
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
 			}
 		],
 		"payable": false,
@@ -35,14 +35,16 @@ const abi_coinCaller = [
 	}
 ]
 
-const address_coinCaller = "0xc323EE368Fb877C918E94fE195f064025c586429"
+const address_cc = "0x96b9b61D75d27Cd5ed61f86eE78F0c6307C3FF0c"
 
-const contract_coinCaller = new web3.eth.Contract(abi_coinCaller, address_coinCaller)
+const contract_cc = new web3.eth.Contract(abi_cc, address_cc)
 
 
-contract_metaCoin.methods.balances(account1).call((err, result) => { console.log(result) })	// 9910
+contract_MC.methods.balanceOf(account1).call((err, result) => { console.log(result) })		// 9910
 
-contract_metaCoin.methods.balances(account2).call((err, result) => { console.log(result) })	// 90
+contract_MC.methods.balanceOf(account2).call((err, result) => { console.log(result) })		// 90
+
+contract_MC.methods.balanceOf(address_cc).call((err, result) => { console.log(result) })	// 0
 
 
 web3.eth.getTransactionCount(account1, (err, txCount) => {
@@ -51,8 +53,8 @@ web3.eth.getTransactionCount(account1, (err, txCount) => {
     nonce:    web3.utils.toHex(txCount),
     gasLimit: web3.utils.toHex(800000), // Raise the gas limit to a much higher amount
     gasPrice: web3.utils.toHex(web3.utils.toWei('10', 'gwei')),
-    to: address_coinCaller,
-    data: contract_coinCaller.methods.sendCoin(address_metaCoin, account2, 50).encodeABI()
+    to: address_MC,
+    data: contract_MC.methods.transfer(address_cc, 100).encodeABI()
   }
 
   const tx = new Tx(txObject)
@@ -67,26 +69,26 @@ web3.eth.getTransactionCount(account1, (err, txCount) => {
   })
 })
 
-// err: null txHash: 0x48349aeb3f6485ce4e28524890c0543a07a1310e69786f951f831cb25840f4b1
+
+contract_MC.methods.balanceOf(account1).call((err, result) => { console.log(result) })		// 9810
+
+contract_MC.methods.balanceOf(account2).call((err, result) => { console.log(result) })		// 90
+
+contract_MC.methods.balanceOf(address_cc).call((err, result) => { console.log(result) })	// 100
 
 
-contract_metaCoin.methods.balances(account1).call((err, result) => { console.log(result) })	// 9860
-
-contract_metaCoin.methods.balances(account2).call((err, result) => { console.log(result) })	// 140
-
-
-web3.eth.getTransactionCount(account2, (err, txCount) => {
+web3.eth.getTransactionCount(account1, (err, txCount) => {
 
   const txObject = {
     nonce:    web3.utils.toHex(txCount),
     gasLimit: web3.utils.toHex(800000), // Raise the gas limit to a much higher amount
     gasPrice: web3.utils.toHex(web3.utils.toWei('10', 'gwei')),
-    to: address_coinCaller,
-    data: contract_coinCaller.methods.sendCoin(address_metaCoin, account1, 5).encodeABI()
+    to: address_cc,
+    data: contract_cc.methods.transfer(address_MC, account2, 10).encodeABI()
   }
 
   const tx = new Tx(txObject)
-  tx.sign(privateKey2)
+  tx.sign(privateKey1)
 
   const serializedTx = tx.serialize()
   const raw = '0x' + serializedTx.toString('hex')
@@ -97,9 +99,9 @@ web3.eth.getTransactionCount(account2, (err, txCount) => {
   })
 })
 
-// err: null txHash: 0xcdbbbb357ffd81c5d0474c921fb8c3a3eeb6afa517c3beca54b7b468a1af0079
 
+contract_MC.methods.balanceOf(account1).call((err, result) => { console.log(result) })		// 9810
 
-contract_metaCoin.methods.balances(account1).call((err, result) => { console.log(result) })	// 9865
+contract_MC.methods.balanceOf(account2).call((err, result) => { console.log(result) })		// 100
 
-contract_metaCoin.methods.balances(account2).call((err, result) => { console.log(result) })	// 135
+contract_MC.methods.balanceOf(address_cc).call((err, result) => { console.log(result) })	// 90
