@@ -1,16 +1,23 @@
-/**
- * https://medium.com/@blockchain101/calling-the-function-of-another-contract-in-solidity-f9edfa921f4c
- *
- */
-
-pragma solidity ^0.4.18;
+pragma solidity >=0.5.0 <0.9.0;
 
 contract DeployedContract {
     
     uint public a = 1;
-
+    string public s = "a";
+    
     function setA(uint _a) public returns (uint) {
         a = _a;
+        return a;
+    }
+    
+    function setS(string memory _s) public returns (string memory) {
+        s = _s;
+        return s;
+    }
+
+    function set2(uint _a, string memory _s) public returns (uint) {
+        a = _a;
+        s = _s;
         return a;
     }
 }
@@ -19,85 +26,65 @@ contract ContractCaller  {
     
     DeployedContract dc;
     
-    function ContractCaller(address _t) public {
+    constructor(address _t) public {
         dc = DeployedContract(_t);
-    }
- 
-    function getA() public view returns (uint) {
-        return dc.a();
     }
     
     function setA(uint _a) public returns (uint) {
         return dc.setA(_a);
     }
-}
-
-contract ContractCallerSig  {
     
-    address dc;
-    
-    function ContractCallerSig(address _t) public {
-        dc = _t;
+    function setS(string memory _s) public returns (string memory) {
+        return dc.setS(_s);
     }
-    
-    function setA_Signature(uint _a) public returns(bool) {
-        require(dc.call(bytes4(keccak256("setA(uint256)")), _a));
-        
-        return true;
+
+    function set2(uint _a, string memory _s) public returns (uint) {
+        return dc.set2(_a, _s);
     }
 }
 
-contract ContractCallerSig2  {
-    
-    address dc;
-    bytes4 fs;  /// function signature
-    
-    function ContractCallerSig2(address _t) public {
-        dc = _t;
-        fs = bytes4(keccak256("setA(uint256)"));
-    }
-    
-    function setA_Signature(uint _a) public returns(bool) {
-        require(dc.call(fs, _a));
-        
-        return true;
-    }
-}
-
-contract ContractCallerSig3  {
+/**
+ * https://docs.soliditylang.org/en/v0.5.16/types.html#members-of-addresses
+ * 
+ * abi.decode(data, (uint)) from https://etherscan.io/contractdiffchecker?a1=0x1568A7f0bdf67D37DC963c345Dbc4A598859ebA3
+ * 
+ * abi.decode(result, (string)) from https://stackoverflow.com/questions/60248647/return-value-from-a-deployed-smart-contract-via-a-smart-contract-to-a-smart-co
+ * 
+ * succesfully call DeployedContract in ^0.6.0
+ * 
+ */
+ 
+contract ContractCallerAbi  {
     
     address dc;
     
-    function ContractCallerSig3(address _t) public {
+    constructor(address _t) public {
         dc = _t;
     }
     
-    function setA_ASM(uint _a) public returns(uint) {
-        bytes4 sig = bytes4(keccak256("setA(uint256)"));
+    function setA(uint _a) public returns (uint) {
+        (bool success, bytes memory result) = dc.call(abi.encodeWithSignature("setA(uint256)", _a));
         
-        assembly {
-            // move pointer to free memory spot
-            let ptr := mload(0x40)
-            // put function sig at memory spot
-            mstore(ptr,sig)
-            // append argument after function sig
-            mstore(add(ptr,0x04), _a)
+        require(success, "fail to call setA");
+        
+        return abi.decode(result, (uint));
+    }
+    
+    function setS(string memory _s) public returns (string memory) {
+        (bool success, bytes memory result) = dc.call(abi.encodeWithSignature("setS(string)", _s));
+        
+        require(success, "fail to call setS");
+        
+        string memory sresult = abi.decode(result, (string));
+        
+        return sresult;
+    }
 
-            let result := call(
-              15000, // gas limit
-              sload(dc_slot),  // to addr. append var to _slot to access storage variable
-              0, // not transfer any ether
-              ptr, // Inputs are stored at location ptr
-              0x24, // Inputs are 36 bytes long
-              ptr,  //Store output over input
-              0x20) //Outputs are 32 bytes long
-            
-            if eq(result, 0) {
-                revert(0, 0)
-            }
-            
-            let answer := mload(ptr) // Assign output to answer var
-            mstore(0x40,add(ptr,0x24)) // Set storage pointer to new space
-        }
+    function set2(uint _a, string memory _s) public returns(uint) {
+        (bool success, bytes memory result) = dc.call(abi.encodeWithSignature("set2(uint256,string)", _a, _s));
+        
+        require(success, "fail to call setS");
+        
+        return abi.decode(result, (uint));
     }
 }
