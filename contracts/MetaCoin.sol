@@ -10,7 +10,7 @@
  */
 pragma solidity >=0.5.0 <0.9.0;
 
-import "./tokens/StandardToken.sol";
+import "./token/StandardToken.sol";
 
 
 contract MetaCoin is StandardToken {
