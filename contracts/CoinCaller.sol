@@ -1,3 +1,10 @@
+/**
+ *  Reference: https://dappsforbeginners.wordpress.com/tutorials/interactions-between-contracts/
+ * 
+ *  @Author defi3
+ * 
+ */
+
 pragma solidity >=0.5.0 <0.9.0;
 
 import "./MetaCoin.sol";

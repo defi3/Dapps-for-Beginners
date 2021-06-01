@@ -105,3 +105,5 @@ contract_MC.methods.balanceOf(account1).call((err, result) => { console.log(resu
 contract_MC.methods.balanceOf(account2).call((err, result) => { console.log(result) })		// 100
 
 contract_MC.methods.balanceOf(address_cc).call((err, result) => { console.log(result) })	// 90
+
+
