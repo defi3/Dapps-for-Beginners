@@ -4,7 +4,7 @@
  */
 pragma solidity >=0.5.0 <0.6.0;
 
-import "../tokens/ERC20.sol";
+import "../token/ERC20.sol";
 import "./Controller.sol";
 import "../utils/SafeMath.sol";
 
@@ -323,7 +323,7 @@ contract Market is IMarket {
         return (amount, additional);
     }
     
-    function liquidateBorrow(address borrower, uint amount, MarketInterface collateralMarket) public {
+    function liquidateBorrow(address borrower, uint amount, IMarket collateralMarket) public {
         require(amount > 0);
         require(borrower != msg.sender);
         
