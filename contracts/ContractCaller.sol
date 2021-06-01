@@ -1,3 +1,12 @@
+/**
+ * 
+ *  Reference 1: https://medium.com/@blockchain101/calling-the-function-of-another-contract-in-solidity-f9edfa921f4c
+ * 
+ *  Reference 2: https://medium.com/@houzier.saurav/calling-functions-of-other-contracts-on-solidity-9c80eed05e0f
+ * 
+ *  @Author defi3
+ * 
+ */
 pragma solidity >=0.5.0 <0.9.0;
 
 contract DeployedContract {

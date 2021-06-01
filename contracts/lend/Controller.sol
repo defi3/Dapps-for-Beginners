@@ -1,6 +1,10 @@
+/**
+ *  Source: https://github.com/ajlopez/DeFiProt/blob/master/contracts/Controller.sol
+ * 
+ */
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./MarketInterface.sol";
+import "./IMarket.sol";
 import "../utils/SafeMath.sol";
 
 contract Controller {
@@ -51,7 +55,7 @@ contract Controller {
     }
 
     function addMarket(address market) public onlyOwner {
-        address marketToken = MarketInterface(market).token();
+        address marketToken = IMarket(market).token();
         require(marketsByToken[marketToken] == address(0));
         markets[market] = true;
         marketsByToken[marketToken] = market;
@@ -96,7 +100,7 @@ contract Controller {
 
     function getAccountValues(address account) public view returns (uint supplyValue, uint borrowValue) {
         for (uint k = 0; k < marketList.length; k++) {
-            MarketInterface market = MarketInterface(marketList[k]);
+            IMarket market = IMarket(marketList[k]);
             uint price = prices[marketList[k]];
             
             supplyValue = supplyValue.add(market.updatedSupplyOf(account).mul(price));
@@ -104,7 +108,7 @@ contract Controller {
         }
     }
     
-    function liquidateCollateral(address borrower, address liquidator, uint amount, MarketInterface collateralMarket) public onlyMarket returns (uint collateralAmount)  {
+    function liquidateCollateral(address borrower, address liquidator, uint amount, IMarket collateralMarket) public onlyMarket returns (uint collateralAmount)  {
         uint price = prices[msg.sender];        
         require(price > 0);
 

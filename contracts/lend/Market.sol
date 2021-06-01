@@ -1,10 +1,14 @@
+/**
+ *  Source: https://github.com/ajlopez/DeFiProt/blob/master/contracts/Market.sol
+ * 
+ */
 pragma solidity >=0.5.0 <0.6.0;
 
 import "../tokens/ERC20.sol";
 import "./Controller.sol";
 import "../utils/SafeMath.sol";
 
-contract Market is MarketInterface {
+contract Market is IMarket {
     using SafeMath for uint256;
 
     address public owner;
