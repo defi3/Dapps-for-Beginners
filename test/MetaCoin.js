@@ -16,7 +16,7 @@ contract("MetaCoin", (accounts) => {
     assert.equal(balance, 10000, "accounts[0]'s balance should be 10000");
 
     balance = await this.coin.balanceOf(accounts[1]);
-    assert.equal(balance, 0, "accounts[1]'s balance should be 10000");
+    assert.equal(balance, 0, "accounts[1]'s balance should be 0");
   });
 
   it("should transfer amount correctly", async () => {
@@ -34,7 +34,7 @@ contract("MetaCoin", (accounts) => {
     assert.equal(amount, 0, "accounts[0] approves accounts[1] to transfer up to 0");
 
     amount = await this.coin.allowance(accounts[1], accounts[0]);
-    assert.equal(amount, 0, "accounts[0] approves accounts[1] to transfer up to 0");
+    assert.equal(amount, 0, "accounts[1] approves accounts[0] to transfer up to 0");
   });
 
   it("should approve amount correctly", async () => {
