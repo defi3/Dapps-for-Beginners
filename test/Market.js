@@ -222,6 +222,38 @@ contract("Market", (accounts) => {
     assert.equal(balance, 1000 - 300);
   });
 
+  it('alice borrow token2', async () => {
+    const borrowResult = await this.market2.borrow(100, { from: alice });
+
+    assert.ok(borrowResult);
+    assert.ok(borrowResult.logs);
+    assert.ok(borrowResult.logs.length);
+    assert.equal(borrowResult.logs[0].event, 'Borrow');
+    assert.equal(borrowResult.logs[0].address, this.market2.address);
+    assert.equal(borrowResult.logs[0].args.user, alice);
+    assert.equal(borrowResult.logs[0].args.amount, 100);
+
+
+    const totalBorrow = await this.market2.totalBorrow();
+    assert.equal(totalBorrow, 100);
+
+    const totalSupply = await this.market2.totalSupply();
+    // console.log(totalSupply);
+    assert.equal(totalSupply, 1000 - 300);
+
+    balance = await this.market2.balance();
+    assert.equal(balance, totalSupply - totalBorrow);			// 1000 - 300 - 100
+
+    balance = await this.token2.balanceOf(this.market2.address);
+    assert.equal(balance, totalSupply - totalBorrow);			// 1000 - 300 - 100
+
+
+    const borrowed = await this.market2.borrowBy(alice);
+    assert.equal(borrowed, 100);
+
+    balance = await this.token2.balanceOf(alice);
+    assert.equal(balance, 100);
+  });
 });
 
 
