@@ -83,6 +83,22 @@ contract("Market", (accounts) => {
     assert.equal(await this.market.utilizationRate(1000, 1000, 0), FACTOR / 2);
     assert.equal(await this.market.utilizationRate(2000, 1000, 1000), FACTOR / 2);
   });
+
+  it('supply token amount', async () => {
+    await this.token.approve(this.market.address, 1000, { from: alice });
+    const supplyResult = await this.market.supply(1000, { from: alice });
+
+    assert.ok(supplyResult);
+    assert.ok(supplyResult.logs);
+    assert.equal(supplyResult.logs.length, 1);
+
+    console.log(supplyResult.logs[0]);
+
+    assert.equal(supplyResult.logs[0].event, 'Supply');
+    assert.equal(supplyResult.logs[0].address, this.market.address);
+    assert.equal(supplyResult.logs[0].args.user, alice);
+    assert.equal(supplyResult.logs[0].args.amount, 1000);
+  });
 });
 
 

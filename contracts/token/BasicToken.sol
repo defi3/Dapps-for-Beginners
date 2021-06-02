@@ -4,7 +4,7 @@
  */
 pragma solidity >=0.5.0 <0.9.0;
 
-import "./ERC20Basic.sol";
+import "./IERC20Basic.sol";
 import "./Balance.sol";
 
 
@@ -12,7 +12,7 @@ import "./Balance.sol";
  * @title Basic token
  * @dev Basic version of StandardToken, with no allowances.
  */
-contract BasicToken is ERC20Basic {
+contract BasicToken is IERC20Basic {
 
     mapping(address => uint256) internal balances;
     using Balances for *;

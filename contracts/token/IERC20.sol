@@ -4,13 +4,13 @@
  */
 pragma solidity >=0.5.0 <0.9.0;
 
-import "./ERC20Basic.sol";
+import "./IERC20Basic.sol";
 
 /**
  * @title ERC20 interface
  * @dev see https://github.com/ethereum/EIPs/issues/20
  */
-contract ERC20 is ERC20Basic {
+contract IERC20 is IERC20Basic {
     function allowance(address account, address spender) public view returns (uint256);
     function approve(address spender, uint256 amount) public returns (bool);
     

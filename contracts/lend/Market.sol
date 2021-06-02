@@ -4,7 +4,7 @@
  */
 pragma solidity >=0.5.0 <0.6.0;
 
-import "../token/ERC20.sol";
+import "../token/IERC20.sol";
 import "./Controller.sol";
 import "../utils/SafeMath.sol";
 
@@ -13,7 +13,7 @@ contract Market is IMarket {
 
     address public owner;
 
-    ERC20 public token;
+    IERC20 public token;
     Controller public controller;
 
     uint public totalSupply;
@@ -50,8 +50,8 @@ contract Market is IMarket {
     event PayBorrow(address user, uint amount);
     event LiquidateBorrow(address borrower, uint amount, address liquidator, address collateralMarket, uint collateralAmount);
 
-    constructor(ERC20 _token, uint _baseBorrowAnnualRate, uint _blocksPerYear, uint _utilizationRateFraction) public {
-        require(ERC20(_token).totalSupply() >= 0);
+    constructor(IERC20 _token, uint _baseBorrowAnnualRate, uint _blocksPerYear, uint _utilizationRateFraction) public {
+        require(IERC20(_token).totalSupply() >= 0);
         owner = msg.sender;
         token = _token;
         borrowIndex = FACTOR;
