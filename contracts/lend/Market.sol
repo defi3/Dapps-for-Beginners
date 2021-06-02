@@ -71,8 +71,12 @@ contract Market is IMarket {
         require(msg.sender == address(controller));
         _;
     }
+    
+    function setController(Controller _controller) public onlyOwner {
+        controller = _controller;
+    }
 
-    function getCash() public view returns (uint) {
+    function balance() public view returns (uint) {
         return token.balanceOf(address(this));
     }
 
@@ -96,11 +100,11 @@ contract Market is IMarket {
     }
 
     function borrowRatePerBlock() public view returns (uint) {
-        return getBorrowRate(getCash(), totalBorrows, 0);
+        return getBorrowRate(balance(), totalBorrows, 0);
     }
 
     function supplyRatePerBlock() public view returns (uint) {
-        return getSupplyRate(getCash(), totalBorrows, 0);
+        return getSupplyRate(balance(), totalBorrows, 0);
     }
 
     function supplyOf(address user) public view returns (uint) {
@@ -137,10 +141,6 @@ contract Market is IMarket {
         (newTotalSupply, newSupplyIndex) = calculateSupplyDataAtBlock(block.number);
 
         return snapshot.supply.mul(newSupplyIndex).div(snapshot.interestIndex);
-    }
-
-    function setController(Controller _controller) public onlyOwner {
-        controller = _controller;
     }
 
     function supply(uint amount) public {
