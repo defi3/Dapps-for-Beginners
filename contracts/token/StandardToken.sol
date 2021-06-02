@@ -17,7 +17,7 @@ import "./BasicToken.sol";
 contract StandardToken is IERC20, BasicToken {
     using SafeMath for uint256;
 
-    mapping (address => mapping (address => uint256)) internal allowances;
+    mapping (address => mapping (address => uint256)) internal _allowances;
 
     /**
      * @dev Transfer tokens from one address to another
@@ -26,11 +26,11 @@ contract StandardToken is IERC20, BasicToken {
      * @param amount uint256 the amount of tokens to be transferred
      */
     function transferFrom(address from, address to, uint256 amount) public returns (bool) {
-        require(allowances[from][msg.sender] >= amount);
+        require(_allowances[from][msg.sender] >= amount);
         
-        balances.move(from, to, amount);
+        _balances.move(from, to, amount);
 
-        allowances[from][msg.sender] = allowances[from][msg.sender].sub(amount);
+        _allowances[from][msg.sender] = _allowances[from][msg.sender].sub(amount);
         
         emit Transfer(from, to, amount);
         
@@ -47,7 +47,7 @@ contract StandardToken is IERC20, BasicToken {
      * @param amount The amount of tokens to be spent.
      */
     function approve(address spender, uint256 amount) public returns (bool) {
-        allowances[msg.sender][spender] = amount;
+        _allowances[msg.sender][spender] = amount;
         
         emit Approval(msg.sender, spender, amount);
         
@@ -61,6 +61,6 @@ contract StandardToken is IERC20, BasicToken {
      * @return A uint256 specifying the amount of tokens still available for the spender.
      */
     function allowance(address owner, address spender) public view returns (uint256) {
-        return allowances[owner][spender];
+        return _allowances[owner][spender];
     }
 }

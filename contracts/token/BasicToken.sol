@@ -14,16 +14,16 @@ import "./Balance.sol";
  */
 contract BasicToken is IERC20Basic {
 
-    mapping(address => uint256) internal balances;
+    mapping(address => uint256) internal _balances;
     using Balances for *;
 
-    uint256 internal totalSupply_;
+    uint256 internal _totalSupply;
 
     /**
     * @dev Total number of tokens in existence
     */
     function totalSupply() public view returns (uint256) {
-        return totalSupply_;
+        return _totalSupply;
     }
 
     /**
@@ -32,7 +32,7 @@ contract BasicToken is IERC20Basic {
     * @param amount The amount to be transferred.
     */
     function transfer(address to, uint256 amount) public returns (bool) {
-        balances.move(msg.sender, to, amount);
+        _balances.move(msg.sender, to, amount);
         
         emit Transfer(msg.sender, to, amount);
         
@@ -45,6 +45,6 @@ contract BasicToken is IERC20Basic {
     * @return An uint256 representing the amount owned by the passed address.
     */
     function balanceOf(address account) public view returns (uint256) {
-        return balances[account];
+        return _balances[account];
     }
 }
