@@ -1,3 +1,9 @@
+/**
+ *  Reference: https://github.com/ajlopez/DeFiProt/blob/master/test/Market_tests.js
+ * 
+ *  @Author defi3
+ * 
+ */
 
 const Token = artifacts.require("./token/FaucetToken.sol");
 const Market = artifacts.require("./lend/Market.sol");
@@ -14,20 +20,17 @@ contract("Market", (accounts) => {
   const ANNUAL_RATE = "1000000000000000000000";	// FACTOR / 1000 * BLOCKS_PER_YEAR = 1e21
   const UTILIZATION_RATE_FRACTION = "1000000000000000000000";	// FACTOR / 1000 * BLOCKS_PER_YEAR = 1e21
 
-  it("initialize state", async () => {
-    // this.token = await Token.new("DAI", "DAI", 1e6, 0);
-    // this.market = await Market.new(this.token.address, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION);
+  it("deploy contracts", async () => {
     this.token = await Token.new("DAI", "DAI", 1e6, 0, { from: alice });
     this.market = await Market.new(this.token.address, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: alice });
 
-    // this.token2 = await Token.new("BAT", "BAT", 1e6, 0);
-    // this.market2 = await Market.new(this.token2.address, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION);
     this.token2 = await Token.new("BAT", "BAT", 1e6, 0, { from: bob });
     this.market2 = await Market.new(this.token2.address, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: bob });
 
-    // this.controller = await Controller.new();
     this.controller = await Controller.new({ from: alice });
+  });
 
+  it("initialize controller", async () => {
     await this.controller.setCollateralFactor(1 * MANTISSA);
     await this.controller.setLiquidationFactor(MANTISSA / 2);
 
@@ -36,9 +39,9 @@ contract("Market", (accounts) => {
 
     await this.controller.setPrice(this.market.address, 1);
     await this.controller.setPrice(this.market2.address, 2);
+  });
 
-    // await this.market.setController(this.controller.address);
-    // await this.market2.setController(this.controller.address);
+  it("set controller", async () => {
     await this.market.setController(this.controller.address, { from: alice });
     await this.market2.setController(this.controller.address, { from: bob });
   });
@@ -94,19 +97,12 @@ contract("Market", (accounts) => {
     assert.equal(await this.market.utilizationRate(2000, 1000, 1000), FACTOR / 2);
 
     const owner1 = await this.market.owner();
-    console.log(owner1); 	// alice
+    // console.log(owner1);
+    assert.equal(owner1, alice);
 
     const owner2 = await this.market2.owner();
-    console.log(owner2); 	// bob
-
-    const owner = await this.controller.owner();
-    console.log(owner);		// alice
-
-    const controller = await this.market.controller();
-    assert.equal(controller, this.controller.address);
-
-    const controller2 = await this.market2.controller();
-    assert.equal(controller2, this.controller.address);
+    // console.log(owner2);
+    assert.equal(owner2, bob);
   });
 
   it('alice supply token', async () => {
