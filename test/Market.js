@@ -30,20 +30,18 @@ contract("Market", (accounts) => {
     this.controller = await Controller.new({ from: alice });
   });
 
-  it("initialize controller", async () => {
-    await this.controller.setCollateralFactor(1 * MANTISSA);
-    await this.controller.setLiquidationFactor(MANTISSA / 2);
-
-    await this.controller.addMarket(this.market.address);
-    await this.controller.addMarket(this.market2.address);
-
-    await this.controller.setPrice(this.market.address, 1);
-    await this.controller.setPrice(this.market2.address, 2);
-  });
-
   it("set controller", async () => {
+    await this.controller.setCollateralFactor(1 * MANTISSA, { from: alice });
+    await this.controller.setLiquidationFactor(MANTISSA / 2, { from: alice });
+
     await this.market.setController(this.controller.address, { from: alice });
     await this.market2.setController(this.controller.address, { from: bob });
+
+    await this.controller.addMarket(this.market.address, { from: alice });
+    await this.controller.addMarket(this.market2.address, { from: alice });
+
+    await this.controller.setPrice(this.market.address, 1, { from: alice });
+    await this.controller.setPrice(this.market2.address, 2, { from: alice });
   });
 
   it("check initial state", async () => {
