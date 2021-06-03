@@ -32,6 +32,8 @@ contract("Controller", (accounts) => {
 
   it("check original state", async () => {
     assert.equal(await this.controller.MANTISSA(), MANTISSA);
+    assert.equal(await this.controller.collateralFactor(), 0);
+    assert.equal(await this.controller.liquidationFactor(), 0);
 
     const owner = await this.controller.owner();
     // console.log(owner);
@@ -72,27 +74,41 @@ contract("Controller", (accounts) => {
   });
 
   it("initialize controller", async () => {
-    await this.controller.setCollateralFactor(1 * MANTISSA);
-    await this.controller.setLiquidationFactor(MANTISSA / 2);
+    try {
+      await this.controller.setCollateralFactor(1 * MANTISSA, { from: bob });
+    } catch (err) {
+      console.log("only owner can set collateral factor");
+    }
 
-    await this.controller.addMarket(this.market.address);
-    await this.controller.addMarket(this.market2.address);
+    await this.controller.setCollateralFactor(1 * MANTISSA, { from: alice });
 
-    await this.controller.setPrice(this.market.address, 1);
-    await this.controller.setPrice(this.market2.address, 2);
+    factor = await this.controller.collateralFactor();
+    assert.equal(factor, 1 * MANTISSA);
+
+
+    try {
+      await this.controller.setLiquidationFactor(MANTISSA / 2, { from: bob });
+    } catch (err) {
+      console.log("only owner can set liquidation factor");
+    }
+
+    await this.controller.setLiquidationFactor(MANTISSA / 2, { from: alice });
+
+    factor = await this.controller.liquidationFactor();
+    assert.equal(factor, MANTISSA / 2);
   });
 
   it("set controller", async () => {
     try {
       await this.market.setController(this.controller.address, { from: bob });
     } catch (err) {
-      console.log(err)
+      console.log("only owner can set controller");
     }
 
     try {
       await this.market2.setController(this.controller.address, { from: alice });
     } catch (err) {
-      console.log(err)
+      console.log("only owner can set controller");
     }
 
     await this.market.setController(this.controller.address, { from: alice });
@@ -106,16 +122,51 @@ contract("Controller", (accounts) => {
     assert.equal(controller2, this.controller.address);
   });
 
-  it("check initial state", async () => {
-    const controller = await this.market.controller();
-    assert.equal(controller, this.controller.address);
+  it("add market", async () => {
+    try {
+      await this.controller.addMarket(this.market.address, { from: bob });
+    } catch (err) {
+      console.log("only owner can add market");
+    }
 
-    const controller2 = await this.market2.controller();
-    assert.equal(controller2, this.controller.address);
+    try {
+      await this.controller.addMarket(this.market2.address, { from: bob });
+    } catch (err) {
+      console.log("only owner can add market");
+    }
+
+
+    await this.controller.addMarket(this.market.address, { from: alice });
+
+    size = (await this.controller.marketListSize()).toNumber();
+    assert.equal(size, 1);
+
+    await this.controller.addMarket(this.market2.address, { from: alice });
+
+    size = (await this.controller.marketListSize()).toNumber();
+    assert.equal(size, 2);
+
+
+    try {
+      await this.controller.setPrice(this.market.address, 1, { from: bob });
+    } catch (err) {
+      console.log("only owner can set price");
+    }
+
+    await this.controller.setPrice(this.market.address, 1, { from: alice });
 
     const price = (await this.controller.prices(this.market.address)).toNumber();
     // console.log(price);
     assert.equal(price, 1);
+
+
+    try {
+      await this.controller.setPrice(this.market2.address, 2, { from: bob });
+    } catch (err) {
+      console.log("only owner can set price");
+    }
+
+    await this.controller.setPrice(this.market2.address, 2);
 
     const price2 = (await this.controller.prices(this.market2.address)).toNumber();
     // console.log(price2);
