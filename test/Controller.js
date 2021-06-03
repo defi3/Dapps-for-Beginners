@@ -172,6 +172,54 @@ contract("Controller", (accounts) => {
     // console.log(price2);
     assert.equal(price2, 2);
   });
+
+  it("check initial accounts", async () => {
+    values = await this.controller.getAccountValues(alice);
+    assert.equal(values.supplyValue, 0);
+    assert.equal(values.borrowValue, 0);
+
+    values2 = await this.controller.getAccountValues(bob);
+    assert.equal(values2.supplyValue, 0);
+    assert.equal(values2.borrowValue, 0);
+
+    assert.equal(await this.controller.getAccountHealth(alice), 0);
+    assert.equal(await this.controller.getAccountHealth(bob), 0);
+
+    assert.equal(await this.controller.getAccountLiquidity(alice), 0);
+    assert.equal(await this.controller.getAccountLiquidity(bob), 0);
+  });
+
+  it("check accounts after supply and borrow", async () => {
+    await this.token.approve(this.market.address, 100, { from: alice });
+    await this.market.supply(100, { from: alice });
+
+    await this.token2.approve(this.market2.address, 1000, { from: bob });
+    await this.market2.supply(1000, { from: bob });
+
+    await this.market2.borrow(10, { from: alice });
+
+    values = await this.controller.getAccountValues(alice);
+    console.log("alice's supply value: " + values.supplyValue.toNumber() + "\tborrowValue: " + values.borrowValue.toNumber());
+    // assert.equal(values.supplyValue, 0);
+    // assert.equal(values.borrowValue, 0);
+
+    values2 = await this.controller.getAccountValues(bob);
+    console.log("bob's supply value: " + values2.supplyValue.toNumber() + "\tborrowValue: " + values2.borrowValue.toNumber());
+    // assert.equal(values2.supplyValue, 0);
+    // assert.equal(values2.borrowValue, 0);
+
+    console.log("alice's health: " + (await this.controller.getAccountHealth(alice)).toNumber());
+    // assert.equal(await this.controller.getAccountHealth(alice), 0);
+
+    console.log("bob's health: " + (await this.controller.getAccountHealth(bob)).toNumber());
+    // assert.equal(await this.controller.getAccountHealth(bob), 0);
+
+    console.log("alice's liquidity: " + (await this.controller.getAccountLiquidity(alice)).toNumber());
+    // assert.equal(await this.controller.getAccountLiquidity(alice), 0);
+
+    console.log("bob's liquidity: " + (await this.controller.getAccountLiquidity(bob)).toNumber());
+    // assert.equal(await this.controller.getAccountLiquidity(bob), 0);
+  });
 });
 
 
