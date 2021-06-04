@@ -21,10 +21,10 @@ contract("Market", (accounts) => {
   const UTILIZATION_RATE_FRACTION = 1e9;	// FACTOR / 1000 * BLOCKS_PER_YEAR = 1e9
 
   it("deploy contracts", async () => {
-    this.token = await Token.new("DAI", "DAI", 1e6 * FACTOR, 0, { from: alice });
+    this.token = await Token.new("DAI", "DAI", 1e6 * FACTOR, 6, { from: alice });
     this.market = await Market.new(this.token.address, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: alice });
 
-    this.token2 = await Token.new("BAT", "BAT", 1e6 * FACTOR, 0, { from: bob });
+    this.token2 = await Token.new("BAT", "BAT", 1e6 * FACTOR, 6, { from: bob });
     this.market2 = await Market.new(this.token2.address, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: bob });
 
     this.controller = await Controller.new({ from: alice });
