@@ -30,21 +30,24 @@ contract("Market", (accounts) => {
     this.controller = await Controller.new({ from: alice });
   });
 
-  it("check original state", async () => {
+  it("check original state of market", async () => {
     assert.equal(await this.market.FACTOR(), 1e18);
-    assert.equal(await this.market2.FACTOR(), 1e18);
 
-    const owner1 = await this.market.owner();
-    // console.log(owner1);
-    assert.equal(owner1, alice);
-
-    const owner2 = await this.market2.owner();
-    // console.log(owner2);
-    assert.equal(owner2, bob);
+    assert.equal(await this.market.owner(), alice);
 
     assert.equal(await this.market.utilizationRate(0, 0, 0), 0);
     assert.equal(await this.market.utilizationRate(1000, 1000, 0), FACTOR / 2);
     assert.equal(await this.market.utilizationRate(2000, 1000, 1000), FACTOR / 2);
+  });
+
+  it("check original state of market 2", async () => {
+    assert.equal(await this.market2.FACTOR(), 1e18);
+
+    assert.equal(await this.market2.owner(), bob);
+
+    assert.equal(await this.market2.utilizationRate(0, 0, 0), 0);
+    assert.equal(await this.market2.utilizationRate(1000, 1000, 0), FACTOR / 2);
+    assert.equal(await this.market2.utilizationRate(2000, 1000, 1000), FACTOR / 2);
   });
 
   it("set controller", async () => {
@@ -62,94 +65,65 @@ contract("Market", (accounts) => {
   });
 
   it("check initial state of market", async () => {
-    amount = await this.market.supplyOf(alice);
-    assert.equal(amount, 0);
+    assert.equal(await this.market.supplyOf(alice), 0);
+    assert.equal(await this.market.supplyOf(bob), 0);
+    assert.equal(await this.market.supplyOf(charlie), 0);
 
-    amount = await this.market.supplyOf(bob);
-    assert.equal(amount, 0);
+    assert.equal(await this.market.borrowBy(alice), 0);
+    assert.equal(await this.market.borrowBy(bob), 0);
+    assert.equal(await this.market.borrowBy(charlie), 0);
 
-    amount = await this.market.supplyOf(charlie);
-    assert.equal(amount, 0);
+    assert.equal(await this.token.balanceOf(this.market.address), 0);
+    assert.equal(await this.market.totalSupply(), 0);
+    assert.equal(await this.market.balance(), 0);
 
+    assert.equal(await this.market.supplyIndex(), FACTOR);
+    assert.equal(await this.market.borrowIndex(), FACTOR);
 
-    balance = await this.token.balanceOf(this.market.address);
-    assert.equal(balance, 0);
+    assert.equal(await this.market.baseBorrowRate(), FACTOR / 1000);
+    assert.equal(await this.market.borrowRatePerBlock(), FACTOR / 1000);
+    assert.equal(await this.market.supplyRatePerBlock(), 0);
 
-    supply = await this.market.totalSupply();
-    assert.equal(supply, 0);
+    assert.ok((await this.market.accrualBlockNumber()) > 0);
 
-    balance = await this.market.balance();
-    assert.equal(balance, 0);
+    assert.equal(await this.market.borrowBy(alice), 0);
+    assert.equal(await this.market.borrowBy(bob), 0);
+    assert.equal(await this.market.borrowBy(charlie), 0);
 
-
-    supplyIndex = await this.market.supplyIndex();
-    assert.equal(supplyIndex, FACTOR);
-
-    borrowIndex = await this.market.borrowIndex();
-    assert.equal(borrowIndex, FACTOR);
-
-    borrowRate = await this.market.baseBorrowRate();
-    assert.equal(borrowRate, FACTOR / 1000);
-
-    borrowRate = await this.market.borrowRatePerBlock();
-    assert.equal(borrowRate, FACTOR / 1000);
-
-    supplyRate = await this.market.supplyRatePerBlock();
-    assert.equal(supplyRate, 0);
-
-    accrualBlockNumber = await this.market.accrualBlockNumber();
-    assert.ok(accrualBlockNumber > 0);
-
-    borrowBy = await this.market.borrowBy(alice);
-    assert.equal(borrowBy, 0);
-
-    updatedBorrowBy = await this.market.updatedBorrowBy(alice);
-    assert.equal(updatedBorrowBy, 0);
+    assert.equal(await this.market.updatedBorrowBy(alice), 0);
+    assert.equal(await this.market.updatedBorrowBy(bob), 0);
+    assert.equal(await this.market.updatedBorrowBy(charlie), 0);
   });
 
   it("check initial state of market 2", async () => {
-    amount = await this.market2.supplyOf(alice);
-    assert.equal(amount, 0);
+    assert.equal(await this.market2.supplyOf(alice), 0);
+    assert.equal(await this.market2.supplyOf(bob), 0);
+    assert.equal(await this.market2.supplyOf(charlie), 0);
 
-    amount = await this.market2.supplyOf(bob);
-    assert.equal(amount, 0);
+    assert.equal(await this.market2.borrowBy(alice), 0);
+    assert.equal(await this.market2.borrowBy(bob), 0);
+    assert.equal(await this.market2.borrowBy(charlie), 0);
 
-    amount = await this.market2.supplyOf(charlie);
-    assert.equal(amount, 0);
+    assert.equal(await this.token2.balanceOf(this.market2.address), 0);
+    assert.equal(await this.market2.totalSupply(), 0);
+    assert.equal(await this.market2.balance(), 0);
 
+    assert.equal(await this.market2.supplyIndex(), FACTOR);
+    assert.equal(await this.market2.borrowIndex(), FACTOR);
 
-    balance = await this.token2.balanceOf(this.market2.address);
-    assert.equal(balance, 0);
+    assert.equal(await this.market2.baseBorrowRate(), FACTOR / 1000);
+    assert.equal(await this.market2.borrowRatePerBlock(), FACTOR / 1000);
+    assert.equal(await this.market2.supplyRatePerBlock(), 0);
 
-    supply = await this.market2.totalSupply();
-    assert.equal(supply, 0);
+    assert.ok((await this.market2.accrualBlockNumber()) > 0);
 
-    balance = await this.market2.balance();
-    assert.equal(balance, 0);
+    assert.equal(await this.market2.borrowBy(alice), 0);
+    assert.equal(await this.market2.borrowBy(bob), 0);
+    assert.equal(await this.market2.borrowBy(charlie), 0);
 
-    supplyIndex = await this.market2.supplyIndex();
-    assert.equal(supplyIndex, FACTOR);
-
-    borrowIndex = await this.market2.borrowIndex();
-    assert.equal(borrowIndex, FACTOR);
-
-    borrowRate = await this.market2.baseBorrowRate();
-    assert.equal(borrowRate, FACTOR / 1000);
-
-    borrowRate = await this.market2.borrowRatePerBlock();
-    assert.equal(borrowRate, FACTOR / 1000);
-
-    supplyRate = await this.market2.supplyRatePerBlock();
-    assert.equal(supplyRate, 0);
-
-    accrualBlockNumber = await this.market2.accrualBlockNumber();
-    assert.ok(accrualBlockNumber > 0);
-
-    borrowBy = await this.market2.borrowBy(alice);
-    assert.equal(borrowBy, 0);
-
-    updatedBorrowBy = await this.market2.updatedBorrowBy(alice);
-    assert.equal(updatedBorrowBy, 0);
+    assert.equal(await this.market2.updatedBorrowBy(alice), 0);
+    assert.equal(await this.market2.updatedBorrowBy(bob), 0);
+    assert.equal(await this.market2.updatedBorrowBy(charlie), 0);
   });
 
   it('alice supply token', async () => {
