@@ -30,6 +30,23 @@ contract("Market", (accounts) => {
     this.controller = await Controller.new({ from: alice });
   });
 
+  it("check original state", async () => {
+    assert.equal(await this.market.FACTOR(), 1e18);
+    assert.equal(await this.market2.FACTOR(), 1e18);
+
+    const owner1 = await this.market.owner();
+    // console.log(owner1);
+    assert.equal(owner1, alice);
+
+    const owner2 = await this.market2.owner();
+    // console.log(owner2);
+    assert.equal(owner2, bob);
+
+    assert.equal(await this.market.utilizationRate(0, 0, 0), 0);
+    assert.equal(await this.market.utilizationRate(1000, 1000, 0), FACTOR / 2);
+    assert.equal(await this.market.utilizationRate(2000, 1000, 1000), FACTOR / 2);
+  });
+
   it("set controller", async () => {
     await this.controller.setCollateralFactor(1 * MANTISSA, { from: alice });
     await this.controller.setLiquidationFactor(MANTISSA / 2, { from: alice });
@@ -44,7 +61,7 @@ contract("Market", (accounts) => {
     await this.controller.setPrice(this.market2.address, 2, { from: alice });
   });
 
-  it("check initial state", async () => {
+  it("check initial state of market", async () => {
     amount = await this.market.supplyOf(alice);
     assert.equal(amount, 0);
 
@@ -54,17 +71,16 @@ contract("Market", (accounts) => {
     amount = await this.market.supplyOf(charlie);
     assert.equal(amount, 0);
 
+
     balance = await this.token.balanceOf(this.market.address);
     assert.equal(balance, 0);
 
     supply = await this.market.totalSupply();
     assert.equal(supply, 0);
 
-    factor = await this.market.FACTOR();
-    assert.equal(factor, 1e18);
-
     balance = await this.market.balance();
     assert.equal(balance, 0);
+
 
     supplyIndex = await this.market.supplyIndex();
     assert.equal(supplyIndex, FACTOR);
@@ -89,18 +105,51 @@ contract("Market", (accounts) => {
 
     updatedBorrowBy = await this.market.updatedBorrowBy(alice);
     assert.equal(updatedBorrowBy, 0);
+  });
 
-    assert.equal(await this.market.utilizationRate(0, 0, 0), 0);
-    assert.equal(await this.market.utilizationRate(1000, 1000, 0), FACTOR / 2);
-    assert.equal(await this.market.utilizationRate(2000, 1000, 1000), FACTOR / 2);
+  it("check initial state of market 2", async () => {
+    amount = await this.market2.supplyOf(alice);
+    assert.equal(amount, 0);
 
-    const owner1 = await this.market.owner();
-    // console.log(owner1);
-    assert.equal(owner1, alice);
+    amount = await this.market2.supplyOf(bob);
+    assert.equal(amount, 0);
 
-    const owner2 = await this.market2.owner();
-    // console.log(owner2);
-    assert.equal(owner2, bob);
+    amount = await this.market2.supplyOf(charlie);
+    assert.equal(amount, 0);
+
+
+    balance = await this.token2.balanceOf(this.market2.address);
+    assert.equal(balance, 0);
+
+    supply = await this.market2.totalSupply();
+    assert.equal(supply, 0);
+
+    balance = await this.market2.balance();
+    assert.equal(balance, 0);
+
+    supplyIndex = await this.market2.supplyIndex();
+    assert.equal(supplyIndex, FACTOR);
+
+    borrowIndex = await this.market2.borrowIndex();
+    assert.equal(borrowIndex, FACTOR);
+
+    borrowRate = await this.market2.baseBorrowRate();
+    assert.equal(borrowRate, FACTOR / 1000);
+
+    borrowRate = await this.market2.borrowRatePerBlock();
+    assert.equal(borrowRate, FACTOR / 1000);
+
+    supplyRate = await this.market2.supplyRatePerBlock();
+    assert.equal(supplyRate, 0);
+
+    accrualBlockNumber = await this.market2.accrualBlockNumber();
+    assert.ok(accrualBlockNumber > 0);
+
+    borrowBy = await this.market2.borrowBy(alice);
+    assert.equal(borrowBy, 0);
+
+    updatedBorrowBy = await this.market2.updatedBorrowBy(alice);
+    assert.equal(updatedBorrowBy, 0);
   });
 
   it('alice supply token', async () => {
