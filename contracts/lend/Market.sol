@@ -42,7 +42,7 @@ contract Market is IMarket {
     mapping (address => SupplySnapshot) supplies;
     mapping (address => BorrowSnapshot) borrows;
 
-    uint public constant FACTOR = 1e18;
+    uint public constant FACTOR = 1e6;
 
     event Supply(address user, uint amount);
     event Redeem(address user, uint amount);
@@ -220,6 +220,10 @@ contract Market is IMarket {
         totalBorrow = totalBorrow.add(amount);
         
         emit Borrow(msg.sender, amount);
+    }
+    
+    function getCurrentBlockNumber() public view returns (uint) {
+        return block.number;
     }
 
     function accrueInterest() public {
