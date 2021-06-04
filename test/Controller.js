@@ -15,16 +15,16 @@ contract("Controller", (accounts) => {
   const charlie = accounts[2];
 
   const MANTISSA = 1e6;
-  const FACTOR = 1e18;
+  const FACTOR = 1e6;
   const BLOCKS_PER_YEAR = 1e6;
-  const ANNUAL_RATE = "1000000000000000000000";	// FACTOR / 1000 * BLOCKS_PER_YEAR = 1e21
-  const UTILIZATION_RATE_FRACTION = "1000000000000000000000";	// FACTOR / 1000 * BLOCKS_PER_YEAR = 1e21
+  const ANNUAL_RATE = 1e9;			// FACTOR / 1000 * BLOCKS_PER_YEAR = 1e9
+  const UTILIZATION_RATE_FRACTION = 1e9;	// FACTOR / 1000 * BLOCKS_PER_YEAR = 1e9
 
   it("deploy contracts", async () => {
-    this.token = await Token.new("DAI", "DAI", 1e6, 0, { from: alice });
+    this.token = await Token.new("DAI", "DAI", 1e6 * FACTOR, 0, { from: alice });
     this.market = await Market.new(this.token.address, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: alice });
 
-    this.token2 = await Token.new("BAT", "BAT", 1e6, 0, { from: bob });
+    this.token2 = await Token.new("BAT", "BAT", 1e6 * FACTOR, 0, { from: bob });
     this.market2 = await Market.new(this.token2.address, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: bob });
 
     this.controller = await Controller.new({ from: alice });
@@ -190,13 +190,13 @@ contract("Controller", (accounts) => {
   });
 
   it("check accounts after supply and borrow", async () => {
-    await this.token.approve(this.market.address, 100, { from: alice });
-    await this.market.supply(100, { from: alice });
+    await this.token.approve(this.market.address, 100 * FACTOR, { from: alice });
+    await this.market.supply(100 * FACTOR, { from: alice });
 
-    await this.token2.approve(this.market2.address, 1000, { from: bob });
-    await this.market2.supply(1000, { from: bob });
+    await this.token2.approve(this.market2.address, 1000 * FACTOR, { from: bob });
+    await this.market2.supply(1000 * FACTOR, { from: bob });
 
-    await this.market2.borrow(10, { from: alice });
+    await this.market2.borrow(10 * FACTOR, { from: alice });
 
     values = await this.controller.getAccountValues(alice);
     console.log("alice's supply value: " + values.supplyValue.toNumber() + "\tborrowValue: " + values.borrowValue.toNumber());
