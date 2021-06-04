@@ -35,6 +35,14 @@ contract("Market", (accounts) => {
 
     assert.equal(await this.market.owner(), alice);
 
+    assert.equal(await this.market.getSupplyRate(0, 0, 0), 0);
+    assert.equal(await this.market.getSupplyRate(1000, 1000, 0), 1 / 2 * (FACTOR / 2 / 1000 + FACTOR / 1000));
+    assert.equal(await this.market.getSupplyRate(2000, 1000, 1000), 1 / 2 * (FACTOR / 2 / 1000 + FACTOR / 1000));
+
+    assert.equal(await this.market.getBorrowRate(0, 0, 0), FACTOR / 1000);
+    assert.equal(await this.market.getBorrowRate(1000, 1000, 0), FACTOR / 2 / 1000 + FACTOR / 1000);
+    assert.equal(await this.market.getBorrowRate(2000, 1000, 1000), FACTOR / 2 / 1000 + FACTOR / 1000);
+
     assert.equal(await this.market.utilizationRate(0, 0, 0), 0);
     assert.equal(await this.market.utilizationRate(1000, 1000, 0), FACTOR / 2);
     assert.equal(await this.market.utilizationRate(2000, 1000, 1000), FACTOR / 2);
@@ -44,6 +52,14 @@ contract("Market", (accounts) => {
     assert.equal(await this.market2.FACTOR(), 1e18);
 
     assert.equal(await this.market2.owner(), bob);
+
+    assert.equal(await this.market2.getSupplyRate(0, 0, 0), 0);
+    assert.equal(await this.market2.getSupplyRate(1000, 1000, 0), 1 / 2 * (FACTOR / 2 / 1000 + FACTOR / 1000));
+    assert.equal(await this.market2.getSupplyRate(2000, 1000, 1000), 1 / 2 * (FACTOR / 2 / 1000 + FACTOR / 1000));
+
+    assert.equal(await this.market2.getBorrowRate(0, 0, 0), FACTOR / 1000);
+    assert.equal(await this.market2.getBorrowRate(1000, 1000, 0), FACTOR / 2 / 1000 + FACTOR / 1000);
+    assert.equal(await this.market2.getBorrowRate(2000, 1000, 1000), FACTOR / 2 / 1000 + FACTOR / 1000);
 
     assert.equal(await this.market2.utilizationRate(0, 0, 0), 0);
     assert.equal(await this.market2.utilizationRate(1000, 1000, 0), FACTOR / 2);
