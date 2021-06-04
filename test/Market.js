@@ -157,6 +157,8 @@ contract("Market", (accounts) => {
     assert.equal(supplyResult.logs[0].args.user, alice);
     assert.equal(supplyResult.logs[0].args.amount, 1000);
 
+    console.log("creation block number: " + (await this.market.accrualBlockNumber()).toNumber());
+
     const supply = await this.market.supplyOf(alice);
     assert.equal(supply, 1000);
 
@@ -171,6 +173,8 @@ contract("Market", (accounts) => {
 
     balance = await this.market.balance();
     assert.equal(balance, 1000);
+
+    console.log("creation block number: " + (await this.market.accrualBlockNumber()).toNumber());
   });
 
   it('alice redeem token', async () => {
@@ -212,6 +216,8 @@ contract("Market", (accounts) => {
     assert.equal(supplyResult.logs[0].args.user, bob);
     assert.equal(supplyResult.logs[0].args.amount, 1000);
 
+    console.log("creation block number: " + (await this.market.accrualBlockNumber()).toNumber());
+
     const supply = await this.market2.supplyOf(bob);
     assert.equal(supply, 1000);
 
@@ -226,6 +232,8 @@ contract("Market", (accounts) => {
 
     balance = await this.market2.balance();
     assert.equal(balance, 1000);
+
+    console.log("creation block number: " + (await this.market2.accrualBlockNumber()).toNumber());
   });
 
   it('bob redeem token2', async () => {
