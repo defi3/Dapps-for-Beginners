@@ -228,17 +228,16 @@ contract Market is IMarket {
 
     function accrueInterest() public {
         uint currentBlockNumber = block.number;
+        
+        if (currentBlockNumber > accrualBlockNumber) {
+            (totalBorrow, borrowIndex) = calculateBorrowDataAtBlock(currentBlockNumber);
+            (totalSupply, supplyIndex) = calculateSupplyDataAtBlock(currentBlockNumber);
 
-        (totalBorrow, borrowIndex) = calculateBorrowDataAtBlock(currentBlockNumber);
-        (totalSupply, supplyIndex) = calculateSupplyDataAtBlock(currentBlockNumber);
-
-        accrualBlockNumber = currentBlockNumber;
+            accrualBlockNumber = currentBlockNumber;
+        }
     }
 
     function calculateBorrowDataAtBlock(uint newBlockNumber) internal view returns (uint newTotalBorrows, uint newBorrowIndex) {
-        if (newBlockNumber <= accrualBlockNumber)
-            return (totalBorrow, borrowIndex);
-
         if (totalBorrow == 0)
             return (totalBorrow, borrowIndex);
 
@@ -252,9 +251,6 @@ contract Market is IMarket {
     }
 
     function calculateSupplyDataAtBlock(uint newBlockNumber) internal view returns (uint newTotalSupply, uint newSupplyIndex) {
-        if (newBlockNumber <= accrualBlockNumber)
-            return (totalSupply, supplyIndex);
-
         if (totalSupply == 0)
             return (totalSupply, supplyIndex);
 
