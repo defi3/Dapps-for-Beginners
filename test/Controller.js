@@ -2,6 +2,8 @@
  *  Reference: https://github.com/ajlopez/DeFiProt/blob/master/test/Controller_tests.js
  * 
  *  @Author defi3
+ *
+ *  tested on local Ganache
  * 
  */
 
