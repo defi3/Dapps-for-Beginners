@@ -1,5 +1,13 @@
 /**
- *  Source: https://github.com/ajlopez/DeFiProt/blob/master/contracts/Market.sol
+ *  Reference: https://github.com/ajlopez/DeFiProt/blob/master/contracts/Market.sol
+ * 
+ *  @Authoer defi3
+ * 
+ *  Main Update 1, 2021-05-31, change getCash() to balance()
+ * 
+ *  Main Update 2, 2021-06-02, add getCurrentBlockNumber()
+ * 
+ *  Main Update 3, 2021-06-05, update accrueInterest()
  * 
  */
 pragma solidity >=0.5.0 <0.6.0;
