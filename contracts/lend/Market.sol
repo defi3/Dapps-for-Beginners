@@ -3,22 +3,22 @@
  * 
  *  @Authoer defi3
  * 
+ *  No interest
+ * 
+ * 
  *  Main Update 1, 2021-05-31, change getCash() to balance()
  * 
- *  Main Update 2, 2021-06-02, add getCurrentBlockNumber()
- * 
- *  Main Update 3, 2021-06-05, update accrueInterest()
+ *  Main Update 2, 2021-06-06, change it to abstract contract
  * 
  */
 pragma solidity >=0.5.0 <0.6.0;
 
 import "./IMarket.sol";
-import "./IController.sol";
 import "../token/IERC20.sol";
 import "../utils/SafeMath.sol";
 
 
-contract BaseMarket is IMarket {
+contract Market is IMarket {
     using SafeMath for uint256;
 
     address public owner;
@@ -27,12 +27,8 @@ contract BaseMarket is IMarket {
     uint public totalSupply;
     uint public totalBorrow;
     
-    IController public controller;
-
-    event Supply(address user, uint amount);
-    event Redeem(address user, uint amount);
-    event Borrow(address user, uint amount);
-    event PayBorrow(address user, uint amount);
+    address public controller;
+    
 
     constructor(IERC20 _token) public {
         require(IERC20(_token).totalSupply() >= 0);
@@ -46,11 +42,11 @@ contract BaseMarket is IMarket {
     }
 
     modifier onlyController() {
-        require(msg.sender == address(controller));
+        require(msg.sender == controller);
         _;
     }
     
-    function setController(IController _controller) public onlyOwner {
+    function setController(address _controller) public onlyOwner {
         controller = _controller;
     }
 
@@ -90,8 +86,6 @@ contract BaseMarket is IMarket {
         redeemInternal(msg.sender, msg.sender, amount);
         
         totalSupply = totalSupply.sub(amount);
-        
-        require(controller.checkAccountHealth(msg.sender));
 
         emit Redeem(msg.sender, amount);
     }
@@ -114,10 +108,11 @@ contract BaseMarket is IMarket {
     }
     
     function payBorrowInternal(address payer, address borrower, uint amount) internal returns (uint paid, uint supplied);
-    
-    
+
+ 
     function transferTo(address sender, address receiver, uint amount) public onlyController {
         require(amount > 0);
+        
         redeemInternal(sender, receiver, amount);
     }
 }

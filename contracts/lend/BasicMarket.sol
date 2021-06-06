@@ -3,23 +3,23 @@
  * 
  *  @Authoer defi3
  * 
- *  Main Update 1, 2021-05-31, change getCash() to balance()
  * 
- *  Main Update 2, 2021-06-02, add getCurrentBlockNumber()
+ *  Main Update 1, 2021-06-02, add getCurrentBlockNumber()
  * 
- *  Main Update 3, 2021-06-05, update accrueInterest()
+ *  Main Update 2, 2021-06-05, update accrueInterest()
+ * 
+ *  Main Update 3, 2021-06-06, inherit Market 
  * 
  */
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./IMarket.sol";
-import "./BaseMarket.sol";
-import "./IController.sol";
-import "./BasicController.sol";
+import "./IMarketWithInterest.sol";
+import "./Market.sol";
+import "./Controller.sol";
 import "../token/IERC20.sol";
 import "../utils/SafeMath.sol";
 
-contract BasicMarket is BaseMarket {
+contract BasicMarket is Market, IMarketWithInterest {
     using SafeMath for uint256;
 
     uint public supplyIndex;
@@ -46,9 +46,8 @@ contract BasicMarket is BaseMarket {
 
     uint public constant FACTOR = 1e6;
 
-    event LiquidateBorrow(address borrower, uint amount, address liquidator, address collateralMarket, uint collateralAmount);
 
-    constructor(IERC20 _token, uint _baseBorrowAnnualRate, uint _blocksPerYear, uint _utilizationRateFraction) BaseMarket(_token) public {
+    constructor(IERC20 _token, uint _baseBorrowAnnualRate, uint _blocksPerYear, uint _utilizationRateFraction) Market(_token) public {
         borrowIndex = FACTOR;
         supplyIndex = FACTOR;
         blocksPerYear = _blocksPerYear;
@@ -132,8 +131,6 @@ contract BasicMarket is BaseMarket {
         supplySnapshot.supply = updatedSupplyOf(supplier);
         supplies[supplier].supply = supplies[supplier].supply.add(amount);
         supplies[supplier].interestIndex = supplyIndex;
-
-        totalSupply = totalSupply.add(amount);
     }
 
     function redeemInternal(address supplier, address receiver, uint amount) internal {
@@ -149,12 +146,16 @@ contract BasicMarket is BaseMarket {
         require(token.transfer(receiver, amount), "No enough tokens");
 
         supplySnapshot.supply = supplySnapshot.supply.sub(amount);
+        
+        Controller ctr = Controller(controller);
+        
+        require(ctr.checkAccountHealth(supplier));
     }
 
     function borrowInternal(address user, uint amount) internal {
         accrueInterest();
 
-        BorrowSnapshot storage borrowSnapshot = borrows[msg.sender];
+        BorrowSnapshot storage borrowSnapshot = borrows[user];
 
         if (borrowSnapshot.principal > 0) {
             uint interest = borrowSnapshot.principal.mul(borrowIndex).div(borrowSnapshot.interestIndex).sub(borrowSnapshot.principal);
@@ -162,10 +163,12 @@ contract BasicMarket is BaseMarket {
             borrowSnapshot.principal = borrowSnapshot.principal.add(interest);
             borrowSnapshot.interestIndex = borrowIndex;
         }
+        
+        Controller ctr = Controller(controller);
 
-        require(controller.checkAccountLiquidity(msg.sender, address(this), amount), "Not enough account liquidity");
+        require(ctr.checkAccountLiquidity(user, address(this), amount), "Not enough account liquidity");
 
-        require(token.transfer(msg.sender, amount), "No enough tokens to borrow");
+        require(token.transfer(user, amount), "No enough tokens to borrow");
 
         borrowSnapshot.principal = borrowSnapshot.principal.add(amount);
         borrowSnapshot.interestIndex = borrowIndex;
@@ -252,7 +255,6 @@ contract BasicMarket is BaseMarket {
         require(token.transferFrom(payer, address(this), amount), "No enough tokens");
 
         snapshot.principal = snapshot.principal.sub(amount);
-        // totalBorrow = totalBorrow.sub(amount);
 
         if (additional > 0)
             supplyInternal(payer, additional);
@@ -260,9 +262,11 @@ contract BasicMarket is BaseMarket {
         return (amount, additional);
     }
     
-    function liquidateBorrow(address borrower, uint amount, IMarket collateralMarket) public {
+    function liquidateBorrow(address borrower, uint amount, address collateral) public {
         require(amount > 0);
         require(borrower != msg.sender);
+        
+        BasicMarket collateralMarket = BasicMarket(collateral);
         
         accrueInterest();
         collateralMarket.accrueInterest();
@@ -272,7 +276,8 @@ contract BasicMarket is BaseMarket {
         require(debt >= amount);
         require(token.balanceOf(msg.sender) >= amount);
         
-        uint collateralAmount = controller.liquidateCollateral(borrower, msg.sender, amount, collateralMarket);
+        Controller ctr = Controller(controller);
+        uint collateralAmount = ctr.liquidateCollateral(borrower, msg.sender, amount, collateral);
 
         uint paid;
         uint additional;

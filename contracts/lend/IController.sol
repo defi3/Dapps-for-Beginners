@@ -20,6 +20,6 @@ interface IController {
     function getAccountLiquidity(address account) external view returns (uint);
     function checkAccountLiquidity(address account, address market, uint amount) external view returns (bool);
     
-    function liquidateCollateral(address borrower, address liquidator, uint amount, IMarket collateralMarket) external returns (uint collateralAmount);
+    function liquidateCollateral(address borrower, address liquidator, uint amount, address collateral) external returns (uint collateralAmount);
 }
 

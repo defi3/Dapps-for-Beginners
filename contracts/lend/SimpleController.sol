@@ -3,17 +3,19 @@
  * 
  *  @Authoer defi3
  * 
+ *  No interest
  * 
- *  Main Update 1, 2021-06-06, inherit Controller 
+ * 
+ *  Main Update 1, 2021-06-06, change it to abstract contract
  * 
  */
 pragma solidity >=0.5.0 <0.6.0;
 
 import "./Controller.sol";
-import "./BasicMarket.sol";
+import "./SimpleMarket.sol";
 import "../utils/SafeMath.sol";
 
-contract BasicController is Controller {
+contract SimpleController is Controller {
     using SafeMath for uint256;
 
     constructor() Controller() public {
@@ -21,11 +23,11 @@ contract BasicController is Controller {
     
     function getAccountValuesInternal(address account) internal view returns (uint supplyValue, uint borrowValue) {
         for (uint k = 0; k < marketList.length; k++) {
-            BasicMarket market = BasicMarket(marketList[k]);
+            SimpleMarket market = SimpleMarket(marketList[k]);
             uint price = prices[marketList[k]];
             
-            supplyValue = supplyValue.add(market.updatedSupplyOf(account).mul(price));
-            borrowValue = borrowValue.add(market.updatedBorrowBy(account).mul(price));
+            supplyValue = supplyValue.add(market.supplyOf(account).mul(price));
+            borrowValue = borrowValue.add(market.borrowBy(account).mul(price));
         }
     }
 }
