@@ -49,17 +49,17 @@ contract SimpleMarket is Market {
         
         Controller ctr = Controller(controller);
         
-        require(ctr.checkAccountHealth(msg.sender));
+        require(ctr.checkAccountHealth(supplier));
     }
 
-    function borrowInternal(address user, uint amount) internal {
+    function borrowInternal(address borrower, uint amount) internal {
         Controller ctr = Controller(controller);
 
-        require(ctr.checkAccountLiquidity(msg.sender, address(this), amount), "Not enough account liquidity");
+        require(ctr.checkAccountLiquidity(borrower, address(this), amount), "Not enough account liquidity");
 
-        require(token.transfer(msg.sender, amount), "No enough tokens to borrow");
+        require(token.transfer(borrower, amount), "No enough tokens to borrow");
 
-        borrows[user] = borrows[user].add(amount);
+        borrows[borrower] = borrows[borrower].add(amount);
     }
 
     function payBorrowInternal(address payer, address borrower, uint amount) internal returns (uint paid, uint supplied) {
