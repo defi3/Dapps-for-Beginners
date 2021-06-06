@@ -146,7 +146,12 @@ contract BasicMarket is Market, IMarketWithInterest {
         
         Controller ctr = Controller(controller);
         
-        require(ctr.checkAccountHealth(supplier));
+        bool status;
+        uint value;
+        
+        (status, value) = ctr.checkAccountHealth(supplier);
+        
+        require(status);
     }
 
     function borrowInternal(address borrower, uint amount) internal {
@@ -162,8 +167,13 @@ contract BasicMarket is Market, IMarketWithInterest {
         }
         
         Controller ctr = Controller(controller);
+        
+        bool status;
+        uint value;
+        
+        (status, value) = ctr.checkAccountLiquidity(borrower, address(this), amount);
 
-        require(ctr.checkAccountLiquidity(borrower, address(this), amount), "Not enough account liquidity");
+        require(status, "Not enough account liquidity");
 
         require(token.transfer(borrower, amount), "No enough tokens to borrow");
 

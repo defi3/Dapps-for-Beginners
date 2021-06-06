@@ -91,28 +91,20 @@ contract Controller is IController {
         return liquidity;
     }
     
-    function checkAccountLiquidity(address account, address market, uint amount) external view returns (bool) {
+    function checkAccountLiquidity(address account, address market, uint amount) external view returns (bool status, uint liquidity) {
         uint price = prices[market];
         uint value = price.mul(amount);
-        return (getAccountLiquidity(account) >= value.mul(2));
-    }
-
-    function getAccountHealth(address account) internal view returns (uint) {
-        uint supplyValue;
-        uint borrowValue;
-
-        (supplyValue, borrowValue) = getAccountValues(account);
-
-        return calculateHealthIndex(supplyValue, borrowValue);
+        
+        return (getAccountLiquidity(account) >= value.mul(2), value);
     }
     
-    function checkAccountHealth(address account) external view returns (bool) {
+    function checkAccountHealth(address account) external view returns (bool status, uint health) {
         uint supplyValue;
         uint borrowValue;
 
         (supplyValue, borrowValue) = getAccountValues(account);
 
-        return supplyValue >= borrowValue.mul(MANTISSA.add(collateralFactor).div(MANTISSA));
+        return (supplyValue >= borrowValue.mul(MANTISSA.add(collateralFactor).div(MANTISSA)), calculateHealthIndex(supplyValue, borrowValue));
     }
     
     function calculateHealthIndex(uint supplyValue, uint borrowValue) internal view returns (uint) {
