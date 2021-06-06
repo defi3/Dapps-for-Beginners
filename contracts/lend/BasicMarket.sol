@@ -22,14 +22,14 @@ import "../utils/SafeMath.sol";
 contract BasicMarket is Market, IMarketWithInterest {
     using SafeMath for uint256;
 
-    uint internal supplyIndex;
-    uint internal borrowIndex;
-    uint internal baseBorrowRate;
+    uint internal _supplyIndex;
+    uint internal _borrowIndex;
+    uint internal _baseBorrowRate;
     
-    uint internal utilizationRateFraction;
+    uint internal _utilizationRateFraction;
     
-    uint internal accrualBlockNumber;
-    uint internal blocksPerYear;
+    uint internal _accrualBlockNumber;
+    uint internal _blocksPerYear;
 
     struct SupplySnapshot {
         uint supply;
@@ -41,19 +41,19 @@ contract BasicMarket is Market, IMarketWithInterest {
         uint interestIndex;
     }
 
-    mapping (address => SupplySnapshot) internal supplies;
-    mapping (address => BorrowSnapshot) internal borrows;
+    mapping (address => SupplySnapshot) internal _supplies;
+    mapping (address => BorrowSnapshot) internal _borrows;
 
     uint public constant FACTOR = 1e6;
 
 
-    constructor(IERC20 _token, uint _baseBorrowAnnualRate, uint _blocksPerYear, uint _utilizationRateFraction) Market(_token) public {
-        borrowIndex = FACTOR;
-        supplyIndex = FACTOR;
-        blocksPerYear = _blocksPerYear;
-        baseBorrowRate = _baseBorrowAnnualRate.div(_blocksPerYear);
-        accrualBlockNumber = block.number;
-        utilizationRateFraction = _utilizationRateFraction.div(_blocksPerYear);
+    constructor(IERC20 token_, uint baseBorrowAnnualRate_, uint blocksPerYear_, uint utilizationRateFraction_) Market(token_) public {
+        _borrowIndex = FACTOR;
+        _supplyIndex = FACTOR;
+        _blocksPerYear = blocksPerYear_;
+        _baseBorrowRate = baseBorrowAnnualRate_.div(blocksPerYear_);
+        _accrualBlockNumber = block.number;
+        _utilizationRateFraction = utilizationRateFraction_.div(blocksPerYear_);
     }
 
 
@@ -67,7 +67,7 @@ contract BasicMarket is Market, IMarketWithInterest {
     function getBorrowRate(uint cash, uint borrowed, uint reserves) internal view returns (uint) {
         uint ur = utilizationRate(cash, borrowed, reserves);
 
-        return ur.mul(utilizationRateFraction).div(FACTOR).add(baseBorrowRate);
+        return ur.mul(_utilizationRateFraction).div(FACTOR).add(_baseBorrowRate);
     }
 
     function getSupplyRate(uint cash, uint borrowed, uint reserves) internal view returns (uint) {
@@ -77,23 +77,23 @@ contract BasicMarket is Market, IMarketWithInterest {
     }
 
     function borrowRatePerBlock() internal view returns (uint) {
-        return getBorrowRate(_token.balanceOf(address(this)), totalBorrow, 0);
+        return getBorrowRate(_token.balanceOf(address(this)), _totalBorrow, 0);
     }
 
     function supplyRatePerBlock() internal view returns (uint) {
-        return getSupplyRate(_token.balanceOf(address(this)), totalBorrow, 0);
+        return getSupplyRate(_token.balanceOf(address(this)), _totalBorrow, 0);
     }
 
     function supplyOf(address account) external view returns (uint) {
-        return supplies[account].supply;
+        return _supplies[account].supply;
     }
 
     function borrowBy(address account) external view returns (uint) {
-        return borrows[account].principal;
+        return _borrows[account].principal;
     }
 
     function updatedBorrowBy(address account) public view returns (uint) {
-        BorrowSnapshot storage snapshot = borrows[account];
+        BorrowSnapshot storage snapshot = _borrows[account];
 
         if (snapshot.principal == 0)
             return 0;
@@ -107,7 +107,7 @@ contract BasicMarket is Market, IMarketWithInterest {
     }
 
     function updatedSupplyOf(address account) public view returns (uint) {
-        SupplySnapshot storage snapshot = supplies[account];
+        SupplySnapshot storage snapshot = _supplies[account];
 
         if (snapshot.supply == 0)
             return 0;
@@ -123,20 +123,20 @@ contract BasicMarket is Market, IMarketWithInterest {
     function supplyInternal(address supplier, uint amount) internal {
         accrueInterest();
 
-        SupplySnapshot storage supplySnapshot = supplies[supplier];
+        SupplySnapshot storage supplySnapshot = _supplies[supplier];
 
         supplySnapshot.supply = updatedSupplyOf(supplier);
-        supplies[supplier].supply = supplies[supplier].supply.add(amount);
-        supplies[supplier].interestIndex = supplyIndex;
+        _supplies[supplier].supply = _supplies[supplier].supply.add(amount);
+        _supplies[supplier].interestIndex = _supplyIndex;
     }
 
     function redeemInternal(address supplier, address receiver, uint amount) internal {
         accrueInterest();
 
-        SupplySnapshot storage supplySnapshot = supplies[supplier];
+        SupplySnapshot storage supplySnapshot = _supplies[supplier];
 
         supplySnapshot.supply = updatedSupplyOf(supplier);
-        supplies[supplier].interestIndex = supplyIndex;
+        _supplies[supplier].interestIndex = _supplyIndex;
 
         require(supplySnapshot.supply >= amount);
 
@@ -144,7 +144,7 @@ contract BasicMarket is Market, IMarketWithInterest {
 
         supplySnapshot.supply = supplySnapshot.supply.sub(amount);
         
-        Controller ctr = Controller(controller);
+        Controller ctr = Controller(_controller);
         
         bool status;
         uint value;
@@ -157,16 +157,16 @@ contract BasicMarket is Market, IMarketWithInterest {
     function borrowInternal(address borrower, uint amount) internal {
         accrueInterest();
 
-        BorrowSnapshot storage borrowSnapshot = borrows[borrower];
+        BorrowSnapshot storage borrowSnapshot = _borrows[borrower];
 
         if (borrowSnapshot.principal > 0) {
-            uint interest = borrowSnapshot.principal.mul(borrowIndex).div(borrowSnapshot.interestIndex).sub(borrowSnapshot.principal);
+            uint interest = borrowSnapshot.principal.mul(_borrowIndex).div(borrowSnapshot.interestIndex).sub(borrowSnapshot.principal);
 
             borrowSnapshot.principal = borrowSnapshot.principal.add(interest);
-            borrowSnapshot.interestIndex = borrowIndex;
+            borrowSnapshot.interestIndex = _borrowIndex;
         }
         
-        Controller ctr = Controller(controller);
+        Controller ctr = Controller(_controller);
         
         bool status;
         uint value;
@@ -178,7 +178,7 @@ contract BasicMarket is Market, IMarketWithInterest {
         require(_token.transfer(borrower, amount), "No enough tokens to borrow");
 
         borrowSnapshot.principal = borrowSnapshot.principal.add(amount);
-        borrowSnapshot.interestIndex = borrowIndex;
+        borrowSnapshot.interestIndex = _borrowIndex;
     }
     
     function getCurrentBlockNumber() external view returns (uint) {
@@ -188,38 +188,38 @@ contract BasicMarket is Market, IMarketWithInterest {
     function accrueInterest() public {
         uint currentBlockNumber = block.number;
         
-        if (currentBlockNumber > accrualBlockNumber) {
-            (totalBorrow, borrowIndex) = calculateBorrowDataAtBlock(currentBlockNumber);
-            (totalSupply, supplyIndex) = calculateSupplyDataAtBlock(currentBlockNumber);
+        if (currentBlockNumber > _accrualBlockNumber) {
+            (_totalBorrow, _borrowIndex) = calculateBorrowDataAtBlock(currentBlockNumber);
+            (_totalSupply, _supplyIndex) = calculateSupplyDataAtBlock(currentBlockNumber);
 
-            accrualBlockNumber = currentBlockNumber;
+            _accrualBlockNumber = currentBlockNumber;
         }
     }
 
     function calculateBorrowDataAtBlock(uint newBlockNumber) internal view returns (uint newTotalBorrows, uint newBorrowIndex) {
-        if (totalBorrow == 0)
-            return (totalBorrow, borrowIndex);
+        if (_totalBorrow == 0)
+            return (_totalBorrow, _borrowIndex);
 
-        uint blockDelta = newBlockNumber - accrualBlockNumber;
+        uint blockDelta = newBlockNumber - _accrualBlockNumber;
 
         uint simpleInterestFactor = borrowRatePerBlock().mul(blockDelta);
-        uint interestAccumulated = simpleInterestFactor.mul(totalBorrow).div(FACTOR);
+        uint interestAccumulated = simpleInterestFactor.mul(_totalBorrow).div(FACTOR);
 
-        newBorrowIndex = simpleInterestFactor.mul(borrowIndex).div(FACTOR).add(borrowIndex);
-        newTotalBorrows = interestAccumulated.add(totalBorrow);
+        newBorrowIndex = simpleInterestFactor.mul(_borrowIndex).div(FACTOR).add(_borrowIndex);
+        newTotalBorrows = interestAccumulated.add(_totalBorrow);
     }
 
     function calculateSupplyDataAtBlock(uint newBlockNumber) internal view returns (uint newTotalSupply, uint newSupplyIndex) {
-        if (totalSupply == 0)
-            return (totalSupply, supplyIndex);
+        if (_totalSupply == 0)
+            return (_totalSupply, _supplyIndex);
 
-        uint blockDelta = newBlockNumber - accrualBlockNumber;
+        uint blockDelta = newBlockNumber - _accrualBlockNumber;
 
         uint simpleInterestFactor = supplyRatePerBlock().mul(blockDelta);
-        uint interestAccumulated = simpleInterestFactor.mul(totalSupply).div(FACTOR);
+        uint interestAccumulated = simpleInterestFactor.mul(_totalSupply).div(FACTOR);
 
-        newSupplyIndex = simpleInterestFactor.mul(supplyIndex).div(FACTOR).add(supplyIndex);
-        newTotalSupply = interestAccumulated.add(totalSupply);
+        newSupplyIndex = simpleInterestFactor.mul(_supplyIndex).div(FACTOR).add(_supplyIndex);
+        newTotalSupply = interestAccumulated.add(_totalSupply);
     }
 
     function getUpdatedTotalBorrows() internal view returns (uint) {
@@ -243,14 +243,14 @@ contract BasicMarket is Market, IMarketWithInterest {
     function payBorrowInternal(address payer, address borrower, uint amount) internal returns (uint paid, uint supplied) {
         accrueInterest();
 
-        BorrowSnapshot storage snapshot = borrows[borrower];
+        BorrowSnapshot storage snapshot = _borrows[borrower];
 
         require(snapshot.principal > 0);
 
-        uint interest = snapshot.principal.mul(borrowIndex).div(snapshot.interestIndex).sub(snapshot.principal);
+        uint interest = snapshot.principal.mul(_borrowIndex).div(snapshot.interestIndex).sub(snapshot.principal);
 
         snapshot.principal = snapshot.principal.add(interest);
-        snapshot.interestIndex = borrowIndex;
+        snapshot.interestIndex = _borrowIndex;
 
         uint additional;
 
@@ -285,7 +285,7 @@ contract BasicMarket is Market, IMarketWithInterest {
         
         require(_token.balanceOf(msg.sender) >= amount);
         
-        Controller ctr = Controller(controller);
+        Controller ctr = Controller(_controller);
         uint collateralAmount = ctr.liquidateCollateral(borrower, msg.sender, amount, collateral);
 
         uint paid;

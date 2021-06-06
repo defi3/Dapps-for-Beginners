@@ -19,8 +19,8 @@ import "../utils/SafeMath.sol";
 contract SimpleMarket is Market {
     using SafeMath for uint256;
 
-    mapping (address => uint) internal supplies;
-    mapping (address => uint) internal borrows;
+    mapping (address => uint) internal _supplies;
+    mapping (address => uint) internal _borrows;
 
     uint public constant FACTOR = 1e6;
 
@@ -29,23 +29,23 @@ contract SimpleMarket is Market {
     }
 
     function supplyOf(address account) public view returns (uint) {
-        return supplies[account];
+        return _supplies[account];
     }
     
     function borrowBy(address account) public view returns (uint) {
-        return borrows[account];
+        return _borrows[account];
     }
 
     function supplyInternal(address supplier, uint amount) internal {
-        supplies[supplier] = supplies[supplier].add(amount);
+        _supplies[supplier] = _supplies[supplier].add(amount);
     }
 
     function redeemInternal(address supplier, address receiver, uint amount) internal {
-        require(supplies[supplier] >= amount);
+        require(_supplies[supplier] >= amount);
 
         require(_token.transfer(receiver, amount), "No enough tokens");
 
-        supplies[supplier] = supplies[supplier].sub(amount);
+        _supplies[supplier] = _supplies[supplier].sub(amount);
         
         Controller ctr = Controller(_controller);
         
@@ -69,15 +69,15 @@ contract SimpleMarket is Market {
 
         require(_token.transfer(borrower, amount), "No enough tokens to borrow");
 
-        borrows[borrower] = borrows[borrower].add(amount);
+        _borrows[borrower] = _borrows[borrower].add(amount);
     }
 
     function payBorrowInternal(address payer, address borrower, uint amount) internal returns (uint paid, uint supplied) {
-        require(borrows[borrower] > 0);
+        require(_borrows[borrower] > 0);
 
         require(_token.transferFrom(payer, address(this), amount), "No enough tokens");
 
-        borrows[borrower] = borrows[borrower].sub(amount);
+        _borrows[borrower] = _borrows[borrower].sub(amount);
             
         return (amount, 0);
     }

@@ -31,6 +31,7 @@ contract Controller is IController {
     
     uint public constant MANTISSA = 1e6;
 
+
     constructor() public {
         owner = msg.sender;
     }
