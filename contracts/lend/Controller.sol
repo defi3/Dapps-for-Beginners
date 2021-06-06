@@ -45,25 +45,25 @@ contract Controller is IController {
         _;
     }
 
-    function marketListSize() public view returns (uint) {
+    function marketListSize() external view returns (uint) {
       return marketList.length;
     }
 
-    function setCollateralFactor(uint factor) public onlyOwner {
+    function setCollateralFactor(uint factor) external onlyOwner {
         collateralFactor = factor;
     }
 
-    function setLiquidationFactor(uint factor) public onlyOwner {
+    function setLiquidationFactor(uint factor) external onlyOwner {
         liquidationFactor = factor;
     }
 
-    function setPrice(address market, uint price) public onlyOwner {
+    function setPrice(address market, uint price) external onlyOwner {
         require(markets[market]);
 
         prices[market] = price;
     }
 
-    function addMarket(address market) public onlyOwner {
+    function addMarket(address market) external onlyOwner {
         address marketToken = IMarket(market).token();
         require(marketsByToken[marketToken] == address(0));
         markets[market] = true;
@@ -72,19 +72,15 @@ contract Controller is IController {
     }
     
     
-    function getAccountValues(address account) public view returns (uint supplyValue, uint borrowValue) {
-        return getAccountValuesInternal(account);
-    }
-    
-    function getAccountValuesInternal(address account) internal view returns (uint supplyValue, uint borrowValue);
+    function getAccountValues(address account) internal view returns (uint supplyValue, uint borrowValue);
 
-    function getAccountLiquidity(address account) public view returns (uint) {
+    function getAccountLiquidity(address account) internal view returns (uint) {
         uint liquidity = 0;
 
         uint supplyValue;
         uint borrowValue;
 
-        (supplyValue, borrowValue) = getAccountValuesInternal(account);
+        (supplyValue, borrowValue) = getAccountValues(account);
 
         borrowValue = borrowValue.mul(collateralFactor.add(MANTISSA));
         borrowValue = borrowValue.div(MANTISSA);
@@ -95,26 +91,26 @@ contract Controller is IController {
         return liquidity;
     }
     
-    function checkAccountLiquidity(address account, address market, uint amount) public view returns (bool) {
+    function checkAccountLiquidity(address account, address market, uint amount) external view returns (bool) {
         uint price = prices[market];
         uint value = price.mul(amount);
         return (getAccountLiquidity(account) >= value.mul(2));
     }
 
-    function getAccountHealth(address account) public view returns (uint) {
+    function getAccountHealth(address account) internal view returns (uint) {
         uint supplyValue;
         uint borrowValue;
 
-        (supplyValue, borrowValue) = getAccountValuesInternal(account);
+        (supplyValue, borrowValue) = getAccountValues(account);
 
         return calculateHealthIndex(supplyValue, borrowValue);
     }
     
-    function checkAccountHealth(address account) public view returns (bool) {
+    function checkAccountHealth(address account) external view returns (bool) {
         uint supplyValue;
         uint borrowValue;
 
-        (supplyValue, borrowValue) = getAccountValuesInternal(account);
+        (supplyValue, borrowValue) = getAccountValues(account);
 
         return supplyValue >= borrowValue.mul(MANTISSA.add(collateralFactor).div(MANTISSA));
     }
@@ -130,7 +126,7 @@ contract Controller is IController {
     }
     
     
-    function liquidateCollateral(address borrower, address liquidator, uint amount, address collateral) public onlyMarket returns (uint collateralAmount)  {
+    function liquidateCollateral(address borrower, address liquidator, uint amount, address collateral) external onlyMarket returns (uint collateralAmount)  {
         uint price = prices[msg.sender];        
         require(price > 0);
 
@@ -140,7 +136,7 @@ contract Controller is IController {
         uint supplyValue;
         uint borrowValue;
 
-        (supplyValue, borrowValue) = getAccountValuesInternal(borrower);
+        (supplyValue, borrowValue) = getAccountValues(borrower);
         require(borrowValue > 0);
         
         uint healthIndex = calculateHealthIndex(supplyValue, borrowValue);

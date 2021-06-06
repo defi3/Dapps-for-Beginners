@@ -21,7 +21,7 @@ contract SimpleController is Controller {
     constructor() Controller() public {
     }
     
-    function getAccountValuesInternal(address account) internal view returns (uint supplyValue, uint borrowValue) {
+    function getAccountValues(address account) internal view returns (uint supplyValue, uint borrowValue) {
         for (uint k = 0; k < marketList.length; k++) {
             SimpleMarket market = SimpleMarket(marketList[k]);
             uint price = prices[marketList[k]];

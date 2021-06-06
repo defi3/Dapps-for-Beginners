@@ -19,7 +19,7 @@ contract BasicController is Controller {
     constructor() Controller() public {
     }
     
-    function getAccountValuesInternal(address account) internal view returns (uint supplyValue, uint borrowValue) {
+    function getAccountValues(address account) internal view returns (uint supplyValue, uint borrowValue) {
         for (uint k = 0; k < marketList.length; k++) {
             BasicMarket market = BasicMarket(marketList[k]);
             uint price = prices[marketList[k]];
