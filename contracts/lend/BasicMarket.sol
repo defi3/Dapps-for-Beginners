@@ -77,11 +77,11 @@ contract BasicMarket is Market, IMarketWithInterest {
     }
 
     function borrowRatePerBlock() internal view returns (uint) {
-        return getBorrowRate(token.balanceOf(address(this)), totalBorrow, 0);
+        return getBorrowRate(_token.balanceOf(address(this)), totalBorrow, 0);
     }
 
     function supplyRatePerBlock() internal view returns (uint) {
-        return getSupplyRate(token.balanceOf(address(this)), totalBorrow, 0);
+        return getSupplyRate(_token.balanceOf(address(this)), totalBorrow, 0);
     }
 
     function supplyOf(address account) external view returns (uint) {
@@ -140,7 +140,7 @@ contract BasicMarket is Market, IMarketWithInterest {
 
         require(supplySnapshot.supply >= amount);
 
-        require(token.transfer(receiver, amount), "No enough tokens");
+        require(_token.transfer(receiver, amount), "No enough tokens");
 
         supplySnapshot.supply = supplySnapshot.supply.sub(amount);
         
@@ -175,7 +175,7 @@ contract BasicMarket is Market, IMarketWithInterest {
 
         require(status, "Not enough account liquidity");
 
-        require(token.transfer(borrower, amount), "No enough tokens to borrow");
+        require(_token.transfer(borrower, amount), "No enough tokens to borrow");
 
         borrowSnapshot.principal = borrowSnapshot.principal.add(amount);
         borrowSnapshot.interestIndex = borrowIndex;
@@ -259,7 +259,7 @@ contract BasicMarket is Market, IMarketWithInterest {
             amount = snapshot.principal;
         }
 
-        require(token.transferFrom(payer, address(this), amount), "No enough tokens");
+        require(_token.transferFrom(payer, address(this), amount), "No enough tokens");
 
         snapshot.principal = snapshot.principal.sub(amount);
 
@@ -283,7 +283,7 @@ contract BasicMarket is Market, IMarketWithInterest {
         
         require(debt >= amount);
         
-        require(token.balanceOf(msg.sender) >= amount);
+        require(_token.balanceOf(msg.sender) >= amount);
         
         Controller ctr = Controller(controller);
         uint collateralAmount = ctr.liquidateCollateral(borrower, msg.sender, amount, collateral);

@@ -23,19 +23,19 @@ contract Market is IMarket {
 
     address internal owner;
 
-    IERC20 internal token;
+    IERC20 internal _token;
     uint internal totalSupply;
     uint internal totalBorrow;
     
     address internal controller;
     
 
-    constructor(IERC20 _token) public {
-        require(IERC20(_token).totalSupply() >= 0);
+    constructor(IERC20 token_) public {
+        require(IERC20(token_).totalSupply() >= 0);
         
         owner = msg.sender;
         
-        token = _token;
+        _token = token_;
     }
 
     modifier onlyOwner() {
@@ -52,15 +52,18 @@ contract Market is IMarket {
         controller = _controller;
     }
 
+    function token() external view returns (address) {
+        return address(_token);
+    }
 
     function balance() external view returns (uint) {
-        return token.balanceOf(address(this));
+        return _token.balanceOf(address(this));
     }
 
 
     function supply(uint amount) external {
         // TODO check msg.sender != this
-        require(token.transferFrom(msg.sender, address(this), amount), "No enough tokens");
+        require(_token.transferFrom(msg.sender, address(this), amount), "No enough tokens");
         
         supplyInternal(msg.sender, amount);
         
@@ -73,7 +76,7 @@ contract Market is IMarket {
     
     
     function borrow(uint amount) external {
-        require(token.balanceOf(address(this)) >= amount);
+        require(_token.balanceOf(address(this)) >= amount);
         
         borrowInternal(msg.sender, amount);
 
@@ -86,7 +89,7 @@ contract Market is IMarket {
 
 
     function redeem(uint amount) external {
-        require(token.balanceOf(address(this)) >= amount);
+        require(_token.balanceOf(address(this)) >= amount);
         
         redeemInternal(msg.sender, msg.sender, amount);
         

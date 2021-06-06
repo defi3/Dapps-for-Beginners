@@ -43,7 +43,7 @@ contract SimpleMarket is Market {
     function redeemInternal(address supplier, address receiver, uint amount) internal {
         require(supplies[supplier] >= amount);
 
-        require(token.transfer(receiver, amount), "No enough tokens");
+        require(_token.transfer(receiver, amount), "No enough tokens");
 
         supplies[supplier] = supplies[supplier].sub(amount);
         
@@ -67,7 +67,7 @@ contract SimpleMarket is Market {
 
         require(status, "Not enough account liquidity");
 
-        require(token.transfer(borrower, amount), "No enough tokens to borrow");
+        require(_token.transfer(borrower, amount), "No enough tokens to borrow");
 
         borrows[borrower] = borrows[borrower].add(amount);
     }
@@ -75,7 +75,7 @@ contract SimpleMarket is Market {
     function payBorrowInternal(address payer, address borrower, uint amount) internal returns (uint paid, uint supplied) {
         require(borrows[borrower] > 0);
 
-        require(token.transferFrom(payer, address(this), amount), "No enough tokens");
+        require(_token.transferFrom(payer, address(this), amount), "No enough tokens");
 
         borrows[borrower] = borrows[borrower].sub(amount);
             
@@ -87,7 +87,7 @@ contract SimpleMarket is Market {
         
         require(borrower != msg.sender);
         
-        require(token.balanceOf(msg.sender) >= amount);
+        require(_token.balanceOf(msg.sender) >= amount);
         
         Controller ctr = Controller(controller);
         uint collateralAmount = ctr.liquidateCollateral(borrower, msg.sender, amount, collateral);
