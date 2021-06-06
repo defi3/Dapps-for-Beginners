@@ -15,8 +15,10 @@ interface IController {
     function setLiquidationFactor(uint factor) external;
     
     function addMarket(address market) external;
-    function marketListSize() external view returns (uint);
+    function size() external view returns (uint);
+    function marketOf(address token) external view returns (address);
     function setPrice(address market, uint price) external;
+    function priceOf(address market) external view returns (uint);
 
     function checkAccountHealth(address account) external view returns (bool status, uint health);
     function checkAccountLiquidity(address account, address market, uint amount) external view returns (bool status, uint liquidity);

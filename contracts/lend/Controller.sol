@@ -50,11 +50,7 @@ contract Controller is IController {
         return _owner;
     }
     
-
-    function marketListSize() external view returns (uint) {
-      return _marketList.length;
-    }
-
+    
     function setCollateralFactor(uint factor) external onlyOwner {
         _collateralFactor = factor;
     }
@@ -62,21 +58,35 @@ contract Controller is IController {
     function setLiquidationFactor(uint factor) external onlyOwner {
         _liquidationFactor = factor;
     }
+    
+
+    function addMarket(address market) external onlyOwner {
+        address token = Market(market).token();
+        
+        require(_marketsByToken[token] == address(0));
+        
+        _markets[market] = true;
+        _marketsByToken[token] = market;
+        _marketList.push(market);
+    }
+    
+    function size() external view returns (uint) {
+      return _marketList.length;
+    }
+    
+    function marketOf(address token) external view returns (address) {
+        return _marketsByToken[token];
+    }
+    
 
     function setPrice(address market, uint price) external onlyOwner {
         require(_markets[market]);
 
         _prices[market] = price;
     }
-
-    function addMarket(address market) external onlyOwner {
-        address marketToken = Market(market).token();
-        
-        require(_marketsByToken[marketToken] == address(0));
-        
-        _markets[market] = true;
-        _marketsByToken[marketToken] = market;
-        _marketList.push(market);
+    
+    function priceOf(address market) external view returns (uint) {
+        return _prices[market];
     }
     
     
