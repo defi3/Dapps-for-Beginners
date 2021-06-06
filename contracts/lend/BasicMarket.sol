@@ -149,10 +149,10 @@ contract BasicMarket is Market, IMarketWithInterest {
         require(ctr.checkAccountHealth(supplier));
     }
 
-    function borrowInternal(address user, uint amount) internal {
+    function borrowInternal(address borrower, uint amount) internal {
         accrueInterest();
 
-        BorrowSnapshot storage borrowSnapshot = borrows[user];
+        BorrowSnapshot storage borrowSnapshot = borrows[borrower];
 
         if (borrowSnapshot.principal > 0) {
             uint interest = borrowSnapshot.principal.mul(borrowIndex).div(borrowSnapshot.interestIndex).sub(borrowSnapshot.principal);
@@ -163,9 +163,9 @@ contract BasicMarket is Market, IMarketWithInterest {
         
         Controller ctr = Controller(controller);
 
-        require(ctr.checkAccountLiquidity(user, address(this), amount), "Not enough account liquidity");
+        require(ctr.checkAccountLiquidity(borrower, address(this), amount), "Not enough account liquidity");
 
-        require(token.transfer(user, amount), "No enough tokens to borrow");
+        require(token.transfer(borrower, amount), "No enough tokens to borrow");
 
         borrowSnapshot.principal = borrowSnapshot.principal.add(amount);
         borrowSnapshot.interestIndex = borrowIndex;
