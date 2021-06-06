@@ -32,7 +32,9 @@ contract Market is IMarket {
 
     constructor(IERC20 _token) public {
         require(IERC20(_token).totalSupply() >= 0);
+        
         owner = msg.sender;
+        
         token = _token;
     }
 
@@ -57,6 +59,9 @@ contract Market is IMarket {
 
 
     function supply(uint amount) public {
+        // TODO check msg.sender != this
+        require(token.transferFrom(msg.sender, address(this), amount), "No enough tokens");
+        
         supplyInternal(msg.sender, amount);
         
         totalSupply = totalSupply.add(amount);

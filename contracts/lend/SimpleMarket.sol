@@ -37,9 +37,6 @@ contract SimpleMarket is Market {
     }
 
     function supplyInternal(address supplier, uint amount) internal {
-        // TODO check msg.sender != this
-        require(token.transferFrom(supplier, address(this), amount), "No enough tokens");
-
         supplies[supplier] = supplies[supplier].add(amount);
     }
 
@@ -77,9 +74,8 @@ contract SimpleMarket is Market {
     
     function liquidateBorrow(address borrower, uint amount, address collateral) public {
         require(amount > 0);
-        require(borrower != msg.sender);
         
-        SimpleMarket collateralMarket = SimpleMarket(collateral);
+        require(borrower != msg.sender);
         
         require(token.balanceOf(msg.sender) >= amount);
         

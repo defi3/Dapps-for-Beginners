@@ -1,5 +1,7 @@
 /**
- *  Source: https://github.com/ajlopez/DeFiProt/blob/master/contracts/Controller.sol
+ *  Reference: https://github.com/ajlopez/DeFiProt/blob/master/contracts/Controller.sol
+ * 
+ *  @Authoer defi3
  * 
  */
 pragma solidity >=0.5.0 <0.6.0;

@@ -121,9 +121,6 @@ contract BasicMarket is Market, IMarketWithInterest {
     }
 
     function supplyInternal(address supplier, uint amount) internal {
-        // TODO check msg.sender != this
-        require(token.transferFrom(supplier, address(this), amount), "No enough tokens");
-
         accrueInterest();
 
         SupplySnapshot storage supplySnapshot = supplies[supplier];
@@ -264,6 +261,7 @@ contract BasicMarket is Market, IMarketWithInterest {
     
     function liquidateBorrow(address borrower, uint amount, address collateral) public {
         require(amount > 0);
+        
         require(borrower != msg.sender);
         
         BasicMarket collateralMarket = BasicMarket(collateral);
@@ -274,6 +272,7 @@ contract BasicMarket is Market, IMarketWithInterest {
         uint debt = updatedBorrowBy(borrower);
         
         require(debt >= amount);
+        
         require(token.balanceOf(msg.sender) >= amount);
         
         Controller ctr = Controller(controller);

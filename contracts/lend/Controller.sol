@@ -140,7 +140,7 @@ contract Controller is IController {
         uint supplyValue;
         uint borrowValue;
 
-        (supplyValue, borrowValue) = getAccountValues(borrower);
+        (supplyValue, borrowValue) = getAccountValuesInternal(borrower);
         require(borrowValue > 0);
         
         uint healthIndex = calculateHealthIndex(supplyValue, borrowValue);
