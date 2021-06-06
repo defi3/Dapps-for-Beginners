@@ -18,58 +18,65 @@ import "../utils/SafeMath.sol";
 contract Controller is IController {
     using SafeMath for uint256;
 
-    address internal owner;
+    address internal _owner;
 
-    mapping (address => bool) internal markets;
-    mapping (address => address) internal marketsByToken;
-    mapping (address => uint) internal prices;
+    mapping (address => bool) internal _markets;
+    mapping (address => address) internal _marketsByToken;
+    mapping (address => uint) internal _prices;
 
-    address[] internal marketList;
+    address[] internal _marketList;
 
-    uint internal collateralFactor;
-    uint internal liquidationFactor;
+    uint internal _collateralFactor;
+    uint internal _liquidationFactor;
     
     uint public constant MANTISSA = 1e6;
 
 
     constructor() public {
-        owner = msg.sender;
+        _owner = msg.sender;
     }
 
     modifier onlyOwner() {
-        require(msg.sender == owner);
+        require(msg.sender == _owner);
         _;
     }
 
     modifier onlyMarket() {
-        require(markets[msg.sender]);
+        require(_markets[msg.sender]);
         _;
     }
+    
+    function owner() external view returns (address) {
+        return _owner;
+    }
+    
 
     function marketListSize() external view returns (uint) {
-      return marketList.length;
+      return _marketList.length;
     }
 
     function setCollateralFactor(uint factor) external onlyOwner {
-        collateralFactor = factor;
+        _collateralFactor = factor;
     }
 
     function setLiquidationFactor(uint factor) external onlyOwner {
-        liquidationFactor = factor;
+        _liquidationFactor = factor;
     }
 
     function setPrice(address market, uint price) external onlyOwner {
-        require(markets[market]);
+        require(_markets[market]);
 
-        prices[market] = price;
+        _prices[market] = price;
     }
 
     function addMarket(address market) external onlyOwner {
         address marketToken = Market(market).token();
-        require(marketsByToken[marketToken] == address(0));
-        markets[market] = true;
-        marketsByToken[marketToken] = market;
-        marketList.push(market);
+        
+        require(_marketsByToken[marketToken] == address(0));
+        
+        _markets[market] = true;
+        _marketsByToken[marketToken] = market;
+        _marketList.push(market);
     }
     
     
@@ -83,7 +90,7 @@ contract Controller is IController {
 
         (supplyValue, borrowValue) = getAccountValues(account);
 
-        borrowValue = borrowValue.mul(collateralFactor.add(MANTISSA));
+        borrowValue = borrowValue.mul(_collateralFactor.add(MANTISSA));
         borrowValue = borrowValue.div(MANTISSA);
 
         if (borrowValue < supplyValue)
@@ -93,7 +100,7 @@ contract Controller is IController {
     }
     
     function checkAccountLiquidity(address account, address market, uint amount) external view returns (bool status, uint liquidity) {
-        uint price = prices[market];
+        uint price = _prices[market];
         uint value = price.mul(amount);
         
         return (getAccountLiquidity(account) >= value.mul(2), value);
@@ -105,14 +112,14 @@ contract Controller is IController {
 
         (supplyValue, borrowValue) = getAccountValues(account);
 
-        return (supplyValue >= borrowValue.mul(MANTISSA.add(collateralFactor).div(MANTISSA)), calculateHealthIndex(supplyValue, borrowValue));
+        return (supplyValue >= borrowValue.mul(MANTISSA.add(_collateralFactor).div(MANTISSA)), calculateHealthIndex(supplyValue, borrowValue));
     }
     
     function calculateHealthIndex(uint supplyValue, uint borrowValue) internal view returns (uint) {
         if (supplyValue == 0 || borrowValue == 0)
             return 0;
 
-        borrowValue = borrowValue.mul(liquidationFactor.add(MANTISSA));
+        borrowValue = borrowValue.mul(_liquidationFactor.add(MANTISSA));
         borrowValue = borrowValue.div(MANTISSA);
         
         return supplyValue.mul(MANTISSA).div(borrowValue);
@@ -120,10 +127,10 @@ contract Controller is IController {
     
     
     function liquidateCollateral(address borrower, address liquidator, uint amount, address collateral) external onlyMarket returns (uint collateralAmount)  {
-        uint price = prices[msg.sender];        
+        uint price = _prices[msg.sender];        
         require(price > 0);
 
-        uint collateralPrice = prices[collateral];        
+        uint collateralPrice = _prices[collateral];        
         require(collateralPrice > 0);
         
         uint supplyValue;

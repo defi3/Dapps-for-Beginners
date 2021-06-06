@@ -9,6 +9,8 @@ pragma solidity >=0.5.0 <0.6.0;
 import "./IMarket.sol";
 
 interface IController {
+    function owner() external view returns (address);
+    
     function setCollateralFactor(uint factor) external;
     function setLiquidationFactor(uint factor) external;
     

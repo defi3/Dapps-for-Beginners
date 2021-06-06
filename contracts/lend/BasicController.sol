@@ -20,9 +20,9 @@ contract BasicController is Controller {
     }
     
     function getAccountValues(address account) internal view returns (uint supplyValue, uint borrowValue) {
-        for (uint k = 0; k < marketList.length; k++) {
-            BasicMarket market = BasicMarket(marketList[k]);
-            uint price = prices[marketList[k]];
+        for (uint k = 0; k < _marketList.length; k++) {
+            BasicMarket market = BasicMarket(_marketList[k]);
+            uint price = _prices[_marketList[k]];
             
             supplyValue = supplyValue.add(market.updatedSupplyOf(account).mul(price));
             borrowValue = borrowValue.add(market.updatedBorrowBy(account).mul(price));
