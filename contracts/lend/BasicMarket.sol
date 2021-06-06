@@ -22,14 +22,14 @@ import "../utils/SafeMath.sol";
 contract BasicMarket is Market, IMarketWithInterest {
     using SafeMath for uint256;
 
-    uint public supplyIndex;
-    uint public borrowIndex;
-    uint public baseBorrowRate;
+    uint internal supplyIndex;
+    uint internal borrowIndex;
+    uint internal baseBorrowRate;
     
-    uint public utilizationRateFraction;
+    uint internal utilizationRateFraction;
     
-    uint public accrualBlockNumber;
-    uint public blocksPerYear;
+    uint internal accrualBlockNumber;
+    uint internal blocksPerYear;
 
     struct SupplySnapshot {
         uint supply;
@@ -41,8 +41,8 @@ contract BasicMarket is Market, IMarketWithInterest {
         uint interestIndex;
     }
 
-    mapping (address => SupplySnapshot) supplies;
-    mapping (address => BorrowSnapshot) borrows;
+    mapping (address => SupplySnapshot) internal supplies;
+    mapping (address => BorrowSnapshot) internal borrows;
 
     uint public constant FACTOR = 1e6;
 
@@ -84,16 +84,16 @@ contract BasicMarket is Market, IMarketWithInterest {
         return getSupplyRate(token.balanceOf(address(this)), totalBorrow, 0);
     }
 
-    function supplyOf(address user) external view returns (uint) {
-        return supplies[user].supply;
+    function supplyOf(address account) external view returns (uint) {
+        return supplies[account].supply;
     }
 
-    function borrowBy(address user) external view returns (uint) {
-        return borrows[user].principal;
+    function borrowBy(address account) external view returns (uint) {
+        return borrows[account].principal;
     }
 
-    function updatedBorrowBy(address user) public view returns (uint) {
-        BorrowSnapshot storage snapshot = borrows[user];
+    function updatedBorrowBy(address account) public view returns (uint) {
+        BorrowSnapshot storage snapshot = borrows[account];
 
         if (snapshot.principal == 0)
             return 0;
@@ -106,8 +106,8 @@ contract BasicMarket is Market, IMarketWithInterest {
         return snapshot.principal.mul(newBorrowIndex).div(snapshot.interestIndex);
     }
 
-    function updatedSupplyOf(address user) public view returns (uint) {
-        SupplySnapshot storage snapshot = supplies[user];
+    function updatedSupplyOf(address account) public view returns (uint) {
+        SupplySnapshot storage snapshot = supplies[account];
 
         if (snapshot.supply == 0)
             return 0;

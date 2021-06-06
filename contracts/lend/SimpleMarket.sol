@@ -19,21 +19,21 @@ import "../utils/SafeMath.sol";
 contract SimpleMarket is Market {
     using SafeMath for uint256;
 
-    mapping (address => uint) supplies;
-    mapping (address => uint) borrows;
+    mapping (address => uint) internal supplies;
+    mapping (address => uint) internal borrows;
 
     uint public constant FACTOR = 1e6;
 
 
-    constructor(IERC20 _token, uint _baseBorrowAnnualRate, uint _blocksPerYear, uint _utilizationRateFraction) Market(_token) public {
+    constructor(IERC20 _token) Market(_token) public {
     }
 
-    function supplyOf(address user) public view returns (uint) {
-        return supplies[user];
+    function supplyOf(address account) public view returns (uint) {
+        return supplies[account];
     }
     
-    function borrowBy(address user) public view returns (uint) {
-        return borrows[user];
+    function borrowBy(address account) public view returns (uint) {
+        return borrows[account];
     }
 
     function supplyInternal(address supplier, uint amount) internal {

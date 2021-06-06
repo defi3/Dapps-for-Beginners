@@ -21,13 +21,13 @@ import "../utils/SafeMath.sol";
 contract Market is IMarket {
     using SafeMath for uint256;
 
-    address public owner;
+    address internal owner;
 
-    IERC20 public token;
-    uint public totalSupply;
-    uint public totalBorrow;
+    IERC20 internal token;
+    uint internal totalSupply;
+    uint internal totalBorrow;
     
-    address public controller;
+    address internal controller;
     
 
     constructor(IERC20 _token) public {
