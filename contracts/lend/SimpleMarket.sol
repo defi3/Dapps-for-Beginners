@@ -47,7 +47,7 @@ contract SimpleMarket is Market {
 
         supplies[supplier] = supplies[supplier].sub(amount);
         
-        Controller ctr = Controller(controller);
+        Controller ctr = Controller(_controller);
         
         bool status;
         uint health;
@@ -58,7 +58,7 @@ contract SimpleMarket is Market {
     }
 
     function borrowInternal(address borrower, uint amount) internal {
-        Controller ctr = Controller(controller);
+        Controller ctr = Controller(_controller);
         
         bool status;
         uint liquidity;
@@ -89,7 +89,7 @@ contract SimpleMarket is Market {
         
         require(_token.balanceOf(msg.sender) >= amount);
         
-        Controller ctr = Controller(controller);
+        Controller ctr = Controller(_controller);
         uint collateralAmount = ctr.liquidateCollateral(borrower, msg.sender, amount, collateral);
 
         uint paid;
