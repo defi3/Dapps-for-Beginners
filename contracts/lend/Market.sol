@@ -48,17 +48,17 @@ contract Market is IMarket {
         _;
     }
     
-    function setController(address _controller) public onlyOwner {
+    function setController(address _controller) external onlyOwner {
         controller = _controller;
     }
 
 
-    function balance() public view returns (uint) {
+    function balance() external view returns (uint) {
         return token.balanceOf(address(this));
     }
 
 
-    function supply(uint amount) public {
+    function supply(uint amount) external {
         // TODO check msg.sender != this
         require(token.transferFrom(msg.sender, address(this), amount), "No enough tokens");
         
@@ -72,7 +72,7 @@ contract Market is IMarket {
     function supplyInternal(address supplier, uint amount) internal;
     
     
-    function borrow(uint amount) public {
+    function borrow(uint amount) external {
         require(token.balanceOf(address(this)) >= amount);
         
         borrowInternal(msg.sender, amount);
@@ -82,10 +82,10 @@ contract Market is IMarket {
         emit Borrow(msg.sender, amount);
     }
  
-    function borrowInternal(address user, uint amount) internal;
+    function borrowInternal(address borrower, uint amount) internal;
 
 
-    function redeem(uint amount) public {
+    function redeem(uint amount) external {
         require(token.balanceOf(address(this)) >= amount);
         
         redeemInternal(msg.sender, msg.sender, amount);
@@ -98,7 +98,7 @@ contract Market is IMarket {
     function redeemInternal(address supplier, address receiver, uint amount) internal;
 
 
-    function payBorrow(uint amount) public {
+    function payBorrow(uint amount) external {
         uint paid;
         uint additional;
         
@@ -115,7 +115,7 @@ contract Market is IMarket {
     function payBorrowInternal(address payer, address borrower, uint amount) internal returns (uint paid, uint supplied);
 
  
-    function transferTo(address sender, address receiver, uint amount) public onlyController {
+    function transferTo(address sender, address receiver, uint amount) external onlyController {
         require(amount > 0);
         
         redeemInternal(sender, receiver, amount);

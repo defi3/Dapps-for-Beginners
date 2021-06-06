@@ -57,38 +57,38 @@ contract BasicMarket is Market, IMarketWithInterest {
     }
 
 
-    function utilizationRate(uint cash, uint borrowed, uint reserves) public pure returns (uint) {
+    function utilizationRate(uint cash, uint borrowed, uint reserves) internal pure returns (uint) {
         if (borrowed == 0)
             return 0;
 
         return borrowed.mul(FACTOR).div(cash.add(borrowed).sub(reserves));
     }
 
-    function getBorrowRate(uint cash, uint borrowed, uint reserves) public view returns (uint) {
+    function getBorrowRate(uint cash, uint borrowed, uint reserves) internal view returns (uint) {
         uint ur = utilizationRate(cash, borrowed, reserves);
 
         return ur.mul(utilizationRateFraction).div(FACTOR).add(baseBorrowRate);
     }
 
-    function getSupplyRate(uint cash, uint borrowed, uint reserves) public view returns (uint) {
+    function getSupplyRate(uint cash, uint borrowed, uint reserves) internal view returns (uint) {
         uint borrowRate = getBorrowRate(cash, borrowed, reserves);
 
         return utilizationRate(cash, borrowed, reserves).mul(borrowRate).div(FACTOR);
     }
 
-    function borrowRatePerBlock() public view returns (uint) {
-        return getBorrowRate(balance(), totalBorrow, 0);
+    function borrowRatePerBlock() internal view returns (uint) {
+        return getBorrowRate(token.balanceOf(address(this)), totalBorrow, 0);
     }
 
-    function supplyRatePerBlock() public view returns (uint) {
-        return getSupplyRate(balance(), totalBorrow, 0);
+    function supplyRatePerBlock() internal view returns (uint) {
+        return getSupplyRate(token.balanceOf(address(this)), totalBorrow, 0);
     }
 
-    function supplyOf(address user) public view returns (uint) {
+    function supplyOf(address user) external view returns (uint) {
         return supplies[user].supply;
     }
 
-    function borrowBy(address user) public view returns (uint) {
+    function borrowBy(address user) external view returns (uint) {
         return borrows[user].principal;
     }
 
@@ -171,7 +171,7 @@ contract BasicMarket is Market, IMarketWithInterest {
         borrowSnapshot.interestIndex = borrowIndex;
     }
     
-    function getCurrentBlockNumber() public view returns (uint) {
+    function getCurrentBlockNumber() external view returns (uint) {
         return block.number;
     }
 
@@ -212,7 +212,7 @@ contract BasicMarket is Market, IMarketWithInterest {
         newTotalSupply = interestAccumulated.add(totalSupply);
     }
 
-    function getUpdatedTotalBorrows() public view returns (uint) {
+    function getUpdatedTotalBorrows() internal view returns (uint) {
         uint newTotalBorrows;
         uint newBorrowIndex;
 
@@ -221,7 +221,7 @@ contract BasicMarket is Market, IMarketWithInterest {
         return newTotalBorrows;
     }
 
-    function getUpdatedTotalSupply() public view returns (uint) {
+    function getUpdatedTotalSupply() internal view returns (uint) {
         uint newTotalSupply;
         uint newSupplyIndex;
 
@@ -259,7 +259,7 @@ contract BasicMarket is Market, IMarketWithInterest {
         return (amount, additional);
     }
     
-    function liquidateBorrow(address borrower, uint amount, address collateral) public {
+    function liquidateBorrow(address borrower, uint amount, address collateral) external {
         require(amount > 0);
         
         require(borrower != msg.sender);
