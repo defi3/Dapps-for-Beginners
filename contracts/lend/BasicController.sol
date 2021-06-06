@@ -4,10 +4,11 @@
  */
 pragma solidity >=0.5.0 <0.6.0;
 
+import "./IController.sol";
 import "./IMarket.sol";
 import "../utils/SafeMath.sol";
 
-contract Controller {
+contract BasicController is IController {
     using SafeMath for uint256;
 
     address public owner;
@@ -78,6 +79,12 @@ contract Controller {
 
         return liquidity;
     }
+    
+    function checkAccountLiquidity(address account, address market, uint amount) public view returns (bool) {
+        uint price = prices[market];
+        uint value = price.mul(amount);
+        return (getAccountLiquidity(account) >= value.mul(2));
+    }
 
     function getAccountHealth(address account) public view returns (uint) {
         uint supplyValue;
@@ -86,6 +93,15 @@ contract Controller {
         (supplyValue, borrowValue) = getAccountValues(account);
 
         return calculateHealthIndex(supplyValue, borrowValue);
+    }
+    
+    function checkAccountHealth(address account) public view returns (bool) {
+        uint supplyValue;
+        uint borrowValue;
+
+        (supplyValue, borrowValue) = getAccountValues(account);
+
+        return supplyValue >= borrowValue.mul(MANTISSA.add(collateralFactor).div(MANTISSA));
     }
     
     function calculateHealthIndex(uint supplyValue, uint borrowValue) internal view returns (uint) {

@@ -12,29 +12,23 @@
  */
 pragma solidity >=0.5.0 <0.6.0;
 
+import "./IMarket.sol";
+import "./BaseMarket.sol";
+import "./IController.sol";
+import "./BasicController.sol";
 import "../token/IERC20.sol";
-import "./Controller.sol";
 import "../utils/SafeMath.sol";
 
-contract Market is IMarket {
+contract BasicMarket is BaseMarket {
     using SafeMath for uint256;
 
-    address public owner;
-
-    IERC20 public token;
-    Controller public controller;
-
-    uint public totalSupply;
     uint public supplyIndex;
-
-    uint public accrualBlockNumber;
-
-    uint public totalBorrow;
     uint public borrowIndex;
     uint public baseBorrowRate;
     
     uint public utilizationRateFraction;
     
+    uint public accrualBlockNumber;
     uint public blocksPerYear;
 
     struct SupplySnapshot {
@@ -52,16 +46,9 @@ contract Market is IMarket {
 
     uint public constant FACTOR = 1e6;
 
-    event Supply(address user, uint amount);
-    event Redeem(address user, uint amount);
-    event Borrow(address user, uint amount);
-    event PayBorrow(address user, uint amount);
     event LiquidateBorrow(address borrower, uint amount, address liquidator, address collateralMarket, uint collateralAmount);
 
-    constructor(IERC20 _token, uint _baseBorrowAnnualRate, uint _blocksPerYear, uint _utilizationRateFraction) public {
-        require(IERC20(_token).totalSupply() >= 0);
-        owner = msg.sender;
-        token = _token;
+    constructor(IERC20 _token, uint _baseBorrowAnnualRate, uint _blocksPerYear, uint _utilizationRateFraction) BaseMarket(_token) public {
         borrowIndex = FACTOR;
         supplyIndex = FACTOR;
         blocksPerYear = _blocksPerYear;
@@ -70,23 +57,6 @@ contract Market is IMarket {
         utilizationRateFraction = _utilizationRateFraction.div(_blocksPerYear);
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == owner);
-        _;
-    }
-
-    modifier onlyController() {
-        require(msg.sender == address(controller));
-        _;
-    }
-    
-    function setController(Controller _controller) public onlyOwner {
-        controller = _controller;
-    }
-
-    function balance() public view returns (uint) {
-        return token.balanceOf(address(this));
-    }
 
     function utilizationRate(uint cash, uint borrowed, uint reserves) public pure returns (uint) {
         if (borrowed == 0)
@@ -151,12 +121,6 @@ contract Market is IMarket {
         return snapshot.supply.mul(newSupplyIndex).div(snapshot.interestIndex);
     }
 
-    function supply(uint amount) public {
-        supplyInternal(msg.sender, amount);
-
-        emit Supply(msg.sender, amount);
-    }
-
     function supplyInternal(address supplier, uint amount) internal {
         // TODO check msg.sender != this
         require(token.transferFrom(supplier, address(this), amount), "No enough tokens");
@@ -172,22 +136,7 @@ contract Market is IMarket {
         totalSupply = totalSupply.add(amount);
     }
 
-    function redeem(uint amount) public {
-        redeemInternal(msg.sender, msg.sender, amount);
-
-        uint supplierSupplyValue;
-        uint supplierBorrowValue;
-
-        (supplierSupplyValue, supplierBorrowValue) = controller.getAccountValues(msg.sender);
-
-        require(supplierSupplyValue >= supplierBorrowValue.mul(controller.MANTISSA().add(controller.collateralFactor())).div(controller.MANTISSA()));
-
-        emit Redeem(msg.sender, amount);
-    }
-
     function redeemInternal(address supplier, address receiver, uint amount) internal {
-        require(token.balanceOf(address(this)) >= amount);
-
         accrueInterest();
 
         SupplySnapshot storage supplySnapshot = supplies[supplier];
@@ -200,13 +149,9 @@ contract Market is IMarket {
         require(token.transfer(receiver, amount), "No enough tokens");
 
         supplySnapshot.supply = supplySnapshot.supply.sub(amount);
-
-        totalSupply = totalSupply.sub(amount);
     }
 
-    function borrow(uint amount) public {
-        require(token.balanceOf(address(this)) >= amount);
-
+    function borrowInternal(address user, uint amount) internal {
         accrueInterest();
 
         BorrowSnapshot storage borrowSnapshot = borrows[msg.sender];
@@ -218,16 +163,12 @@ contract Market is IMarket {
             borrowSnapshot.interestIndex = borrowIndex;
         }
 
-        require(controller.getAccountLiquidity(msg.sender) >= controller.prices(address(this)).mul(amount).mul(2), "Not enough account liquidity");
+        require(controller.checkAccountLiquidity(msg.sender, address(this), amount), "Not enough account liquidity");
 
         require(token.transfer(msg.sender, amount), "No enough tokens to borrow");
 
         borrowSnapshot.principal = borrowSnapshot.principal.add(amount);
         borrowSnapshot.interestIndex = borrowIndex;
-
-        totalBorrow = totalBorrow.add(amount);
-        
-        emit Borrow(msg.sender, amount);
     }
     
     function getCurrentBlockNumber() public view returns (uint) {
@@ -289,18 +230,6 @@ contract Market is IMarket {
         return newTotalSupply;
     }
 
-    function payBorrow(uint amount) public {
-        uint paid;
-        uint additional;
-        
-        (paid, additional) = payBorrowInternal(msg.sender, msg.sender, amount);
-        
-        emit PayBorrow(msg.sender, paid);
-        
-        if (additional > 0)
-            emit Supply(msg.sender, additional);
-    }
-
     function payBorrowInternal(address payer, address borrower, uint amount) internal returns (uint paid, uint supplied) {
         accrueInterest();
 
@@ -323,7 +252,7 @@ contract Market is IMarket {
         require(token.transferFrom(payer, address(this), amount), "No enough tokens");
 
         snapshot.principal = snapshot.principal.sub(amount);
-        totalBorrow = totalBorrow.sub(amount);
+        // totalBorrow = totalBorrow.sub(amount);
 
         if (additional > 0)
             supplyInternal(payer, additional);
@@ -354,11 +283,6 @@ contract Market is IMarket {
         
         if (additional > 0)
             emit Supply(msg.sender, additional);
-    }
-    
-    function transferTo(address sender, address receiver, uint amount) public onlyController {
-        require(amount > 0);
-        redeemInternal(sender, receiver, amount);
     }
 }
 
