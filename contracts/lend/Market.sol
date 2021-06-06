@@ -21,35 +21,35 @@ import "../utils/SafeMath.sol";
 contract Market is IMarket {
     using SafeMath for uint256;
 
-    address internal owner;
+    address internal _owner;
 
     IERC20 internal _token;
     uint internal _totalSupply;
     uint internal _totalBorrow;
     
-    address internal controller;
+    address internal _controller;
     
 
     constructor(IERC20 token_) public {
         require(IERC20(token_).totalSupply() >= 0);
         
-        owner = msg.sender;
+        _owner = msg.sender;
         
         _token = token_;
     }
 
     modifier onlyOwner() {
-        require(msg.sender == owner);
+        require(msg.sender == _owner);
         _;
     }
 
     modifier onlyController() {
-        require(msg.sender == controller);
+        require(msg.sender == _controller);
         _;
     }
     
-    function setController(address _controller) external onlyOwner {
-        controller = _controller;
+    function setController(address controller_) external onlyOwner {
+        _controller = controller_;
     }
 
 
