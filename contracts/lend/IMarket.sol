@@ -17,6 +17,8 @@ interface IMarket {
     function setController(address controller) external;
     
     function token() external view returns (address);
+    function totalSupply() external view returns (uint);
+    function totalBorrow() external view returns (uint);
     function balance() external view returns (uint);
     
     function borrow(uint amount) external;

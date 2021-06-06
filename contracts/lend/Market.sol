@@ -24,8 +24,8 @@ contract Market is IMarket {
     address internal owner;
 
     IERC20 internal _token;
-    uint internal totalSupply;
-    uint internal totalBorrow;
+    uint internal _totalSupply;
+    uint internal _totalBorrow;
     
     address internal controller;
     
@@ -52,8 +52,17 @@ contract Market is IMarket {
         controller = _controller;
     }
 
+
     function token() external view returns (address) {
         return address(_token);
+    }
+    
+    function totalSupply() external view returns (uint) {
+        return _totalSupply;
+    }
+    
+    function totalBorrow() external view returns (uint) {
+        return _totalBorrow;
     }
 
     function balance() external view returns (uint) {
@@ -67,7 +76,7 @@ contract Market is IMarket {
         
         supplyInternal(msg.sender, amount);
         
-        totalSupply = totalSupply.add(amount);
+        _totalSupply = _totalSupply.add(amount);
 
         emit Supply(msg.sender, amount);
     }
@@ -80,7 +89,7 @@ contract Market is IMarket {
         
         borrowInternal(msg.sender, amount);
 
-        totalBorrow = totalBorrow.add(amount);
+        _totalBorrow = _totalBorrow.add(amount);
         
         emit Borrow(msg.sender, amount);
     }
@@ -93,7 +102,7 @@ contract Market is IMarket {
         
         redeemInternal(msg.sender, msg.sender, amount);
         
-        totalSupply = totalSupply.sub(amount);
+        _totalSupply = _totalSupply.sub(amount);
 
         emit Redeem(msg.sender, amount);
     }
@@ -107,7 +116,7 @@ contract Market is IMarket {
         
         (paid, additional) = payBorrowInternal(msg.sender, msg.sender, amount);
         
-        totalBorrow = totalBorrow.sub(amount);
+        _totalBorrow = _totalBorrow.sub(amount);
         
         emit PayBorrow(msg.sender, paid);
         
