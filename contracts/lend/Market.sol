@@ -52,7 +52,10 @@ contract Market is IMarket {
         _controller = controller_;
     }
 
-
+    function owner() external view returns (address) {
+        return _owner;
+    }
+    
     function token() external view returns (address) {
         return address(_token);
     }

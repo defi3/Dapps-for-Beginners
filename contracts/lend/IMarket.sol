@@ -14,6 +14,8 @@ pragma solidity >=0.5.0 <0.6.0;
 import "./IController.sol";
 
 interface IMarket {
+    function owner() external view returns (address);
+    
     function setController(address controller) external;
     
     function token() external view returns (address);
