@@ -87,7 +87,7 @@ contract SimpleMarket is Market {
 
         (paid, additional) = payBorrowInternal(msg.sender, borrower, amount);
         
-        emit LiquidateBorrow(borrower, paid, msg.sender, address(collateralMarket), collateralAmount);
+        emit LiquidateBorrow(borrower, paid, msg.sender, collateral, collateralAmount);
     }
 }
 
