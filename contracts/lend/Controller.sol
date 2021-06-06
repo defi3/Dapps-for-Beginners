@@ -18,16 +18,16 @@ import "../utils/SafeMath.sol";
 contract Controller is IController {
     using SafeMath for uint256;
 
-    address public owner;
+    address internal owner;
 
-    mapping (address => bool) public markets;
-    mapping (address => address) public marketsByToken;
-    mapping (address => uint) public prices;
+    mapping (address => bool) internal markets;
+    mapping (address => address) internal marketsByToken;
+    mapping (address => uint) internal prices;
 
-    address[] public marketList;
+    address[] internal marketList;
 
-    uint public collateralFactor;
-    uint public liquidationFactor;
+    uint internal collateralFactor;
+    uint internal liquidationFactor;
     
     uint public constant MANTISSA = 1e6;
 
@@ -64,7 +64,7 @@ contract Controller is IController {
     }
 
     function addMarket(address market) external onlyOwner {
-        address marketToken = IMarket(market).token();
+        address marketToken = Market(market).token();
         require(marketsByToken[marketToken] == address(0));
         markets[market] = true;
         marketsByToken[marketToken] = market;
