@@ -195,12 +195,12 @@ contract("SimpleController", (accounts) => {
     console.log("bob's health status: " + healthOfBob.status + "\thealth index: " + healthOfBob.health / MANTISSA);
 
 
-    liquidityOfAlice = await this.controller.accountLiquidity(alice, this.market2.address, 0);
+    liquidityOfAlice = await this.controller.accountLiquidity(alice, this.market2.address, 30);
     console.log("alice's liquidity status: " + liquidityOfAlice.status + "\tliquidity: " + liquidityOfAlice.liquidity_ / MANTISSA);
     // assert.equal(liquidityOfAlice.status, true);
     // assert.equal(liquidityOfAlice.liquidity_, 0);
 
-    liquidityOfBob = await this.controller.accountLiquidity(bob, this.market2.address, 0);
+    liquidityOfBob = await this.controller.accountLiquidity(bob, this.market2.address, 1000);
     console.log("bob's liquidity status: " + liquidityOfBob.status + "\tliquidity: " + liquidityOfBob.liquidity_ / MANTISSA);
     // assert.equal(liquidityOfBob.status, true);
     // assert.equal(liquidityOfBob.liquidity_, 0);

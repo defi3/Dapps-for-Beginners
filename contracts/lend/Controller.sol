@@ -111,7 +111,8 @@ contract Controller is IController {
     
     function accountValuesInternal(address account) internal view returns (uint supplyValue, uint borrowValue);
 
-
+   
+   // called by borrowInternal() in Market 
     function accountLiquidity(address account, address market, uint amount) external view returns (bool status, uint liquidity_) {
         uint liquidity = accountLiquidityInternal(account);
         
