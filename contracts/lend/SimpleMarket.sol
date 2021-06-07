@@ -25,7 +25,7 @@ contract SimpleMarket is Market {
     uint public constant FACTOR = 1e6;
 
 
-    constructor(IERC20 _token) Market(_token) public {
+    constructor(address _token) Market(_token) public {
     }
 
     function supplyOf(address account) public view returns (uint) {
@@ -43,7 +43,7 @@ contract SimpleMarket is Market {
     function redeemInternal(address supplier, address receiver, uint amount) internal {
         require(_supplies[supplier] >= amount);
 
-        require(_token.transfer(receiver, amount), "No enough tokens");
+        require(IERC20(_token).transfer(receiver, amount), "No enough tokens");
 
         _supplies[supplier] = _supplies[supplier].sub(amount);
         
@@ -67,15 +67,15 @@ contract SimpleMarket is Market {
 
         require(status, "Not enough account liquidity");
 
-        require(_token.transfer(borrower, amount), "No enough tokens to borrow");
+        require(IERC20(_token).transfer(borrower, amount), "No enough tokens to borrow");
 
         _borrows[borrower] = _borrows[borrower].add(amount);
     }
 
-    function payBorrowInternal(address payer, address borrower, uint amount) internal returns (uint paid, uint supplied) {
+    function payBorrowInternal(address payer, address borrower, uint amount) internal returns (uint paid, uint additional) {
         require(_borrows[borrower] > 0);
 
-        require(_token.transferFrom(payer, address(this), amount), "No enough tokens");
+        require(IERC20(_token).transferFrom(payer, address(this), amount), "No enough tokens");
 
         _borrows[borrower] = _borrows[borrower].sub(amount);
             
@@ -87,7 +87,7 @@ contract SimpleMarket is Market {
         
         require(borrower != msg.sender);
         
-        require(_token.balanceOf(msg.sender) >= amount);
+        require(IERC20(_token).balanceOf(msg.sender) >= amount);
         
         Controller ctr = Controller(_controller);
         uint collateralAmount = ctr.liquidateCollateral(borrower, msg.sender, amount, collateral);

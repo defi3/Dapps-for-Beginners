@@ -47,7 +47,7 @@ contract BasicMarket is Market, IMarketWithInterest {
     uint public constant FACTOR = 1e6;
 
 
-    constructor(IERC20 token_, uint baseBorrowAnnualRate_, uint blocksPerYear_, uint utilizationRateFraction_) Market(token_) public {
+    constructor(address token_, uint baseBorrowAnnualRate_, uint blocksPerYear_, uint utilizationRateFraction_) Market(token_) public {
         _borrowIndex = FACTOR;
         _supplyIndex = FACTOR;
         _blocksPerYear = blocksPerYear_;
@@ -77,11 +77,11 @@ contract BasicMarket is Market, IMarketWithInterest {
     }
 
     function borrowRatePerBlock() internal view returns (uint) {
-        return getBorrowRate(_token.balanceOf(address(this)), _totalBorrow, 0);
+        return getBorrowRate(balance(), _totalBorrow, 0);
     }
 
     function supplyRatePerBlock() internal view returns (uint) {
-        return getSupplyRate(_token.balanceOf(address(this)), _totalBorrow, 0);
+        return getSupplyRate(balance(), _totalBorrow, 0);
     }
 
     function supplyOf(address account) external view returns (uint) {
@@ -140,7 +140,7 @@ contract BasicMarket is Market, IMarketWithInterest {
 
         require(supplySnapshot.supply >= amount);
 
-        require(_token.transfer(receiver, amount), "No enough tokens");
+        require(IERC20(_token).transfer(receiver, amount), "No enough tokens");
 
         supplySnapshot.supply = supplySnapshot.supply.sub(amount);
         
@@ -175,13 +175,13 @@ contract BasicMarket is Market, IMarketWithInterest {
 
         require(status, "Not enough account liquidity");
 
-        require(_token.transfer(borrower, amount), "No enough tokens to borrow");
+        require(IERC20(_token).transfer(borrower, amount), "No enough tokens to borrow");
 
         borrowSnapshot.principal = borrowSnapshot.principal.add(amount);
         borrowSnapshot.interestIndex = _borrowIndex;
     }
     
-    function getCurrentBlockNumber() external view returns (uint) {
+    function blockNumber() external view returns (uint) {
         return block.number;
     }
 
@@ -240,7 +240,7 @@ contract BasicMarket is Market, IMarketWithInterest {
         return newTotalSupply;
     }
 
-    function payBorrowInternal(address payer, address borrower, uint amount) internal returns (uint paid, uint supplied) {
+    function payBorrowInternal(address payer, address borrower, uint amount) internal returns (uint paid, uint additional) {
         accrueInterest();
 
         BorrowSnapshot storage snapshot = _borrows[borrower];
@@ -259,7 +259,7 @@ contract BasicMarket is Market, IMarketWithInterest {
             amount = snapshot.principal;
         }
 
-        require(_token.transferFrom(payer, address(this), amount), "No enough tokens");
+        require(IERC20(_token).transferFrom(payer, address(this), amount), "No enough tokens");
 
         snapshot.principal = snapshot.principal.sub(amount);
 
@@ -283,7 +283,7 @@ contract BasicMarket is Market, IMarketWithInterest {
         
         require(debt >= amount);
         
-        require(_token.balanceOf(msg.sender) >= amount);
+        require(IERC20(_token).balanceOf(msg.sender) >= amount);
         
         Controller ctr = Controller(_controller);
         uint collateralAmount = ctr.liquidateCollateral(borrower, msg.sender, amount, collateral);
