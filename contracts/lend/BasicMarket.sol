@@ -240,7 +240,7 @@ contract BasicMarket is Market, IMarketWithInterest {
         return newTotalSupply;
     }
 
-    function payBorrowInternal(address payer, address borrower, uint amount) internal returns (uint paid, uint additional) {
+    function payBorrowInternal(address payer, address borrower, uint amount) internal returns (uint paid, uint additional_) {
         accrueInterest();
 
         BorrowSnapshot storage snapshot = _borrows[borrower];
