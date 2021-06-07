@@ -151,11 +151,11 @@ contract("SimpleController", (accounts) => {
 
     healthOfAlice = await this.controller.accountHealth(alice);
     assert.equal(healthOfAlice.status, true);
-    assert.equal(healthOfAlice.health, 0);
+    assert.equal(healthOfAlice.index, 0);
 
     healthOfBob = await this.controller.accountHealth(bob);
     assert.equal(healthOfBob.status, true);
-    assert.equal(healthOfBob.health, 0);
+    assert.equal(healthOfBob.index, 0);
 
     liquidityOfAlice = await this.controller.accountLiquidity(alice, this.market.address, 0);
     // console.log(liquidityOfAlice);
@@ -187,12 +187,12 @@ contract("SimpleController", (accounts) => {
     // assert.equal(valuesOfBob.borrowValue, 0);
 
     healthOfAlice = await this.controller.accountHealth(alice);
-    console.log("alice's health status: " + healthOfAlice.status + "\thealth index: " + healthOfAlice.health / MANTISSA);
+    console.log("alice's health status: " + healthOfAlice.status + "\thealth index: " + healthOfAlice.index / MANTISSA);
     // assert.equal(healthOfAlice.status, true);
-    // assert.equal(healthOfAlice.health, 0);
+    // assert.equal(healthOfAlice.index, 0);
 
     healthOfBob = await this.controller.accountHealth(bob);
-    console.log("bob's health status: " + healthOfBob.status + "\thealth index: " + healthOfBob.health / MANTISSA);
+    console.log("bob's health status: " + healthOfBob.status + "\thealth index: " + healthOfBob.index / MANTISSA);
 
 
     liquidityOfAlice = await this.controller.accountLiquidity(alice, this.market2.address, 30);

@@ -28,7 +28,7 @@ interface IController {
     function priceOf(address market) external view returns (uint);
 
     function accountValues(address account) external view returns (uint supplyValue, uint borrowValue);
-    function accountHealth(address account) external view returns (bool status, uint health);
+    function accountHealth(address account) external view returns (bool status, uint index);
     function accountLiquidity(address account, address market, uint amount) external view returns (bool status, uint liquidity_);
     
     function liquidateCollateral(address borrower, address liquidator, uint amount, address collateral) external returns (uint collateralAmount);
