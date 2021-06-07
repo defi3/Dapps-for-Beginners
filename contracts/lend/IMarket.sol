@@ -25,7 +25,8 @@ interface IMarket {
     
     function owner() external view returns (address);
     
-    function setController(address controller) external;
+    function controller() external view returns(address);
+    function setController(address controller_) external;
     
     function token() external view returns (address);
     function totalSupply() external view returns (uint);

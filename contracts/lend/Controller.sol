@@ -57,10 +57,18 @@ contract Controller is IController {
     }
     
     
+    function collateralFactor() external view returns (uint) {
+        return _collateralFactor;
+    }
+    
     function setCollateralFactor(uint factor) external onlyOwner {
         _collateralFactor = factor;
     }
 
+    function liquidationFactor() external view returns (uint) {
+        return _liquidationFactor;
+    }
+    
     function setLiquidationFactor(uint factor) external onlyOwner {
         _liquidationFactor = factor;
     }

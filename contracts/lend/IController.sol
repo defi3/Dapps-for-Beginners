@@ -16,7 +16,9 @@ import "./IMarket.sol";
 interface IController {
     function owner() external view returns (address);
     
+    function collateralFactor() external view returns (uint);
     function setCollateralFactor(uint factor) external;
+    function liquidationFactor() external view returns (uint);
     function setLiquidationFactor(uint factor) external;
     
     function addMarket(address market) external;
@@ -27,7 +29,7 @@ interface IController {
 
     function accountValues(address account) external view returns (uint supplyValue, uint borrowValue);
     function accountHealth(address account) external view returns (bool status, uint health);
-    function accountLiquidity(address account, address market, uint amount) external view returns (bool status, uint liquidity);
+    function accountLiquidity(address account, address market, uint amount) external view returns (bool status, uint liquidity_);
     
     function liquidateCollateral(address borrower, address liquidator, uint amount, address collateral) external returns (uint collateralAmount);
 }

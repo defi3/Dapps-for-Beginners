@@ -53,6 +53,10 @@ contract Market is IMarket {
         _;
     }
     
+    function controller() external view returns(address) {
+        return _controller;
+    }
+    
     function setController(address controller_) external onlyOwner {
         _controller = controller_;
     }
