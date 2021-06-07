@@ -104,7 +104,7 @@ contract Controller is IController {
     function accountValuesInternal(address account) internal view returns (uint supplyValue, uint borrowValue);
 
 
-    function accountLiquidity(address account, address market, uint amount) public view returns (bool status, uint liquidity_) {
+    function accountLiquidity(address account, address market, uint amount) external view returns (bool status, uint liquidity_) {
         uint liquidity = accountLiquidityInternal(account);
         
         return (liquidity >= _prices[market].mul(amount).mul(2), liquidity);

@@ -15,13 +15,13 @@ import "./Controller.sol";
 import "./BasicMarket.sol";
 import "../utils/SafeMath.sol";
 
-contract BasicController is Controller {
+contract BasicController is Controller() {
     using SafeMath for uint256;
 
-    constructor() Controller() public {
+    constructor() public {
     }
     
-    function getAccountValues(address account) internal view returns (uint supplyValue, uint borrowValue) {
+    function accountValuesInternal(address account) internal view returns (uint supplyValue, uint borrowValue) {
         for (uint k = 0; k < _marketList.length; k++) {
             BasicMarket market = BasicMarket(_marketList[k]);
             uint price = _prices[_marketList[k]];
