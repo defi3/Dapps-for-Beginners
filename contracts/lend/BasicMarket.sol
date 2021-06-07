@@ -8,7 +8,9 @@
  * 
  *  Main Update 2, 2021-06-05, update accrueInterest()
  * 
- *  Main Update 3, 2021-06-06, inherit Market 
+ *  Main Update 3, 2021-06-06, inherit Market
+ * 
+ *  Main Update 4, 2021-06-06, improve naming convention
  * 
  */
 pragma solidity >=0.5.0 <0.6.0;

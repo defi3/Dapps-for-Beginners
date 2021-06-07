@@ -8,6 +8,8 @@
  * 
  *  Main Update 1, 2021-06-06, add events
  * 
+ *  Main Update 2, 2021-06-06, add owner(), totalSupply(), totalBorrow()
+ * 
  */
 pragma solidity >=0.5.0 <0.6.0;
 

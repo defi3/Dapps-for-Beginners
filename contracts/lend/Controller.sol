@@ -8,6 +8,10 @@
  * 
  *  Main Update 1, 2021-06-06, change it to abstract contract
  * 
+ *  Main Update 2, 2021-06-06, add owner(), marketOf(), priceOf()
+ * 
+ *  Main Update 3, 2021-06-06, improve naming convention
+ * 
  */
 pragma solidity >=0.5.0 <0.6.0;
 
