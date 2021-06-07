@@ -20,23 +20,25 @@ import "../utils/SafeMath.sol";
 
 contract SimpleMarket is Market {
     using SafeMath for uint256;
+    
+    uint public constant FACTOR = 1e6;
 
     mapping (address => uint) internal _supplies;
     mapping (address => uint) internal _borrows;
 
-    uint public constant FACTOR = 1e6;
 
-
-    constructor(address _token) Market(_token) public {
+    constructor(address token_) Market(token_) public {
     }
 
-    function supplyOf(address account) public view returns (uint) {
+
+    function supplyOf(address account) external view returns (uint) {
         return _supplies[account];
     }
     
-    function borrowBy(address account) public view returns (uint) {
+    function borrowBy(address account) external view returns (uint) {
         return _borrows[account];
     }
+
 
     function supplyInternal(address supplier, uint amount) internal {
         _supplies[supplier] = _supplies[supplier].add(amount);
@@ -74,15 +76,26 @@ contract SimpleMarket is Market {
         _borrows[borrower] = _borrows[borrower].add(amount);
     }
 
-    function payBorrowInternal(address payer, address borrower, uint amount) internal returns (uint paid, uint additional) {
+    function payBorrowInternal(address payer, address borrower, uint amount) internal returns (uint paid, uint additional_) {
         require(_borrows[borrower] > 0);
 
         require(IERC20(_token).transferFrom(payer, address(this), amount), "No enough tokens");
+        
+        uint additional;
+        
+        if (amount > _borrows[borrower]) {
+            additional = amount.sub(_borrows[borrower]);
+            amount = _borrows[borrower];
+        }
 
         _borrows[borrower] = _borrows[borrower].sub(amount);
+        
+        if (additional > 0)
+            supplyInternal(payer, additional);
             
-        return (amount, 0);
+        return (amount, additional);
     }
+    
     
     function liquidateBorrow(address borrower, uint amount, address collateral) public {
         require(amount > 0);

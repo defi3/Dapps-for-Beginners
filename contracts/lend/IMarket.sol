@@ -16,6 +16,13 @@ pragma solidity >=0.5.0 <0.6.0;
 import "./IController.sol";
 
 interface IMarket {
+    event Supply(address user, uint amount);
+    event Redeem(address user, uint amount);
+    event Borrow(address user, uint amount);
+    event PayBorrow(address user, uint amount);
+    
+    event LiquidateBorrow(address borrower, uint amount, address liquidator, address collateral, uint collateralAmount);
+    
     function owner() external view returns (address);
     
     function setController(address controller) external;
@@ -35,12 +42,5 @@ interface IMarket {
     
     function liquidateBorrow(address borrower, uint amount, address collateral) external;
     function transferTo(address sender, address receiver, uint amount) external;
-    
-    event Supply(address user, uint amount);
-    event Redeem(address user, uint amount);
-    event Borrow(address user, uint amount);
-    event PayBorrow(address user, uint amount);
-    
-    event LiquidateBorrow(address borrower, uint amount, address liquidator, address collateral, uint collateralAmount);
 }
 

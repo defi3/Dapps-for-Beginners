@@ -42,6 +42,7 @@ contract Market is IMarket {
         _token = token_;
     }
 
+
     modifier onlyOwner() {
         require(msg.sender == _owner);
         _;
@@ -59,7 +60,8 @@ contract Market is IMarket {
     function owner() external view returns (address) {
         return _owner;
     }
-    
+
+ 
     function token() external view returns (address) {
         return _token;
     }

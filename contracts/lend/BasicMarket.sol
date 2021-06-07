@@ -23,16 +23,9 @@ import "../utils/SafeMath.sol";
 
 contract BasicMarket is Market, IMarketWithInterest {
     using SafeMath for uint256;
-
-    uint internal _supplyIndex;
-    uint internal _borrowIndex;
-    uint internal _baseBorrowRate;
     
-    uint internal _utilizationRateFraction;
+    uint public constant FACTOR = 1e6;
     
-    uint internal _accrualBlockNumber;
-    uint internal _blocksPerYear;
-
     struct SupplySnapshot {
         uint supply;
         uint interestIndex;
@@ -43,10 +36,17 @@ contract BasicMarket is Market, IMarketWithInterest {
         uint interestIndex;
     }
 
+    uint internal _supplyIndex;
+    uint internal _borrowIndex;
+    uint internal _baseBorrowRate;
+    
+    uint internal _utilizationRateFraction;
+    
+    uint internal _accrualBlockNumber;
+    uint internal _blocksPerYear;
+
     mapping (address => SupplySnapshot) internal _supplies;
     mapping (address => BorrowSnapshot) internal _borrows;
-
-    uint public constant FACTOR = 1e6;
 
 
     constructor(address token_, uint baseBorrowAnnualRate_, uint blocksPerYear_, uint utilizationRateFraction_) Market(token_) public {
@@ -59,32 +59,33 @@ contract BasicMarket is Market, IMarketWithInterest {
     }
 
 
-    function utilizationRate(uint cash, uint borrowed, uint reserves) internal pure returns (uint) {
+    function utilizationRate(uint cash, uint borrowed, uint reserves) public pure returns (uint) {
         if (borrowed == 0)
             return 0;
 
         return borrowed.mul(FACTOR).div(cash.add(borrowed).sub(reserves));
     }
 
-    function getBorrowRate(uint cash, uint borrowed, uint reserves) internal view returns (uint) {
+    function borrowRate(uint cash, uint borrowed, uint reserves) public view returns (uint) {
         uint ur = utilizationRate(cash, borrowed, reserves);
 
         return ur.mul(_utilizationRateFraction).div(FACTOR).add(_baseBorrowRate);
     }
 
-    function getSupplyRate(uint cash, uint borrowed, uint reserves) internal view returns (uint) {
-        uint borrowRate = getBorrowRate(cash, borrowed, reserves);
+    function supplyRate(uint cash, uint borrowed, uint reserves) public view returns (uint) {
+        uint borrowRate__ = borrowRate(cash, borrowed, reserves);
 
-        return utilizationRate(cash, borrowed, reserves).mul(borrowRate).div(FACTOR);
+        return utilizationRate(cash, borrowed, reserves).mul(borrowRate__).div(FACTOR);
     }
 
-    function borrowRatePerBlock() internal view returns (uint) {
-        return getBorrowRate(balance(), _totalBorrow, 0);
+    function borrowRatePerBlock() public view returns (uint) {
+        return borrowRate(balance(), _totalBorrow, 0);
     }
 
-    function supplyRatePerBlock() internal view returns (uint) {
-        return getSupplyRate(balance(), _totalBorrow, 0);
+    function supplyRatePerBlock() public view returns (uint) {
+        return supplyRate(balance(), _totalBorrow, 0);
     }
+
 
     function supplyOf(address account) external view returns (uint) {
         return _supplies[account].supply;
@@ -183,6 +184,7 @@ contract BasicMarket is Market, IMarketWithInterest {
         borrowSnapshot.interestIndex = _borrowIndex;
     }
     
+    
     function blockNumber() external view returns (uint) {
         return block.number;
     }
@@ -270,6 +272,7 @@ contract BasicMarket is Market, IMarketWithInterest {
             
         return (amount, additional);
     }
+    
     
     function liquidateBorrow(address borrower, uint amount, address collateral) external {
         require(amount > 0);
