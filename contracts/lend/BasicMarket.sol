@@ -152,7 +152,7 @@ contract BasicMarket is Market, IMarketWithInterest {
         bool status;
         uint value;
         
-        (status, value) = ctr.checkAccountHealth(supplier);
+        (status, value) = ctr.accountHealth(supplier);
         
         require(status);
     }
@@ -174,7 +174,7 @@ contract BasicMarket is Market, IMarketWithInterest {
         bool status;
         uint value;
         
-        (status, value) = ctr.checkAccountLiquidity(borrower, address(this), amount);
+        (status, value) = ctr.accountLiquidity(borrower, address(this), amount);
 
         require(status, "Not enough account liquidity");
 

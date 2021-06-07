@@ -12,6 +12,9 @@
  * 
  *  Main Update 3, 2021-06-06, improve naming convention
  * 
+ * 
+ *  To-do: It currenlty uses three mapping: _markets, _marketsByToken, _prices and one array: _marketList for markets. Please optimize this part.
+ * 
  */
 pragma solidity >=0.5.0 <0.6.0;
 
@@ -21,19 +24,18 @@ import "../utils/SafeMath.sol";
 
 contract Controller is IController {
     using SafeMath for uint256;
+    
+    uint public constant MANTISSA = 1e6;
 
     address internal _owner;
+    
+    uint internal _collateralFactor;
+    uint internal _liquidationFactor;
 
     mapping (address => bool) internal _markets;
     mapping (address => address) internal _marketsByToken;
     mapping (address => uint) internal _prices;
-
     address[] internal _marketList;
-
-    uint internal _collateralFactor;
-    uint internal _liquidationFactor;
-    
-    uint public constant MANTISSA = 1e6;
 
 
     constructor() public {
@@ -94,15 +96,27 @@ contract Controller is IController {
     }
     
     
-    function getAccountValues(address account) internal view returns (uint supplyValue, uint borrowValue);
+    // for testing and UI
+    function accountValues(address account) public view returns (uint supplyValue, uint borrowValue) {
+        return accountValuesInternal(account);
+    }
+    
+    function accountValuesInternal(address account) internal view returns (uint supplyValue, uint borrowValue);
 
-    function getAccountLiquidity(address account) internal view returns (uint) {
+
+    function accountLiquidity(address account, address market, uint amount) public view returns (bool status, uint liquidity_) {
+        uint liquidity = accountLiquidityInternal(account);
+        
+        return (liquidity >= _prices[market].mul(amount).mul(2), liquidity);
+    }
+    
+    function accountLiquidityInternal(address account) internal view returns (uint) {
         uint liquidity = 0;
 
         uint supplyValue;
         uint borrowValue;
 
-        (supplyValue, borrowValue) = getAccountValues(account);
+        (supplyValue, borrowValue) = accountValuesInternal(account);
 
         borrowValue = borrowValue.mul(_collateralFactor.add(MANTISSA));
         borrowValue = borrowValue.div(MANTISSA);
@@ -113,18 +127,12 @@ contract Controller is IController {
         return liquidity;
     }
     
-    function checkAccountLiquidity(address account, address market, uint amount) external view returns (bool status, uint liquidity) {
-        uint price = _prices[market];
-        uint value = price.mul(amount);
-        
-        return (getAccountLiquidity(account) >= value.mul(2), value);
-    }
     
-    function checkAccountHealth(address account) external view returns (bool status, uint health) {
+    function accountHealth(address account) external view returns (bool status, uint health) {
         uint supplyValue;
         uint borrowValue;
 
-        (supplyValue, borrowValue) = getAccountValues(account);
+        (supplyValue, borrowValue) = accountValuesInternal(account);
 
         return (supplyValue >= borrowValue.mul(MANTISSA.add(_collateralFactor).div(MANTISSA)), calculateHealthIndex(supplyValue, borrowValue));
     }
@@ -150,7 +158,7 @@ contract Controller is IController {
         uint supplyValue;
         uint borrowValue;
 
-        (supplyValue, borrowValue) = getAccountValues(borrower);
+        (supplyValue, borrowValue) = accountValuesInternal(borrower);
         require(borrowValue > 0);
         
         uint healthIndex = calculateHealthIndex(supplyValue, borrowValue);

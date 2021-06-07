@@ -56,7 +56,7 @@ contract SimpleMarket is Market {
         bool status;
         uint health;
         
-        (status, health) = ctr.checkAccountHealth(supplier);
+        (status, health) = ctr.accountHealth(supplier);
         
         require(status);
     }
@@ -67,7 +67,7 @@ contract SimpleMarket is Market {
         bool status;
         uint liquidity;
         
-        (status, liquidity) = ctr.checkAccountLiquidity(borrower, address(this), amount);
+        (status, liquidity) = ctr.accountLiquidity(borrower, address(this), amount);
 
         require(status, "Not enough account liquidity");
 
