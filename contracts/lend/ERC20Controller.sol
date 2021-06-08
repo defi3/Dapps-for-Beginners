@@ -19,10 +19,10 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "./IController.sol";
-import "./Market.sol";
+import "./ERC20Market.sol";
 import "../utils/SafeMath.sol";
 
-contract Controller is IController {
+contract ERC20Controller is IController {
     using SafeMath for uint256;
     
     uint public constant MANTISSA = 1e6;
@@ -75,7 +75,7 @@ contract Controller is IController {
     
 
     function addMarket(address market) external onlyOwner {
-        address token = Market(market).token();
+        address token = ERC20Market(market).token();
         
         require(_marketsByToken[token] == address(0));
         
@@ -180,7 +180,7 @@ contract Controller is IController {
         
         collateralAmount = collateralValue.div(collateralPrice);
         
-        Market collateralMarket = Market(collateral);
+        ERC20Market collateralMarket = ERC20Market(collateral);
         collateralMarket.transferTo(borrower, liquidator, collateralAmount);
     }
 }

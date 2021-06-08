@@ -15,13 +15,13 @@
  */
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./IFloatingMarket.sol";
-import "./Market.sol";
-import "./Controller.sol";
+import "./IMarketFloating.sol";
+import "./ERC20Market.sol";
+import "./ERC20Controller.sol";
 import "../token/IERC20.sol";
 import "../utils/SafeMath.sol";
 
-contract FloatingMarket is Market, IFloatingMarket {
+contract ERC20MarketFloating is ERC20Market, IMarketFloating {
     using SafeMath for uint256;
     
     uint public constant FACTOR = 1e6;
@@ -49,7 +49,7 @@ contract FloatingMarket is Market, IFloatingMarket {
     mapping (address => BorrowSnapshot) internal _borrows;
 
 
-    constructor(address token_, uint baseBorrowAnnualRate_, uint blocksPerYear_, uint utilizationRateFraction_) Market(token_) public {
+    constructor(address token_, uint baseBorrowAnnualRate_, uint blocksPerYear_, uint utilizationRateFraction_) ERC20Market(token_) public {
         _borrowIndex = FACTOR;
         _supplyIndex = FACTOR;
         _blocksPerYear = blocksPerYear_;
@@ -147,7 +147,7 @@ contract FloatingMarket is Market, IFloatingMarket {
 
         supplySnapshot.supply = supplySnapshot.supply.sub(amount);
         
-        Controller ctr = Controller(_controller);
+        ERC20Controller ctr = ERC20Controller(_controller);
         
         bool status;
         uint value;
@@ -169,7 +169,7 @@ contract FloatingMarket is Market, IFloatingMarket {
             borrowSnapshot.interestIndex = _borrowIndex;
         }
         
-        Controller ctr = Controller(_controller);
+        ERC20Controller ctr = ERC20Controller(_controller);
         
         bool status;
         uint value;
@@ -279,7 +279,7 @@ contract FloatingMarket is Market, IFloatingMarket {
         
         require(borrower != msg.sender);
         
-        FloatingMarket collateralMarket = FloatingMarket(collateral);
+        ERC20MarketFloating collateralMarket = ERC20MarketFloating(collateral);
         
         accrueInterest();
         collateralMarket.accrueInterest();
@@ -290,7 +290,7 @@ contract FloatingMarket is Market, IFloatingMarket {
         
         require(IERC20(_token).balanceOf(msg.sender) >= amount);
         
-        Controller ctr = Controller(_controller);
+        ERC20Controller ctr = ERC20Controller(_controller);
         uint collateralAmount = ctr.liquidateCollateral(borrower, msg.sender, amount, collateral);
 
         uint paid;

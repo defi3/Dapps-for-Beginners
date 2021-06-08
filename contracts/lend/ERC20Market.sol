@@ -22,7 +22,7 @@ import "../token/IERC20.sol";
 import "../utils/SafeMath.sol";
 
 
-contract Market is IMarket {
+contract ERC20Market is IMarket {
     using SafeMath for uint256;
 
     address internal _owner;

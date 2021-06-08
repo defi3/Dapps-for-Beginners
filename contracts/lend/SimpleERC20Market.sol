@@ -13,12 +13,12 @@
  */
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./Market.sol";
-import "./Controller.sol";
+import "./ERC20Market.sol";
+import "./ERC20Controller.sol";
 import "../token/IERC20.sol";
 import "../utils/SafeMath.sol";
 
-contract SimpleMarket is Market {
+contract SimpleERC20Market is ERC20Market {
     using SafeMath for uint256;
     
     uint public constant FACTOR = 1e6;
@@ -27,7 +27,7 @@ contract SimpleMarket is Market {
     mapping (address => uint) internal _borrows;
 
 
-    constructor(address token_) Market(token_) public {
+    constructor(address token_) ERC20Market(token_) public {
     }
 
 
@@ -51,7 +51,7 @@ contract SimpleMarket is Market {
 
         _supplies[supplier] = _supplies[supplier].sub(amount);
         
-        Controller ctr = Controller(_controller);
+        ERC20Controller ctr = ERC20Controller(_controller);
         
         bool status;
         uint health;
@@ -62,7 +62,7 @@ contract SimpleMarket is Market {
     }
 
     function borrowInternal(address borrower, uint amount) internal {
-        Controller ctr = Controller(_controller);
+        ERC20Controller ctr = ERC20Controller(_controller);
         
         bool status;
         uint liquidity;
@@ -104,7 +104,7 @@ contract SimpleMarket is Market {
         
         require(IERC20(_token).balanceOf(msg.sender) >= amount);
         
-        Controller ctr = Controller(_controller);
+        ERC20Controller ctr = ERC20Controller(_controller);
         uint collateralAmount = ctr.liquidateCollateral(borrower, msg.sender, amount, collateral);
 
         uint paid;

@@ -10,7 +10,7 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "./IMarket.sol";
 
-contract IFloatingMarket is IMarket {
+contract IMarketFloating is IMarket {
     function utilizationRate(uint balance_, uint totalBorrow_, uint reserve_) external pure returns (uint);
     function borrowRate(uint balance_, uint totalBorrow_, uint reserve_) external view returns (uint);
     function supplyRate(uint balance_, uint totalBorrow_, uint reserve_) external view returns (uint);
