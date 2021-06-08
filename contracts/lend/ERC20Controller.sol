@@ -18,11 +18,11 @@
  */
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./IController.sol";
+import "./IERC20Controller.sol";
 import "./ERC20Market.sol";
 import "../utils/SafeMath.sol";
 
-contract ERC20Controller is IController {
+contract ERC20Controller is IERC20Controller {
     using SafeMath for uint256;
     
     uint public constant MANTISSA = 1e6;

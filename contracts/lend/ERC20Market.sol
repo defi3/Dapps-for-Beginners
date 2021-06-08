@@ -17,12 +17,12 @@
  */
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./IMarket.sol";
+import "./IERC20Market.sol";
 import "../token/IERC20.sol";
 import "../utils/SafeMath.sol";
 
 
-contract ERC20Market is IMarket {
+contract ERC20Market is IERC20Market {
     using SafeMath for uint256;
 
     address internal _owner;

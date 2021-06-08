@@ -13,9 +13,7 @@
  */
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./IController.sol";
-
-interface IMarket {
+interface IERC20Market {
     event Supply(address user, uint amount);
     event Redeem(address user, uint amount);
     event Borrow(address user, uint amount);
