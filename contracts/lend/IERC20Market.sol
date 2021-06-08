@@ -13,7 +13,9 @@
  */
 pragma solidity >=0.5.0 <0.6.0;
 
-interface IERC20Market {
+import "./IMarket.sol";
+
+contract IERC20Market is IMarket {
     event Supply(address user, uint amount);
     event Redeem(address user, uint amount);
     event Borrow(address user, uint amount);
@@ -21,23 +23,10 @@ interface IERC20Market {
     
     event LiquidateBorrow(address borrower, uint amount, address liquidator, address collateral, uint collateralAmount);
     
-    function owner() external view returns (address);
-    
-    function controller() external view returns(address);
-    function setController(address controller_) external;
-    
-    function token() external view returns (address);
-    function totalSupply() external view returns (uint);
-    function totalBorrow() external view returns (uint);
-    function balance() external view returns (uint);
-    
     function borrow(uint amount) external;
     function supply(uint amount) external;
     function redeem(uint amount) external;
     function payBorrow(uint amount) external;
-    
-    function supplyOf(address account) external view returns (uint);
-    function borrowBy(address account) external view returns (uint);
     
     function liquidateBorrow(address borrower, uint amount, address collateral) external;
     function transferTo(address sender, address receiver, uint amount) external;

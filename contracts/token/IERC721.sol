@@ -1,5 +1,5 @@
 /**
- *   Source: https://github.com/ajlopez/DeFiProt/blob/master/contracts/test/ERC20Basic.sol
+ *   Source: https://github.com/loomnetwork/cryptozombie-lessons/blob/master/en/5/02-erc721-2.md
  * 
  */
 pragma solidity >=0.5.0 <0.9.0;
