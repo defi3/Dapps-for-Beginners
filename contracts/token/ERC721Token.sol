@@ -4,49 +4,43 @@
  */
 pragma solidity >=0.5.0 <0.6.0;
 
-import "../utils/Ownable.sol";
 import "./IERC721.sol";
+import "../utils/Ownable.sol";
+import "../utils/SafeMath.sol";
 
 contract ERC721Token is Ownable(), IERC721 {
-    mapping (uint => address) internal owners;
+    using SafeMath for uint256;
     
-    mapping (address => uint) internal balances;
+    mapping (uint => address) internal _owners;
+    
+    mapping (address => uint) internal _balances;
     
     mapping (uint => mapping (address => bool)) internal _allowances;
-    
-    
-    constructor() public {
-        
-    }
 
     
-    function balanceOf(address _owner) external view returns (uint256) {
-        return balances[_owner];
+    function balanceOf(address owner_) external view returns (uint256) {
+        return _balances[owner_];
     }
     
-    function ownerOf(uint256 _tokenId) external view returns (address) {
-        return owners[_tokenId];
+    function ownerOf(uint256 tokenId_) external view returns (address) {
+        return _owners[tokenId_];
     }
     
-    function transferFrom(address _from, address _to, uint256 _tokenId) external {
-        require (owners[_tokenId] == msg.sender || _allowances[_tokenId][msg.sender]);
+    function transferFrom(address from, address to, uint256 tokenId_) external {
+        require (_owners[tokenId_] == msg.sender || _allowances[tokenId_][msg.sender]);
         
-        _transfer(_from, _to, _tokenId);
+        _balances[to] = _balances[to].add(1);
+        _balances[from] = _balances[from].add(1);
+        _owners[tokenId_] = to;
+        
+        emit Transfer(from, to, tokenId_);
     }
     
-    function _transfer(address _from, address _to, uint256 _tokenId) internal {
-        balances[_to]++;
-        balances[_from]--;
-        owners[_tokenId] = _to;
+    function approve(address spender, uint256 tokenId_) external {
+        require(_owners[tokenId_] == msg.sender);
         
-        emit Transfer(_from, _to, _tokenId);
-    }
-    
-    function approve(address _approved, uint256 _tokenId) external {
-        require(owners[_tokenId] == msg.sender);
+        _allowances[tokenId_][spender] = true;
         
-        _allowances[_tokenId][_approved] = true;
-        
-        emit Approval(msg.sender, _approved, _tokenId);
+        emit Approval(msg.sender, spender, tokenId_);
     }
 }

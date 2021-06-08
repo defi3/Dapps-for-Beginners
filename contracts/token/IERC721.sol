@@ -5,11 +5,11 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 interface IERC721 {
-    event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
-    event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
+    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId_);
+    event Approval(address indexed owner_, address indexed spender, uint256 indexed tokenId_);
 
-    function balanceOf(address _owner) external view returns (uint256);
-    function ownerOf(uint256 _tokenId) external view returns (address);
-    function transferFrom(address _from, address _to, uint256 _tokenId) external;
-    function approve(address _approved, uint256 _tokenId) external;
+    function balanceOf(address owner_) external view returns (uint256);
+    function ownerOf(uint256 tokenId_) external view returns (address);
+    function transferFrom(address from, address to, uint256 tokenId_) external;
+    function approve(address spender, uint256 tokenId_) external;
 }
