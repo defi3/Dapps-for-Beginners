@@ -11,9 +11,9 @@ pragma solidity >=0.5.0 <0.6.0;
 import "./IMarket.sol";
 
 contract IMarketWithInterest is IMarket {
-    function utilizationRate(uint cash, uint borrowed, uint reserves) external pure returns (uint);
-    function borrowRate(uint cash, uint borrowed, uint reserves) external view returns (uint);
-    function supplyRate(uint cash, uint borrowed, uint reserves) external view returns (uint);
+    function utilizationRate(uint balance_, uint totalBorrow_, uint reserve_) external pure returns (uint);
+    function borrowRate(uint balance_, uint totalBorrow_, uint reserve_) external view returns (uint);
+    function supplyRate(uint balance_, uint totalBorrow_, uint reserve_) external view returns (uint);
     function borrowRatePerBlock() external view returns (uint);
     function supplyRatePerBlock() external view returns (uint);
     

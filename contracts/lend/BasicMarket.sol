@@ -59,23 +59,23 @@ contract BasicMarket is Market, IMarketWithInterest {
     }
 
 
-    function utilizationRate(uint cash, uint borrowed, uint reserves) public pure returns (uint) {
-        if (borrowed == 0)
+    function utilizationRate(uint balance_, uint totalBorrow_, uint reserve_) public pure returns (uint) {
+        if (totalBorrow_ == 0)
             return 0;
 
-        return borrowed.mul(FACTOR).div(cash.add(borrowed).sub(reserves));
+        return totalBorrow_.mul(FACTOR).div(balance_.add(totalBorrow_).sub(reserve_));
     }
 
-    function borrowRate(uint cash, uint borrowed, uint reserves) public view returns (uint) {
-        uint ur = utilizationRate(cash, borrowed, reserves);
+    function borrowRate(uint balance_, uint totalBorrow_, uint reserve_) public view returns (uint) {
+        uint ur = utilizationRate(balance_, totalBorrow_, reserve_);
 
         return ur.mul(_utilizationRateFraction).div(FACTOR).add(_baseBorrowRate);
     }
 
-    function supplyRate(uint cash, uint borrowed, uint reserves) public view returns (uint) {
-        uint borrowRate__ = borrowRate(cash, borrowed, reserves);
+    function supplyRate(uint balance_, uint totalBorrow_, uint reserve_) public view returns (uint) {
+        uint borrowRate__ = borrowRate(balance_, totalBorrow_, reserve_);
 
-        return utilizationRate(cash, borrowed, reserves).mul(borrowRate__).div(FACTOR);
+        return utilizationRate(balance_, totalBorrow_, reserve_).mul(borrowRate__).div(FACTOR);
     }
 
     function borrowRatePerBlock() public view returns (uint) {
