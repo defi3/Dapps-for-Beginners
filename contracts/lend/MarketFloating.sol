@@ -15,13 +15,13 @@
  */
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./IMarketWithInterest.sol";
+import "./IMarketFloating.sol";
 import "./Market.sol";
 import "./Controller.sol";
 import "../token/IERC20.sol";
 import "../utils/SafeMath.sol";
 
-contract BasicMarket is Market, IMarketWithInterest {
+contract MarketFloating is Market, IMarketFloating {
     using SafeMath for uint256;
     
     uint public constant FACTOR = 1e6;
@@ -279,7 +279,7 @@ contract BasicMarket is Market, IMarketWithInterest {
         
         require(borrower != msg.sender);
         
-        BasicMarket collateralMarket = BasicMarket(collateral);
+        MarketFloating collateralMarket = MarketFloating(collateral);
         
         accrueInterest();
         collateralMarket.accrueInterest();
