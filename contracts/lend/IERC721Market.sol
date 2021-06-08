@@ -1,6 +1,4 @@
 /**
- *  Reference: https://github.com/ajlopez/DeFiProt/blob/master/contracts/MarketInterface.sol
- * 
  *  @Authoer defi3
  * 
  *  No interest
