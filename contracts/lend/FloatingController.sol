@@ -12,10 +12,10 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "./Controller.sol";
-import "./MarketFloating.sol";
+import "./FloatingMarket.sol";
 import "../utils/SafeMath.sol";
 
-contract ControllerFloating is Controller() {
+contract FloatingController is Controller() {
     using SafeMath for uint256;
 
     constructor() public {
@@ -23,7 +23,7 @@ contract ControllerFloating is Controller() {
     
     function accountValuesInternal(address account) internal view returns (uint supplyValue, uint borrowValue) {
         for (uint k = 0; k < _marketList.length; k++) {
-            MarketFloating market = MarketFloating(_marketList[k]);
+            FloatingMarket market = FloatingMarket(_marketList[k]);
             uint price = _prices[_marketList[k]];
             
             supplyValue = supplyValue.add(market.updatedSupplyOf(account).mul(price));
