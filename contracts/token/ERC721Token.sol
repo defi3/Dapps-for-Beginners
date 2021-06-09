@@ -9,10 +9,11 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "./IERC721.sol";
+import "./IERC721Metadata.sol";
 import "../utils/Ownable.sol";
 import "../utils/SafeMath.sol";
 
-contract ERC721Token is Ownable, IERC721 {
+contract ERC721Token is Ownable, IERC721, IERC721Metadata {
     using SafeMath for uint256;
     
     string internal _name;
@@ -45,13 +46,75 @@ contract ERC721Token is Ownable, IERC721 {
         return _symbol;
     }
 
+
+    /**
+     * @dev Mints `tokenId_` and transfers it to `to`.
+     *
+     * Requirements:
+     *
+     * - `tokenId_` must not exist.
+     * - `to` cannot be the zero address.
+     *
+     * Emits a {Transfer} event.
+     */
+    function _mint(address to, uint256 tokenId_) internal onlyOwner {
+        require(to != address(0), "ERC721: mint to the zero address");
+        
+        require(_owners[tokenId_] == address(0), "ERC721: token already minted");
+
+        _balances[to] += 1;
+        
+        _owners[tokenId_] = to;
+
+        emit Transfer(address(0), to, tokenId_);
+    }
+    
+    /**
+     * @dev Destroys `tokenId_`.
+     * The approval is cleared when the token is burned.
+     *
+     * Requirements:
+     *
+     * - `tokenId_` must exist.
+     *
+     * Emits a {Transfer} event.
+     */
+    function _burn(uint256 tokenId_) internal onlyOwner {
+        address owner = _owners[tokenId_];
+        
+        require(owner != address(0));
+        
+        _allowances[tokenId_] = address(0);
+
+        _balances[owner] -= 1;
+        
+        delete _owners[tokenId_];
+
+        emit Transfer(owner, address(0), tokenId_);
+    }
+    
+    /**
+     * @dev Returns whether `tokenId` exists.
+     *
+     * Tokens can be managed by their owner or approved accounts via {approve}.
+     *
+     * Tokens start existing when they are minted (`_mint`),
+     * and stop existing when they are burned (`_burn`).
+     */
+    function _exists(uint256 tokenId_) internal view returns (bool) {
+        return _owners[tokenId_] != address(0);
+    }
     
     function balanceOf(address owner_) external view returns (uint256) {
         require(owner_ != address(0), "ERC721: balance query for the zero address");
         
         return _balances[owner_];
     }
-    
+
+   
+    /**
+     * @dev See {IERC721-balanceOf}.
+     */
     function ownerOf(uint256 tokenId_) external view returns (address) {
         address owner = _owners[tokenId_];
         
@@ -60,6 +123,9 @@ contract ERC721Token is Ownable, IERC721 {
         return owner;
     }
     
+    /**
+     * @dev See {IERC721-transferFrom}.
+     */
     function transferFrom(address from, address to, uint256 tokenId_) external {
         require (_owners[tokenId_] == msg.sender || _allowances[tokenId_] == msg.sender, "ERC721: transfer caller is not owner nor approved");
         
@@ -75,6 +141,9 @@ contract ERC721Token is Ownable, IERC721 {
         emit Transfer(from, to, tokenId_);
     }
     
+    /**
+     * @dev See {IERC721-approve}.
+     */
     function approve(address to, uint256 tokenId_) external {
         address owner = _owners[tokenId_];
         
