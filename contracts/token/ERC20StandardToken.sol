@@ -5,7 +5,7 @@
 pragma solidity >=0.5.0 <0.9.0;
 
 import "./IERC20.sol";
-import "./BasicToken.sol";
+import "./ERC20BasicToken.sol";
 
 /**
  * @title Standard ERC20 token
@@ -14,7 +14,7 @@ import "./BasicToken.sol";
  * https://github.com/ethereum/EIPs/issues/20
  * Based on code by FirstBlood: https://github.com/Firstbloodio/token/blob/master/smart_contract/FirstBloodToken.sol
  */
-contract StandardToken is IERC20, BasicToken {
+contract ERC20StandardToken is IERC20, ERC20BasicToken {
     using SafeMath for uint256;
 
     mapping (address => mapping (address => uint256)) internal _allowances;

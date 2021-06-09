@@ -12,7 +12,7 @@ pragma solidity >=0.5.0 <0.9.0;
 
 import "../utils/SafeMath.sol";
 
-library Balances {
+library ERC20Balances {
     using SafeMath for uint256;
     
     function move(mapping(address => uint256) storage balances, address from, address to, uint amount) internal {
