@@ -171,7 +171,7 @@ contract ERC20Controller is IERC20Controller, Ownable {
         collateralAmount = collateralValue.div(collateralPrice);
         
         ERC20Market collateralMarket = ERC20Market(collateral);
-        collateralMarket.transferTo(borrower, liquidator, collateralAmount);
+        collateralMarket.transferFrom(borrower, liquidator, collateralAmount);
     }
 }
 

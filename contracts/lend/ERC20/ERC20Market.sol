@@ -112,10 +112,10 @@ contract ERC20Market is IERC20Market, Controllable {
     function payBorrowInternal(address payer, address borrower, uint amount) internal returns (uint paid, uint additional);
 
  
-    function transferFrom(address sender, address receiver, uint amount) external onlyController {
+    function transferFrom(address from, address to, uint amount) external onlyController {
         require(amount > 0);
         
-        redeemInternal(sender, receiver, amount);
+        redeemInternal(from, to, amount);
     }
 }
 
