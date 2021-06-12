@@ -124,7 +124,11 @@ contract ERC20Market is IERC20Market, Controllable {
     function transferFrom(address from, address to, uint amount) external onlyController {
         require(amount > 0);
         
+        require(IERC20(_token).balanceOf(address(this)) >= amount, "ERC20Market::redeem: market does not have enough tokens");
+        
         _redeem(from, amount);
+        
+        _totalSupply = _totalSupply.sub(amount);
         
         require(IERC20(_token).transferFrom(from, to, amount), "ERC20Market::transferFrom: not able to do transferFrom");
     }
