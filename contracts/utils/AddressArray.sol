@@ -20,7 +20,7 @@ library AddressArray {
         return i;
     }
     
-    function check(address[] storage arr, address a) internal view returns(bool) {
+    function include(address[] storage arr, address a) internal view returns(bool) {
         return find(arr, a) < arr.length;
     }
     

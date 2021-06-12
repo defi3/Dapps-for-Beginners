@@ -31,7 +31,7 @@ contract ERC20Controller is Controller, IERC20Controller {
     
 
     function setPrice(address market, uint price) external onlyOwner {
-        require(_markets.check(market));
+        require(_markets.include(market), "ERC20Controller::setPrice: market is not added");
 
         _prices[market] = price;
     }

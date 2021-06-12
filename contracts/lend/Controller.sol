@@ -44,7 +44,7 @@ contract Controller is IController, Ownable {
 
 
     modifier onlyMarket() {
-        require(_markets.check(msg.sender), "Controller::_: only market can call it");
+        require(_markets.include(msg.sender), "Controller::_: only market can call it");
         _;
     }
     

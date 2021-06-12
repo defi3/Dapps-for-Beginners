@@ -105,11 +105,33 @@ contract("SimpleERC20Controller", (accounts) => {
     try {
       await this.controller.addMarket(this.market2.address, { from: bob });
     } catch (err) {
-      console.log("only owner can add market");
+      console.log("only owner can add market 2");
     }
 
 
     await this.controller.addMarket(this.market.address, { from: alice });
+
+    assert.equal(await this.controller.size(), 1);
+
+    await this.controller.addMarket(this.market2.address, { from: alice });
+
+    assert.equal(await this.controller.size(), 2);
+
+
+    try {
+      await this.controller.removeMarket(this.market.address, { from: bob });
+    } catch (err) {
+      console.log("only owner can remove market");
+    }
+
+    try {
+      await this.controller.removeMarket(this.market2.address, { from: bob });
+    } catch (err) {
+      console.log("only owner can remove market 2");
+    }
+
+    
+    await this.controller.removeMarket(this.market2.address, { from: alice });
 
     assert.equal(await this.controller.size(), 1);
 
