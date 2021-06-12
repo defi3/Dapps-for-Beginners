@@ -10,76 +10,23 @@
  * 
  *  Main Update 3, 2021-06-06, improve naming convention
  * 
- *  Main Update 4, 2021-06-12, use Ownable
- * 
- * 
- *  To-do: It currenlty uses three mapping: _markets, _marketsByToken, _prices and one array: _marketList for markets. Please optimize this part.
+ *  Main Update 4, 2021-06-12, add Controller for inheritance
  * 
  */
 pragma solidity >=0.5.0 <0.6.0;
 
+import "../Controller.sol";
 import "./IERC20Controller.sol";
 import "./ERC20Market.sol";
-import "../../utils/Ownable.sol";
 import "../../utils/SafeMath.sol";
 
-contract ERC20Controller is IERC20Controller, Ownable {
+contract ERC20Controller is Controller, IERC20Controller {
     using SafeMath for uint256;
-    
-    uint public constant MANTISSA = 1e6;
-    
-    uint internal _collateralFactor;
-    uint internal _liquidationFactor;
 
-    mapping (address => bool) internal _markets;
-    mapping (address => address) internal _marketsByToken;
     mapping (address => uint) internal _prices;
-    address[] internal _marketList;
 
 
-    constructor() Ownable() public {
-    }
-
-
-    modifier onlyMarket() {
-        require(_markets[msg.sender]);
-        _;
-    }
-    
-    
-    function collateralFactor() external view returns (uint) {
-        return _collateralFactor;
-    }
-    
-    function setCollateralFactor(uint factor) external onlyOwner {
-        _collateralFactor = factor;
-    }
-
-    function liquidationFactor() external view returns (uint) {
-        return _liquidationFactor;
-    }
-    
-    function setLiquidationFactor(uint factor) external onlyOwner {
-        _liquidationFactor = factor;
-    }
-    
-
-    function addMarket(address market) external onlyOwner {
-        address token = ERC20Market(market).token();
-        
-        require(_marketsByToken[token] == address(0));
-        
-        _markets[market] = true;
-        _marketsByToken[token] = market;
-        _marketList.push(market);
-    }
-    
-    function size() external view returns (uint) {
-      return _marketList.length;
-    }
-    
-    function marketOf(address token) external view returns (address) {
-        return _marketsByToken[token];
+    constructor() Controller() public {
     }
     
 
