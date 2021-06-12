@@ -12,7 +12,7 @@ import "./ERC20Balance.sol";
  * @title Basic token
  * @dev Basic version of StandardToken, with no allowances.
  */
-contract ERC20BasicToken is IERC20Basic {
+contract ERC20Basic is IERC20Basic {
 
     mapping(address => uint256) internal _balances;
     using ERC20Balances for *;

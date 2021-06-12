@@ -11,10 +11,9 @@ import "./IERC20Basic.sol";
  * @dev see https://github.com/ethereum/EIPs/issues/20
  */
 contract IERC20 is IERC20Basic {
-    function allowance(address account, address spender) public view returns (uint256);
-    function approve(address spender, uint256 amount) public returns (bool);
-    
     event Approval(address indexed owner, address indexed spender, uint256 amount);
     
+    function allowance(address account, address spender) public view returns (uint256);
+    function approve(address spender, uint256 amount) public returns (bool);
     function transferFrom(address from, address to, uint256 amount) public returns (bool);
 }

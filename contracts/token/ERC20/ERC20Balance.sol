@@ -10,7 +10,7 @@
  */
 pragma solidity >=0.5.0 <0.9.0;
 
-import "../utils/SafeMath.sol";
+import "../../utils/SafeMath.sol";
 
 library ERC20Balances {
     using SafeMath for uint256;

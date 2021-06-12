@@ -8,14 +8,14 @@
  */
 pragma solidity >=0.5.0 <0.9.0;
 
-import "./ERC20StandardToken.sol";
+import "./ERC20Standard.sol";
 
 /**
   * @title The Compound Faucet Test Token
   * @author Compound
   * @notice A simple test token that lets anyone get more of it.
   */
-contract ERC20FaucetToken is ERC20StandardToken {
+contract ERC20Faucet is ERC20Standard {
     string internal _name;
     string internal _symbol;
     uint8 internal _decimals;
