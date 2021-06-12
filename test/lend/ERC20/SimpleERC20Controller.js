@@ -7,11 +7,11 @@
  * 
  */
 
-const Token = artifacts.require("./token/FaucetToken.sol");
-const Market = artifacts.require("./lend/SimpleMarket.sol");
-const Controller = artifacts.require('./lend/SimpleController.sol');
+const Token = artifacts.require("./token/ERC20/FaucetToken.sol");
+const Market = artifacts.require("./lend/ERC20/SimpleERC20Market.sol");
+const Controller = artifacts.require('./lend/ERC20/SimpleERC20Controller.sol');
 
-contract("SimpleController", (accounts) => {
+contract("SimpleERC20Controller", (accounts) => {
   const alice = accounts[0];
   const bob = accounts[1];
   const charlie = accounts[2];
