@@ -43,26 +43,26 @@ contract ERC20Controller is Controller, IERC20Controller {
     
     // for testing and UI
     function accountValues(address account) public view returns (uint supplyValue, uint borrowValue) {
-        return accountValuesInternal(account);
+        return _accountValues(account);
     }
     
-    function accountValuesInternal(address account) internal view returns (uint supplyValue, uint borrowValue);
+    function _accountValues(address account) internal view returns (uint supplyValue, uint borrowValue);
 
    
    // called by borrowInternal() in Market 
     function accountLiquidity(address account, address market, uint amount) external view returns (bool status, uint liquidity_) {
-        uint liquidity = accountLiquidityInternal(account);
+        uint liquidity = _accountLiquidity(account);
         
         return (liquidity >= _prices[market].mul(amount).mul(2), liquidity);
     }
     
-    function accountLiquidityInternal(address account) internal view returns (uint) {
+    function _accountLiquidity(address account) internal view returns (uint) {
         uint liquidity = 0;
 
         uint supplyValue;
         uint borrowValue;
 
-        (supplyValue, borrowValue) = accountValuesInternal(account);
+        (supplyValue, borrowValue) = _accountValues(account);
 
         borrowValue = borrowValue.mul(_collateralFactor.add(MANTISSA));
         borrowValue = borrowValue.div(MANTISSA);
@@ -78,7 +78,7 @@ contract ERC20Controller is Controller, IERC20Controller {
         uint supplyValue;
         uint borrowValue;
 
-        (supplyValue, borrowValue) = accountValuesInternal(account);
+        (supplyValue, borrowValue) = _accountValues(account);
 
         return (supplyValue >= borrowValue.mul(MANTISSA.add(_collateralFactor).div(MANTISSA)), calculateHealthIndex(supplyValue, borrowValue));
     }
@@ -104,7 +104,7 @@ contract ERC20Controller is Controller, IERC20Controller {
         uint supplyValue;
         uint borrowValue;
 
-        (supplyValue, borrowValue) = accountValuesInternal(borrower);
+        (supplyValue, borrowValue) = _accountValues(borrower);
         require(borrowValue > 0);
         
         uint healthIndex = calculateHealthIndex(supplyValue, borrowValue);
