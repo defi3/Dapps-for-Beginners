@@ -10,13 +10,13 @@
  */
 pragma solidity >=0.5.0 <0.9.0;
 
-import "./token/FaucetToken.sol";
+import "./token/ERC20/ERC20Faucet.sol";
 
 
-contract MetaCoin is FaucetToken {
+contract MetaCoin is ERC20Faucet {
     address internal _owner;
     
-	constructor () FaucetToken("MetaCoin", "MC", 10000, 2) public {
+	constructor () ERC20Faucet("MetaCoin", "MC", 10000, 2) public {
 	    _owner = msg.sender;
 	}
 }
