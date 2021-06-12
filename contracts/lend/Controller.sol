@@ -37,7 +37,7 @@ contract Controller is IController, Ownable {
     uint internal _liquidationFactor;
 
     mapping (address => bool) internal _markets;
-    mapping (address => address) internal _marketsByToken;
+    mapping (address => address) internal _tokenToMarket;
     address[] internal _marketList;
 
 
@@ -71,10 +71,10 @@ contract Controller is IController, Ownable {
     function addMarket(address market) external onlyOwner {
         address token = IMarket(market).token();
         
-        require(_marketsByToken[token] == address(0));
+        require(_tokenToMarket[token] == address(0));
         
         _markets[market] = true;
-        _marketsByToken[token] = market;
+        _tokenToMarket[token] = market;
         _marketList.push(market);
     }
     
@@ -87,11 +87,11 @@ contract Controller is IController, Ownable {
         
         address token = market.token();
         
-        require(_marketsByToken[token] != address(0));
+        require(_tokenToMarket[token] != address(0));
         
         
-        _markets[market_] = false;
-        delete _marketsByToken[token];
+        delete _markets[market_];
+        delete _tokenToMarket[token];
         _marketList.removeByValue(market_);
     }
     
@@ -104,6 +104,6 @@ contract Controller is IController, Ownable {
     }
     
     function marketOf(address token) external view returns (address) {
-        return _marketsByToken[token];
+        return _tokenToMarket[token];
     }
 }
