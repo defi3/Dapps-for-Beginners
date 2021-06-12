@@ -17,6 +17,9 @@ contract IERC721Market is IMarket {
     event Borrow(address user, uint256 tokenId_);
     event PayBorrow(address user, uint256 tokenId_);
     
+    function supplyOf(address account) external view returns (uint[] memory);
+    function borrowBy(address account) external view returns (uint[] memory);
+    
     function borrow(uint256 tokenId_) external;
     function supply(uint256 tokenId_) external;
     function redeem(uint256 tokenId_) external;

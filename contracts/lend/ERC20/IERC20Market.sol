@@ -23,6 +23,9 @@ contract IERC20Market is IMarket {
     
     event LiquidateBorrow(address borrower, uint amount, address liquidator, address collateral, uint collateralAmount);
     
+    function supplyOf(address account) external view returns (uint);
+    function borrowBy(address account) external view returns (uint);
+    
     function borrow(uint amount) external;
     function supply(uint amount) external;
     function redeem(uint amount) external;

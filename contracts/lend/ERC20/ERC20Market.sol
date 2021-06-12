@@ -18,41 +18,24 @@
  * 
  *  Main Update 6, 2021-06-12, move condtions from _supply() to supply(), _borrow() to borrow(), _redeem() to redeem(), _payBorrow() to payBorrow()
  * 
+ *  Main Update 7, 2021-06-12, add Market for inheritance
+ * 
  */
 pragma solidity >=0.5.0 <0.6.0;
 
+import "../Market.sol";
 import "./IERC20Market.sol";
 import "../../token/ERC20/IERC20.sol";
-import "../../utils/Controllable.sol";
 import "../../utils/SafeMath.sol";
 
 
-contract ERC20Market is IERC20Market, Controllable {
+contract ERC20Market is Market, IERC20Market {
     using SafeMath for uint256;
-
-    address internal _token;
-    uint internal _totalSupply;
-    uint internal _totalBorrow;
     
 
-    constructor(address token_) Controllable() public {
-        require(IERC20(token_).totalSupply() >= 0);
-        
-        _token = token_;
+    constructor(address token_) Market(token_) public {
     }
 
- 
-    function token() external view returns (address) {
-        return _token;
-    }
-    
-    function totalSupply() external view returns (uint) {
-        return _totalSupply;
-    }
-    
-    function totalBorrow() external view returns (uint) {
-        return _totalBorrow;
-    }
 
     function balance() public view returns (uint) {
         return IERC20(_token).balanceOf(address(this));

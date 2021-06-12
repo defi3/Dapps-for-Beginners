@@ -16,7 +16,4 @@ interface IMarket {
     function totalSupply() external view returns (uint);
     function totalBorrow() external view returns (uint);
     function balance() external view returns (uint);
-    
-    function supplyOf(address account) external view returns (uint);
-    function borrowBy(address account) external view returns (uint);
 }
