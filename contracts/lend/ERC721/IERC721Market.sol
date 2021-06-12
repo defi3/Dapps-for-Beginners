@@ -22,5 +22,5 @@ contract IERC721Market is IMarket {
     function redeem(uint256 tokenId_) external;
     function payBorrow(uint256 tokenId_) external;
 
-    function transferFrom(address sender, address receiver, uint256 tokenId_) external;
+    function transferFrom(address from, address to, uint256 tokenId_) external;
 }
