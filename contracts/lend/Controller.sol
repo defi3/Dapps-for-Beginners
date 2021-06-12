@@ -14,9 +14,6 @@
  * 
  *  Main Update 5, 2021-06-12, add Controller for inheritance
  * 
- * 
- *  To-do: It currenlty uses three mapping: _markets, _marketsByToken, _prices and one array: _marketList for markets. Please optimize this part.
- * 
  */
 pragma solidity >=0.5.0 <0.6.0;
 
@@ -36,9 +33,8 @@ contract Controller is IController, Ownable {
     uint internal _collateralFactor;
     uint internal _liquidationFactor;
 
-    mapping (address => bool) internal _markets;
     mapping (address => address) internal _tokenToMarket;
-    address[] internal _marketList;
+    address[] internal _markets;
 
 
     constructor() Ownable() public {
@@ -46,7 +42,7 @@ contract Controller is IController, Ownable {
 
 
     modifier onlyMarket() {
-        require(_markets[msg.sender]);
+        _markets.check(msg.sender);
         _;
     }
     
@@ -73,9 +69,8 @@ contract Controller is IController, Ownable {
         
         require(_tokenToMarket[token] == address(0));
         
-        _markets[market] = true;
         _tokenToMarket[token] = market;
-        _marketList.push(market);
+        _markets.push(market);
     }
     
     function removeMarket(address market_) external onlyOwner returns (bool) {
@@ -90,9 +85,8 @@ contract Controller is IController, Ownable {
         require(_tokenToMarket[token] != address(0));
         
         
-        delete _markets[market_];
         delete _tokenToMarket[token];
-        _marketList.removeByValue(market_);
+        _markets.removeByValue(market_);
     }
     
     function findMarket(address market_) internal returns (uint) {
@@ -100,7 +94,7 @@ contract Controller is IController, Ownable {
     }
     
     function size() external view returns (uint) {
-      return _marketList.length;
+      return _markets.length;
     }
     
     function marketOf(address token) external view returns (address) {

@@ -24,9 +24,9 @@ contract SimpleERC20Controller is ERC20Controller() {
     }
     
     function _accountValues(address account) internal view returns (uint supplyValue, uint borrowValue) {
-        for (uint k = 0; k < _marketList.length; k++) {
-            SimpleERC20Market market = SimpleERC20Market(_marketList[k]);
-            uint price = _prices[_marketList[k]];
+        for (uint k = 0; k < _markets.length; k++) {
+            SimpleERC20Market market = SimpleERC20Market(_markets[k]);
+            uint price = _prices[_markets[k]];
             
             supplyValue = supplyValue.add(market.supplyOf(account).mul(price));
             borrowValue = borrowValue.add(market.borrowBy(account).mul(price));

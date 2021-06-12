@@ -22,9 +22,9 @@ contract ERC20ControllerFloating is ERC20Controller() {
     }
     
     function _accountValues(address account) internal view returns (uint supplyValue, uint borrowValue) {
-        for (uint k = 0; k < _marketList.length; k++) {
-            ERC20MarketFloating market = ERC20MarketFloating(_marketList[k]);
-            uint price = _prices[_marketList[k]];
+        for (uint k = 0; k < _markets.length; k++) {
+            ERC20MarketFloating market = ERC20MarketFloating(_markets[k]);
+            uint price = _prices[_markets[k]];
             
             supplyValue = supplyValue.add(market.updatedSupplyOf(account).mul(price));
             borrowValue = borrowValue.add(market.updatedBorrowBy(account).mul(price));
