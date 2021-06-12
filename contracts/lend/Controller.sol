@@ -23,10 +23,13 @@ pragma solidity >=0.5.0 <0.6.0;
 import "./IController.sol";
 import "./IMarket.sol";
 import "../utils/Ownable.sol";
+import "../utils/AddressArray.sol";
 import "../utils/SafeMath.sol";
 
 contract Controller is IController, Ownable {
     using SafeMath for uint256;
+    
+    using AddressArray for address[];
     
     uint public constant MANTISSA = 1e6;
     
@@ -73,6 +76,27 @@ contract Controller is IController, Ownable {
         _markets[market] = true;
         _marketsByToken[token] = market;
         _marketList.push(market);
+    }
+    
+    function removeMarket(address market_) external onlyOwner returns (bool) {
+        IMarket market = IMarket(market_);
+        
+        require(market.balance() == 0);
+        require(market.totalSupply() == 0);
+        require(market.totalBorrow() == 0);
+        
+        address token = market.token();
+        
+        require(_marketsByToken[token] != address(0));
+        
+        
+        _markets[market_] = false;
+        delete _marketsByToken[token];
+        _marketList.removeByValue(market_);
+    }
+    
+    function findMarket(address market_) internal returns (uint) {
+        
     }
     
     function size() external view returns (uint) {

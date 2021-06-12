@@ -19,6 +19,7 @@ interface IController {
     function setLiquidationFactor(uint factor) external;
     
     function addMarket(address market) external;
+    function removeMarket(address market) external returns (bool);
     function size() external view returns (uint);
     function marketOf(address token) external view returns (address);
 
