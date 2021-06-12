@@ -44,10 +44,8 @@ contract SimpleERC20Market is ERC20Market {
         _supplies[supplier] = _supplies[supplier].add(amount);
     }
 
-    function _redeem(address supplier, address receiver, uint amount) internal {
+    function _redeem(address supplier, uint amount) internal {
         require(_supplies[supplier] >= amount);
-
-        require(IERC20(_token).transfer(receiver, amount), "No enough tokens");
 
         _supplies[supplier] = _supplies[supplier].sub(amount);
         
@@ -71,15 +69,11 @@ contract SimpleERC20Market is ERC20Market {
 
         require(status, "Not enough account liquidity");
 
-        require(IERC20(_token).transfer(borrower, amount), "No enough tokens to borrow");
-
         _borrows[borrower] = _borrows[borrower].add(amount);
     }
 
     function _payBorrow(address payer, address borrower, uint amount) internal returns (uint paid, uint additional_) {
         require(_borrows[borrower] > 0);
-
-        require(IERC20(_token).transferFrom(payer, address(this), amount), "No enough tokens");
         
         uint additional;
         

@@ -133,7 +133,7 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
         _supplies[supplier].interestIndex = _supplyIndex;
     }
 
-    function _redeem(address supplier, address receiver, uint amount) internal {
+    function _redeem(address supplier, uint amount) internal {
         accrueInterest();
 
         SupplySnapshot storage supplySnapshot = _supplies[supplier];
@@ -142,8 +142,6 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
         _supplies[supplier].interestIndex = _supplyIndex;
 
         require(supplySnapshot.supply >= amount);
-
-        require(IERC20(_token).transfer(receiver, amount), "No enough tokens");
 
         supplySnapshot.supply = supplySnapshot.supply.sub(amount);
         
@@ -177,8 +175,6 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
         (status, value) = ctr.accountLiquidity(borrower, address(this), amount);
 
         require(status, "Not enough account liquidity");
-
-        require(IERC20(_token).transfer(borrower, amount), "No enough tokens to borrow");
 
         borrowSnapshot.principal = borrowSnapshot.principal.add(amount);
         borrowSnapshot.interestIndex = _borrowIndex;
@@ -244,7 +240,7 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
         return newTotalSupply;
     }
 
-    function payBorrowInternal(address payer, address borrower, uint amount) internal returns (uint paid, uint additional_) {
+    function _payBorrow(address payer, address borrower, uint amount) internal returns (uint paid, uint additional_) {
         accrueInterest();
 
         BorrowSnapshot storage snapshot = _borrows[borrower];
@@ -262,8 +258,6 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
             additional = amount.sub(snapshot.principal);
             amount = snapshot.principal;
         }
-
-        require(IERC20(_token).transferFrom(payer, address(this), amount), "No enough tokens");
 
         snapshot.principal = snapshot.principal.sub(amount);
 
@@ -296,7 +290,7 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
         uint paid;
         uint additional;
 
-        (paid, additional) = payBorrowInternal(msg.sender, borrower, amount);
+        (paid, additional) = _payBorrow(msg.sender, borrower, amount);
         
         emit LiquidateBorrow(borrower, paid, msg.sender, address(collateralMarket), collateralAmount);
         

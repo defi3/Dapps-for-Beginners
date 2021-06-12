@@ -56,12 +56,13 @@ contract ERC20Market is IERC20Market, Controllable {
 
 
     function supply(uint amount) external {
-        // TODO check msg.sender != this
-        require(IERC20(_token).transferFrom(msg.sender, address(this), amount), "No enough tokens");
+        require(IERC20(_token).balanceOf(msg.sender) >= amount, "ERC20Market::supply: msg.sender does not have enough tokens");
         
         _supply(msg.sender, amount);
         
         _totalSupply = _totalSupply.add(amount);
+        
+        require(IERC20(_token).transferFrom(msg.sender, address(this), amount), "ERC20Market::supply: not able to do transferFrom");
 
         emit Supply(msg.sender, amount);
     }
@@ -70,11 +71,13 @@ contract ERC20Market is IERC20Market, Controllable {
     
     
     function borrow(uint amount) external {
-        require(IERC20(_token).balanceOf(address(this)) >= amount);
+        require(IERC20(_token).balanceOf(address(this)) >= amount, "ERC20Market::borrow: market does not have enough tokens");
         
         _borrow(msg.sender, amount);
 
         _totalBorrow = _totalBorrow.add(amount);
+        
+        require(IERC20(_token).transfer(msg.sender, amount), "ERC20Market::borrow: not able to do transfer");
         
         emit Borrow(msg.sender, amount);
     }
@@ -83,25 +86,31 @@ contract ERC20Market is IERC20Market, Controllable {
 
 
     function redeem(uint amount) external {
-        require(IERC20(_token).balanceOf(address(this)) >= amount);
+        require(IERC20(_token).balanceOf(address(this)) >= amount, "ERC20Market::redeem: market does not have enough tokens");
         
-        _redeem(msg.sender, msg.sender, amount);
+        _redeem(msg.sender, amount);
         
         _totalSupply = _totalSupply.sub(amount);
+        
+        require(IERC20(_token).transfer(msg.sender, amount), "ERC20Market::redeem: not able to do transfer");
 
         emit Redeem(msg.sender, amount);
     }
 
-    function _redeem(address supplier, address receiver, uint amount) internal;
+    function _redeem(address supplier, uint amount) internal;
 
 
     function payBorrow(uint amount) external {
+        require(IERC20(_token).balanceOf(msg.sender) >= amount, "ERC20Market::payBorrow: msg.sender does not have enough tokens");
+        
         uint paid;
         uint additional;
         
         (paid, additional) = _payBorrow(msg.sender, msg.sender, amount);
         
         _totalBorrow = _totalBorrow.sub(amount);
+        
+        require(IERC20(_token).transferFrom(msg.sender, address(this), amount), "ERC20Market::payBorrow: not able to do transferFrom");
         
         emit PayBorrow(msg.sender, paid);
         
@@ -115,7 +124,9 @@ contract ERC20Market is IERC20Market, Controllable {
     function transferFrom(address from, address to, uint amount) external onlyController {
         require(amount > 0);
         
-        _redeem(from, to, amount);
+        _redeem(from, amount);
+        
+        require(IERC20(_token).transferFrom(from, to, amount), "ERC20Market::transferFrom: not able to do transferFrom");
     }
 }
 

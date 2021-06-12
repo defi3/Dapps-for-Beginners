@@ -7,7 +7,7 @@
  * 
  */
 
-const Token = artifacts.require("./token/ERC20/FaucetToken.sol");
+const Token = artifacts.require("./token/ERC20/ERC20Faucet.sol");
 const Market = artifacts.require("./lend/ERC20/SimpleERC20Market.sol");
 const Controller = artifacts.require('./lend/ERC20/SimpleERC20Controller.sol');
 
