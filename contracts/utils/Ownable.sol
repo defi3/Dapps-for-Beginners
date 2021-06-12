@@ -30,7 +30,7 @@ contract Ownable {
      * @dev Throws if called by any account other than the owner.
      */
     modifier onlyOwner() {
-        require(isOwner(), "Ownable: only owner can call it");
+        require(isOwner(), "Ownable::_: only owner can call it");
         _;
     }
 

@@ -14,6 +14,8 @@
  * 
  *  Main Update 5, 2021-06-12, add Controller for inheritance
  * 
+ *  Main Update 6, 2021-06-12, use AddressArray, remove _markets and rename _marketList to _markets
+ * 
  */
 pragma solidity >=0.5.0 <0.6.0;
 
@@ -42,7 +44,7 @@ contract Controller is IController, Ownable {
 
 
     modifier onlyMarket() {
-        _markets.check(msg.sender);
+        require(_markets.check(msg.sender), "Controller::_: only market can call it");
         _;
     }
     
@@ -87,10 +89,6 @@ contract Controller is IController, Ownable {
         
         delete _tokenToMarket[token];
         _markets.removeByValue(market_);
-    }
-    
-    function findMarket(address market_) internal returns (uint) {
-        
     }
     
     function size() external view returns (uint) {

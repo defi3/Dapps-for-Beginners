@@ -28,12 +28,12 @@ contract Controllable is Ownable {
     }
 
     modifier onlyController() {
-        require(isController(), "Controllable: only controller can call it");
+        require(isController(), "Controllable::_: only controller can call it");
         _;
     }
     
     modifier onlyOwnerOrController() {
-        require((msg.sender == _owner) || (msg.sender == _controller), "Controllable: only owner or controller can call it");
+        require((msg.sender == _owner) || (msg.sender == _controller), "Controllable::_: only owner or controller can call it");
         _;
     }
 
