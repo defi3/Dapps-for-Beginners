@@ -10,10 +10,10 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "./IERC721.sol";
 import "./IERC721Metadata.sol";
-import "../utils/Ownable.sol";
-import "../utils/SafeMath.sol";
+import "../../utils/Ownable.sol";
+import "../../utils/SafeMath.sol";
 
-contract ERC721Token is Ownable, IERC721, IERC721Metadata {
+contract ERC721 is Ownable, IERC721, IERC721Metadata {
     using SafeMath for uint256;
     
     string internal _name;
