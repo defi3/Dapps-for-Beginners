@@ -20,14 +20,13 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "./IERC20Controller.sol";
 import "./ERC20Market.sol";
+import "../../utils/Ownable.sol";
 import "../../utils/SafeMath.sol";
 
-contract ERC20Controller is IERC20Controller {
+contract ERC20Controller is IERC20Controller, Ownable {
     using SafeMath for uint256;
     
     uint public constant MANTISSA = 1e6;
-
-    address internal _owner;
     
     uint internal _collateralFactor;
     uint internal _liquidationFactor;
@@ -38,22 +37,13 @@ contract ERC20Controller is IERC20Controller {
     address[] internal _marketList;
 
 
-    constructor() public {
-        _owner = msg.sender;
+    constructor() Ownable() public {
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == _owner);
-        _;
-    }
 
     modifier onlyMarket() {
         require(_markets[msg.sender]);
         _;
-    }
-    
-    function owner() external view returns (address) {
-        return _owner;
     }
     
     
