@@ -19,50 +19,22 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "./IERC20Market.sol";
 import "../../token/ERC20/IERC20.sol";
+import "../../utils/Controllable.sol";
 import "../../utils/SafeMath.sol";
 
 
-contract ERC20Market is IERC20Market {
+contract ERC20Market is IERC20Market, Controllable {
     using SafeMath for uint256;
-
-    address internal _owner;
 
     address internal _token;
     uint internal _totalSupply;
     uint internal _totalBorrow;
     
-    address internal _controller;
-    
 
-    constructor(address token_) public {
+    constructor(address token_) Controllable() public {
         require(IERC20(token_).totalSupply() >= 0);
         
-        _owner = msg.sender;
-        
         _token = token_;
-    }
-
-
-    modifier onlyOwner() {
-        require(msg.sender == _owner);
-        _;
-    }
-
-    modifier onlyController() {
-        require(msg.sender == _controller);
-        _;
-    }
-    
-    function controller() external view returns(address) {
-        return _controller;
-    }
-    
-    function setController(address controller_) external onlyOwner {
-        _controller = controller_;
-    }
-
-    function owner() external view returns (address) {
-        return _owner;
     }
 
  
