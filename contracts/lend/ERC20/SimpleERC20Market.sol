@@ -40,11 +40,11 @@ contract SimpleERC20Market is ERC20Market {
     }
 
 
-    function supplyInternal(address supplier, uint amount) internal {
+    function _supply(address supplier, uint amount) internal {
         _supplies[supplier] = _supplies[supplier].add(amount);
     }
 
-    function redeemInternal(address supplier, address receiver, uint amount) internal {
+    function _redeem(address supplier, address receiver, uint amount) internal {
         require(_supplies[supplier] >= amount);
 
         require(IERC20(_token).transfer(receiver, amount), "No enough tokens");
@@ -61,7 +61,7 @@ contract SimpleERC20Market is ERC20Market {
         require(status);
     }
 
-    function borrowInternal(address borrower, uint amount) internal {
+    function _borrow(address borrower, uint amount) internal {
         ERC20Controller ctr = ERC20Controller(_controller);
         
         bool status;
@@ -76,7 +76,7 @@ contract SimpleERC20Market is ERC20Market {
         _borrows[borrower] = _borrows[borrower].add(amount);
     }
 
-    function payBorrowInternal(address payer, address borrower, uint amount) internal returns (uint paid, uint additional_) {
+    function _payBorrow(address payer, address borrower, uint amount) internal returns (uint paid, uint additional_) {
         require(_borrows[borrower] > 0);
 
         require(IERC20(_token).transferFrom(payer, address(this), amount), "No enough tokens");
@@ -91,7 +91,7 @@ contract SimpleERC20Market is ERC20Market {
         _borrows[borrower] = _borrows[borrower].sub(amount);
         
         if (additional > 0)
-            supplyInternal(payer, additional);
+            _supply(payer, additional);
             
         return (amount, additional);
     }
@@ -110,7 +110,7 @@ contract SimpleERC20Market is ERC20Market {
         uint paid;
         uint additional;
 
-        (paid, additional) = payBorrowInternal(msg.sender, borrower, amount);
+        (paid, additional) = _payBorrow(msg.sender, borrower, amount);
         
         emit LiquidateBorrow(borrower, paid, msg.sender, collateral, collateralAmount);
     }

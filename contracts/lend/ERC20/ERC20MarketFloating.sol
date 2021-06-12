@@ -123,7 +123,7 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
         return snapshot.supply.mul(newSupplyIndex).div(snapshot.interestIndex);
     }
 
-    function supplyInternal(address supplier, uint amount) internal {
+    function _supply(address supplier, uint amount) internal {
         accrueInterest();
 
         SupplySnapshot storage supplySnapshot = _supplies[supplier];
@@ -133,7 +133,7 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
         _supplies[supplier].interestIndex = _supplyIndex;
     }
 
-    function redeemInternal(address supplier, address receiver, uint amount) internal {
+    function _redeem(address supplier, address receiver, uint amount) internal {
         accrueInterest();
 
         SupplySnapshot storage supplySnapshot = _supplies[supplier];
@@ -157,7 +157,7 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
         require(status);
     }
 
-    function borrowInternal(address borrower, uint amount) internal {
+    function _borrow(address borrower, uint amount) internal {
         accrueInterest();
 
         BorrowSnapshot storage borrowSnapshot = _borrows[borrower];
@@ -268,7 +268,7 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
         snapshot.principal = snapshot.principal.sub(amount);
 
         if (additional > 0)
-            supplyInternal(payer, additional);
+            _supply(payer, additional);
             
         return (amount, additional);
     }

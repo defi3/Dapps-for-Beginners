@@ -59,47 +59,47 @@ contract ERC20Market is IERC20Market, Controllable {
         // TODO check msg.sender != this
         require(IERC20(_token).transferFrom(msg.sender, address(this), amount), "No enough tokens");
         
-        supplyInternal(msg.sender, amount);
+        _supply(msg.sender, amount);
         
         _totalSupply = _totalSupply.add(amount);
 
         emit Supply(msg.sender, amount);
     }
 
-    function supplyInternal(address supplier, uint amount) internal;
+    function _supply(address supplier, uint amount) internal;
     
     
     function borrow(uint amount) external {
         require(IERC20(_token).balanceOf(address(this)) >= amount);
         
-        borrowInternal(msg.sender, amount);
+        _borrow(msg.sender, amount);
 
         _totalBorrow = _totalBorrow.add(amount);
         
         emit Borrow(msg.sender, amount);
     }
  
-    function borrowInternal(address borrower, uint amount) internal;
+    function _borrow(address borrower, uint amount) internal;
 
 
     function redeem(uint amount) external {
         require(IERC20(_token).balanceOf(address(this)) >= amount);
         
-        redeemInternal(msg.sender, msg.sender, amount);
+        _redeem(msg.sender, msg.sender, amount);
         
         _totalSupply = _totalSupply.sub(amount);
 
         emit Redeem(msg.sender, amount);
     }
 
-    function redeemInternal(address supplier, address receiver, uint amount) internal;
+    function _redeem(address supplier, address receiver, uint amount) internal;
 
 
     function payBorrow(uint amount) external {
         uint paid;
         uint additional;
         
-        (paid, additional) = payBorrowInternal(msg.sender, msg.sender, amount);
+        (paid, additional) = _payBorrow(msg.sender, msg.sender, amount);
         
         _totalBorrow = _totalBorrow.sub(amount);
         
@@ -109,13 +109,13 @@ contract ERC20Market is IERC20Market, Controllable {
             emit Supply(msg.sender, additional);
     }
     
-    function payBorrowInternal(address payer, address borrower, uint amount) internal returns (uint paid, uint additional);
+    function _payBorrow(address payer, address borrower, uint amount) internal returns (uint paid, uint additional);
 
  
     function transferFrom(address from, address to, uint amount) external onlyController {
         require(amount > 0);
         
-        redeemInternal(from, to, amount);
+        _redeem(from, to, amount);
     }
 }
 
