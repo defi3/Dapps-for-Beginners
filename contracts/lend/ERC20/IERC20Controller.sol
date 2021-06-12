@@ -12,8 +12,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 interface IERC20Controller {
-    function owner() external view returns (address);
-    
     function collateralFactor() external view returns (uint);
     function setCollateralFactor(uint factor) external;
     function liquidationFactor() external view returns (uint);
