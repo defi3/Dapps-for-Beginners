@@ -3,14 +3,14 @@
  * 
  *  @Authoer defi3
  * 
- *  No interest
- * 
  * 
  *  Main Update 1, 2021-06-06, change it to abstract contract
  * 
  *  Main Update 2, 2021-06-06, add owner(), marketOf(), priceOf()
  * 
  *  Main Update 3, 2021-06-06, improve naming convention
+ * 
+ *  Main Update 4, 2021-06-12, use Ownable
  * 
  * 
  *  To-do: It currenlty uses three mapping: _markets, _marketsByToken, _prices and one array: _marketList for markets. Please optimize this part.
