@@ -20,7 +20,7 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "./IERC20Controller.sol";
 import "./ERC20Market.sol";
-import "../utils/SafeMath.sol";
+import "../../utils/SafeMath.sol";
 
 contract ERC20Controller is IERC20Controller {
     using SafeMath for uint256;

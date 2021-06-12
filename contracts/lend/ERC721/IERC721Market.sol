@@ -9,7 +9,7 @@
  */
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./IMarket.sol";
+import "../IMarket.sol";
 
 contract IERC721Market is IMarket {
     event Supply(address user, uint256 tokenId_);

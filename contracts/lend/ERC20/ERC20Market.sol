@@ -18,8 +18,8 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "./IERC20Market.sol";
-import "../token/IERC20.sol";
-import "../utils/SafeMath.sol";
+import "../../token/ERC20/IERC20.sol";
+import "../../utils/SafeMath.sol";
 
 
 contract ERC20Market is IERC20Market {

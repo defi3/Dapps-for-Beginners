@@ -13,7 +13,7 @@
  */
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./IMarket.sol";
+import "../IMarket.sol";
 
 contract IERC20Market is IMarket {
     event Supply(address user, uint amount);
