@@ -14,15 +14,6 @@ contract Extremal is Minimal, Maximal {
 
     constructor(uint256 min_, uint256 max_) Minimal(min_) Maximal(max_) internal {
     }
-
-    function min() public view returns(uint256) {
-        return _min;
-    }
-
-    modifier minimum(uint256 amount) {
-        require(amount > _min, "Minimal::_: not enough amount to call it");
-        _;
-    }
     
     modifier extremum(uint256 amount) {
         require((amount > _min) && (amount < _max), "Extremal::_: not enough amount or too much amount to call it");
