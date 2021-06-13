@@ -24,8 +24,6 @@ import "../../utils/SafeMath.sol";
 
 contract SimpleERC20Market is ERC20Market {
     using SafeMath for uint256;
-    
-    uint public constant FACTOR = 1e6;
 
     mapping (address => uint) internal _supplies;
     mapping (address => uint) internal _borrows;
@@ -64,14 +62,14 @@ contract SimpleERC20Market is ERC20Market {
     }
 
     function _borrow(address borrower, uint amount) internal {
-        ERC20Controller ctr = ERC20Controller(_controller);
+        ERC20Controller ctr = ERC20Controller(_controller); 
         
         bool status;
         uint liquidity;
         
         (status, liquidity) = ctr.accountLiquidity(borrower, address(this), amount);
 
-        require(status, "Not enough account liquidity");
+        require(status, "SimpleERC20Market::_borrow: Not enough account liquidity");
 
         _borrows[borrower] = _borrows[borrower].add(amount);
     }
