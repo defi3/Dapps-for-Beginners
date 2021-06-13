@@ -116,7 +116,7 @@ contract ERC20Market is Market, IERC20Market, Minimal {
         
         _totalSupply = _totalSupply.sub(amount);
         
-        require(IERC20(_token).transfer(receiver, amount), "ERC20Market::redeemFor: not able to do transferFrom");
+        require(IERC20(_token).transfer(receiver, amount), "ERC20Market::redeemFor: not able to do transfer");
     }
 }
 
