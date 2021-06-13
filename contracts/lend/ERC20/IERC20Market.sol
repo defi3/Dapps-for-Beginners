@@ -32,6 +32,6 @@ contract IERC20Market is IMarket {
     function payBorrow(uint amount) external;
     
     function liquidateBorrow(address borrower, uint amount, address collateral) external;
-    function transferFrom(address from, address to, uint amount) external;
+    function redeemFor(address from, address to, uint amount) external;
 }
 

@@ -118,7 +118,7 @@ contract ERC20Controller is Controller, IERC20Controller {
         collateralAmount = collateralValue.div(collateralPrice);
         
         ERC20Market collateralMarket = ERC20Market(collateral);
-        collateralMarket.transferFrom(borrower, liquidator, collateralAmount);
+        collateralMarket.redeemFor(borrower, liquidator, collateralAmount);
     }
 }
 

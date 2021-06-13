@@ -95,7 +95,7 @@ contract ERC20Market is Market, IERC20Market {
         
         (paid, additional) = _payBorrow(msg.sender, msg.sender, amount);
         
-        _totalBorrow = _totalBorrow.sub(amount);
+        _totalBorrow = _totalBorrow.sub(paid);
         
         require(IERC20(_token).transferFrom(msg.sender, address(this), amount), "ERC20Market::payBorrow: not able to do transferFrom");
         
@@ -108,16 +108,16 @@ contract ERC20Market is Market, IERC20Market {
     function _payBorrow(address payer, address borrower, uint amount) internal returns (uint paid, uint additional);
 
  
-    function transferFrom(address from, address to, uint amount) external onlyController {
+    function redeemFor(address supplier, address receiver, uint amount) external onlyController {
         require(amount > 0);
         
-        require(IERC20(_token).balanceOf(address(this)) >= amount, "ERC20Market::redeem: market does not have enough tokens");
+        require(IERC20(_token).balanceOf(address(this)) >= amount, "ERC20Market::redeemFor: market does not have enough tokens");
         
-        _redeem(from, amount);
+        _redeem(supplier, amount);
         
         _totalSupply = _totalSupply.sub(amount);
         
-        require(IERC20(_token).transferFrom(from, to, amount), "ERC20Market::transferFrom: not able to do transferFrom");
+        require(IERC20(_token).transfer(receiver, amount), "ERC20Market::redeemFor: not able to do transferFrom");
     }
 }
 
