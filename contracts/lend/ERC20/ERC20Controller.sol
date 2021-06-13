@@ -22,6 +22,8 @@ import "../../utils/SafeMath.sol";
 
 contract ERC20Controller is Controller, IERC20Controller {
     using SafeMath for uint256;
+    
+    uint public constant MANTISSA = 1e6;
 
     mapping (address => uint) internal _prices;
 

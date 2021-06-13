@@ -30,7 +30,7 @@ contract Controller is IController, Ownable {
     
     using AddressArray for address[];
     
-    uint public constant MANTISSA = 1e6;
+    // uint public constant MANTISSA = 1e6;
     
     uint internal _collateralFactor;
     uint internal _liquidationFactor;
