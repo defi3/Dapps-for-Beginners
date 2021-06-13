@@ -270,9 +270,7 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
     }
     
     
-    function liquidateBorrow(address borrower, uint amount, address collateral) external {
-        require(amount > 0);
-        
+    function liquidateBorrow(address borrower, uint amount, address collateral) external minimum(amount) {
         require(borrower != msg.sender);
         
         ERC20MarketFloating collateralMarket = ERC20MarketFloating(collateral);

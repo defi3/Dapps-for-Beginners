@@ -93,9 +93,7 @@ contract SimpleERC20Market is ERC20Market {
     }
     
     
-    function liquidateBorrow(address borrower, uint amount, address collateral) public {
-        require(amount > 0);
-        
+    function liquidateBorrow(address borrower, uint amount, address collateral) public minimum(amount) {
         require(borrower != msg.sender);
         
         require(IERC20(_token).balanceOf(msg.sender) >= amount);
