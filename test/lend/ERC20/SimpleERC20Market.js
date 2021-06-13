@@ -32,9 +32,8 @@ contract("SimpleERC20Market", (accounts) => {
   });
 
   it("check original state of market", async () => {
-    assert.equal(await this.market.FACTOR(), FACTOR);
-
     assert.equal(await this.market.owner(), alice);
+    assert.equal(await this.market.controller(), 0);
 
     assert.equal(await this.market.token(), this.token.address);
     assert.equal(await this.token.balanceOf(this.market.address), 0);
@@ -51,9 +50,8 @@ contract("SimpleERC20Market", (accounts) => {
   });
 
   it("check original state of market2", async () => {
-    assert.equal(await this.market2.FACTOR(), FACTOR);
-
     assert.equal(await this.market2.owner(), bob);
+    assert.equal(await this.market2.controller(), 0);
 
     assert.equal(await this.market2.token(), this.token2.address);
     assert.equal(await this.token2.balanceOf(this.market2.address), 0);
@@ -81,6 +79,9 @@ contract("SimpleERC20Market", (accounts) => {
 
     await this.controller.setPrice(this.market.address, 1, { from: alice });
     await this.controller.setPrice(this.market2.address, 2, { from: alice });
+
+    assert.equal(await this.market.controller(), this.controller.address);
+    assert.equal(await this.market2.controller(), this.controller.address);
   });
 
   it("check initial state of market", async () => {
