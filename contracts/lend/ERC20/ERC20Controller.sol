@@ -51,7 +51,7 @@ contract ERC20Controller is Controller, IERC20Controller {
     function _accountValues(address account) internal view returns (uint supplyValue, uint borrowValue);
 
    
-   // called by borrowInternal() in Market 
+    // called by _borrow() in Market 
     function accountLiquidity(address account, address market, uint amount) external view returns (bool status, uint liquidity_) {
         uint liquidity = _accountLiquidity(account);
         
