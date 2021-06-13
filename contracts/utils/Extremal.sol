@@ -5,9 +5,9 @@
  * 
  */
  
- import "./Minimal.sol";
- import "./Maximal.sol";
- 
+import "./Minimal.sol";
+import "./Maximal.sol";
+
 pragma solidity >=0.5.0 <0.6.0;
 
 contract Extremal is Minimal, Maximal {
@@ -16,7 +16,9 @@ contract Extremal is Minimal, Maximal {
     }
     
     modifier extremum(uint256 amount) {
-        require((amount > _min) && (amount < _max), "Extremal::_: not enough amount or too much amount to call it");
+        require(amount > _min, "Minimal::_: not enough amount to call it");
+        require(amount < _max, "Maximal::_: too much amount to call it");
+        // require((amount > _min) && (amount < _max), "Extremal::_: not enough amount or too much amount to call it");
         _;
     }
 }

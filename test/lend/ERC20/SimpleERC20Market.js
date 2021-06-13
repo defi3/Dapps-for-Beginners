@@ -23,10 +23,10 @@ contract("SimpleERC20Market", (accounts) => {
 
   it("deploy contracts", async () => {
     this.token = await Token.new("DAI", "DAI", INIT_AMOUNT * MANTISSA, DECIMALS, { from: alice });
-    this.market = await Market.new(this.token.address, { from: alice });
+    this.market = await Market.new(this.token.address, 0, 2000 * MANTISSA, { from: alice });
 
     this.token2 = await Token.new("BAT", "BAT", INIT_AMOUNT * MANTISSA, DECIMALS, { from: bob });
-    this.market2 = await Market.new(this.token2.address, { from: bob });
+    this.market2 = await Market.new(this.token2.address, 0, 2000 * MANTISSA, { from: bob });
 
     this.controller = await Controller.new({ from: alice });
   });
