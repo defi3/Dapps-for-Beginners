@@ -12,6 +12,8 @@
  * 
  *  Main Update 3, 2021-06-12, move condtions from _supply() to supply(), _borrow() to borrow(), _redeem() to redeem(), _payBorrow() to payBorrow()
  * 
+ *  Main Update 4, 2021-06-13, add Extremal
+ * 
  */
 pragma solidity >=0.5.0 <0.6.0;
 
@@ -29,7 +31,7 @@ contract SimpleERC20Market is ERC20Market {
     mapping (address => uint) internal _borrows;
 
 
-    constructor(address token_) ERC20Market(token_) public {
+    constructor(address token_, uint256 min_, uint256 max_) ERC20Market(token_, min_, max_) public {
     }
 
 
@@ -93,7 +95,7 @@ contract SimpleERC20Market is ERC20Market {
     }
     
     
-    function liquidateBorrow(address borrower, uint amount, address collateral) public minimum(amount) {
+    function liquidateBorrow(address borrower, uint amount, address collateral) public extremum(amount) {
         require(borrower != msg.sender);
         
         require(IERC20(_token).balanceOf(msg.sender) >= amount);

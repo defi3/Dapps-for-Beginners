@@ -20,7 +20,7 @@
  * 
  *  Main Update 7, 2021-06-12, add Market for inheritance
  * 
- *  Main Update 8, 2021-06-13, add Minimal
+ *  Main Update 8, 2021-06-13, add Extremal
  * 
  */
 pragma solidity >=0.5.0 <0.6.0;
@@ -28,15 +28,15 @@ pragma solidity >=0.5.0 <0.6.0;
 import "../Market.sol";
 import "./IERC20Market.sol";
 import "../../token/ERC20/IERC20.sol";
-import "../../utils/Minimal.sol";
+import "../../utils/Extremal.sol";
 import "../../utils/SafeMath.sol";
 
 
-contract ERC20Market is Market, IERC20Market, Minimal {
+contract ERC20Market is Market, IERC20Market, Extremal {
     using SafeMath for uint256;
     
 
-    constructor(address token_) Market(token_) Minimal(0) public {
+    constructor(address token_, uint256 min_, uint256 max_) Market(token_) Extremal(min_, max_) public {
     }
 
 
@@ -45,7 +45,7 @@ contract ERC20Market is Market, IERC20Market, Minimal {
     }
 
 
-    function supply(uint amount) external minimum(amount) {
+    function supply(uint amount) external extremum(amount) {
         require(IERC20(_token).balanceOf(msg.sender) >= amount, "ERC20Market::supply: msg.sender does not have enough tokens");
         
         _supply(msg.sender, amount);
@@ -60,7 +60,7 @@ contract ERC20Market is Market, IERC20Market, Minimal {
     function _supply(address supplier, uint amount) internal;
     
     
-    function borrow(uint amount) external minimum(amount) {
+    function borrow(uint amount) external extremum(amount) {
         require(IERC20(_token).balanceOf(address(this)) >= amount, "ERC20Market::borrow: market does not have enough tokens");
         
         _borrow(msg.sender, amount);
@@ -75,7 +75,7 @@ contract ERC20Market is Market, IERC20Market, Minimal {
     function _borrow(address borrower, uint amount) internal;
 
 
-    function redeem(uint amount) external minimum(amount) {
+    function redeem(uint amount) external extremum(amount) {
         require(IERC20(_token).balanceOf(address(this)) >= amount, "ERC20Market::redeem: market does not have enough tokens");
         
         _redeem(msg.sender, amount);
@@ -90,7 +90,7 @@ contract ERC20Market is Market, IERC20Market, Minimal {
     function _redeem(address supplier, uint amount) internal; 
 
 
-    function payBorrow(uint amount) external minimum(amount) {
+    function payBorrow(uint amount) external extremum(amount) {
         require(IERC20(_token).balanceOf(msg.sender) >= amount, "ERC20Market::payBorrow: msg.sender does not have enough tokens");
         
         uint paid;
@@ -111,7 +111,7 @@ contract ERC20Market is Market, IERC20Market, Minimal {
     function _payBorrow(address payer, address borrower, uint amount) internal returns (uint paid, uint additional);
 
  
-    function redeemFor(address supplier, address receiver, uint amount) external onlyController minimum(amount) {
+    function redeemFor(address supplier, address receiver, uint amount) external onlyController extremum(amount) {
         require(IERC20(_token).balanceOf(address(this)) >= amount, "ERC20Market::redeemFor: market does not have enough tokens");
         
         _redeem(supplier, amount);

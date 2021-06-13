@@ -14,6 +14,8 @@
  * 
  *  Main Update 5, 2021-06-12, move condtions from _supply() to supply(), _borrow() to borrow(), _redeem() to redeem(), _payBorrow() to payBorrow()
  * 
+ *  Main Update 6, 2021-06-13, add Extremal
+ * 
  */
 pragma solidity >=0.5.0 <0.6.0;
 
@@ -51,7 +53,7 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
     mapping (address => BorrowSnapshot) internal _borrows;
 
 
-    constructor(address token_, uint baseBorrowAnnualRate_, uint blocksPerYear_, uint utilizationRateFraction_) ERC20Market(token_) public {
+    constructor(address token_, uint256 min_, uint256 max_, uint baseBorrowAnnualRate_, uint blocksPerYear_, uint utilizationRateFraction_) ERC20Market(token_, min_, max_) public {
         _borrowIndex = FACTOR;
         _supplyIndex = FACTOR;
         _blocksPerYear = blocksPerYear_;
@@ -270,7 +272,7 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
     }
     
     
-    function liquidateBorrow(address borrower, uint amount, address collateral) external minimum(amount) {
+    function liquidateBorrow(address borrower, uint amount, address collateral) external extremum(amount) {
         require(borrower != msg.sender);
         
         ERC20MarketFloating collateralMarket = ERC20MarketFloating(collateral);
