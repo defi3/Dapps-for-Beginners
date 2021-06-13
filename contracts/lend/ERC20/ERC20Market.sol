@@ -20,6 +20,8 @@
  * 
  *  Main Update 7, 2021-06-12, add Market for inheritance
  * 
+ *  Main Update 8, 2021-06-13, add Minimal
+ * 
  */
 pragma solidity >=0.5.0 <0.6.0;
 
