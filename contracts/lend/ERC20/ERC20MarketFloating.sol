@@ -61,6 +61,28 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
         _accrualBlockNumber = block.number;
         _utilizationRateFraction = utilizationRateFraction_.div(blocksPerYear_);
     }
+    
+    
+    function supplyIndex() external view returns (uint) {
+        return _supplyIndex;
+    }
+    
+    function borrowIndex() external view returns (uint) {
+        return _borrowIndex;
+    }
+    
+    function baseBorrowRate() external view returns (uint) {
+        return _baseBorrowRate;
+    }
+    
+    
+    function supplyOf(address account) external view returns (uint) {
+        return _supplies[account].supply;
+    }
+
+    function borrowBy(address account) external view returns (uint) {
+        return _borrows[account].principal;
+    }
 
 
     function utilizationRate(uint balance_, uint totalBorrow_, uint reserve_) public pure returns (uint) {
@@ -89,15 +111,7 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
     function supplyRatePerBlock() public view returns (uint) {
         return supplyRate(balance(), _totalBorrow, 0);
     }
-
-
-    function supplyOf(address account) external view returns (uint) {
-        return _supplies[account].supply;
-    }
-
-    function borrowBy(address account) external view returns (uint) {
-        return _borrows[account].principal;
-    }
+    
 
     function updatedBorrowBy(address account) public view returns (uint) {
         BorrowSnapshot storage snapshot = _borrows[account];
@@ -187,6 +201,10 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
     
     function blockNumber() external view returns (uint) {
         return block.number;
+    }
+    
+    function accrualBlockNumber() external view returns (uint) {
+        return _accrualBlockNumber;
     }
 
     function accrueInterest() public {

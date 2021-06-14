@@ -7,43 +7,66 @@
  * 
  */
 
-const Token = artifacts.require("./token/FaucetToken.sol");
-const Market = artifacts.require("./lend/Market.sol");
-const Controller = artifacts.require('./lend/Controller.sol');
+const Token = artifacts.require("./token/ERC20/ERC20Faucet.sol");
+const Market = artifacts.require("./lend/ERC20/ERC20MarketFloating.sol");
+const Controller = artifacts.require('./lend/ERC20/ERC20ControllerFloating.sol');
 
-contract("Market", (accounts) => {
+contract("ERC20MarketFloating", (accounts) => {
   const alice = accounts[0];
   const bob = accounts[1];
   const charlie = accounts[2];
 
+  const DECIMALS = 6;
   const MANTISSA = 1e6;
   const FACTOR = 1e6;
+  const INIT_AMOUNT = 1e6;
+
   const BLOCKS_PER_YEAR = 1e6;
   const ANNUAL_RATE = 1e9;			// FACTOR / 1000 * BLOCKS_PER_YEAR = 1e9
   const UTILIZATION_RATE_FRACTION = 1e9;	// FACTOR / 1000 * BLOCKS_PER_YEAR = 1e9
 
   it("deploy contracts", async () => {
-    this.token = await Token.new("DAI", "DAI", 1e6 * FACTOR, 6, { from: alice });
-    this.market = await Market.new(this.token.address, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: alice });
+    this.token = await Token.new("DAI", "DAI", INIT_AMOUNT * MANTISSA, DECIMALS, { from: alice });
+    this.market = await Market.new(this.token.address, 0, 2000 * MANTISSA, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: alice });
 
-    this.token2 = await Token.new("BAT", "BAT", 1e6 * FACTOR, 6, { from: bob });
-    this.market2 = await Market.new(this.token2.address, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: bob });
+    this.token2 = await Token.new("BAT", "BAT", INIT_AMOUNT * MANTISSA, DECIMALS, { from: bob });
+    this.market2 = await Market.new(this.token2.address, 0, 2000 * MANTISSA, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: bob });
 
     this.controller = await Controller.new({ from: alice });
   });
 
   it("check original state of market", async () => {
+    // ERC20MarketFloating
     assert.equal(await this.market.FACTOR(), FACTOR);
 
+    // Controllable
     assert.equal(await this.market.owner(), alice);
+    assert.equal(await this.market.controller(), 0);
 
-    assert.equal(await this.market.getSupplyRate(0, 0, 0), 0);
-    assert.equal(await this.market.getSupplyRate(1000, 1000, 0), 1 / 2 * (FACTOR / 2 / 1000 + FACTOR / 1000));
-    assert.equal(await this.market.getSupplyRate(2000, 1000, 1000), 1 / 2 * (FACTOR / 2 / 1000 + FACTOR / 1000));
+    // Market
+    assert.equal(await this.market.token(), this.token.address);
+    assert.equal(await this.token.balanceOf(this.market.address), 0);
 
-    assert.equal(await this.market.getBorrowRate(0, 0, 0), FACTOR / 1000);
-    assert.equal(await this.market.getBorrowRate(1000, 1000, 0), FACTOR / 2 / 1000 + FACTOR / 1000);
-    assert.equal(await this.market.getBorrowRate(2000, 1000, 1000), FACTOR / 2 / 1000 + FACTOR / 1000);
+    assert.equal(await this.market.totalSupply(), 0);
+    assert.equal(await this.market.totalBorrow(), 0);
+
+    // ERC20Market
+    assert.equal(await this.market.balance(), 0);
+
+    // ERC20MarketFloating
+    assert.equal(await this.market.supplyOf(alice), 0);
+    assert.equal(await this.market.borrowBy(alice), 0);
+
+    assert.equal(await this.market.supplyOf(bob), 0);
+    assert.equal(await this.market.borrowBy(bob), 0);
+
+    assert.equal(await this.market.supplyRate(0, 0, 0), 0);
+    assert.equal(await this.market.supplyRate(1000, 1000, 0), 1 / 2 * (FACTOR / 2 / 1000 + FACTOR / 1000));
+    assert.equal(await this.market.supplyRate(2000, 1000, 1000), 1 / 2 * (FACTOR / 2 / 1000 + FACTOR / 1000));
+
+    assert.equal(await this.market.borrowRate(0, 0, 0), FACTOR / 1000);
+    assert.equal(await this.market.borrowRate(1000, 1000, 0), FACTOR / 2 / 1000 + FACTOR / 1000);
+    assert.equal(await this.market.borrowRate(2000, 1000, 1000), FACTOR / 2 / 1000 + FACTOR / 1000);
 
     assert.equal(await this.market.utilizationRate(0, 0, 0), 0);
     assert.equal(await this.market.utilizationRate(1000, 1000, 0), FACTOR / 2);
@@ -51,17 +74,37 @@ contract("Market", (accounts) => {
   });
 
   it("check original state of market 2", async () => {
+    // ERC20MarketFloating
     assert.equal(await this.market2.FACTOR(), FACTOR);
 
+    // Controllable
     assert.equal(await this.market2.owner(), bob);
+    assert.equal(await this.market2.controller(), 0);
 
-    assert.equal(await this.market2.getSupplyRate(0, 0, 0), 0);
-    assert.equal(await this.market2.getSupplyRate(1000, 1000, 0), 1 / 2 * (FACTOR / 2 / 1000 + FACTOR / 1000));
-    assert.equal(await this.market2.getSupplyRate(2000, 1000, 1000), 1 / 2 * (FACTOR / 2 / 1000 + FACTOR / 1000));
+    // Market
+    assert.equal(await this.market2.token(), this.token2.address);
+    assert.equal(await this.token2.balanceOf(this.market2.address), 0);
 
-    assert.equal(await this.market2.getBorrowRate(0, 0, 0), FACTOR / 1000);
-    assert.equal(await this.market2.getBorrowRate(1000, 1000, 0), FACTOR / 2 / 1000 + FACTOR / 1000);
-    assert.equal(await this.market2.getBorrowRate(2000, 1000, 1000), FACTOR / 2 / 1000 + FACTOR / 1000);
+    assert.equal(await this.market2.totalSupply(), 0);
+    assert.equal(await this.market2.totalBorrow(), 0);
+
+    // ERC20Market
+    assert.equal(await this.market2.balance(), 0);
+
+    // ERC20MarketFloating
+    assert.equal(await this.market2.supplyOf(alice), 0);
+    assert.equal(await this.market2.borrowBy(alice), 0);
+
+    assert.equal(await this.market2.supplyOf(bob), 0);
+    assert.equal(await this.market2.borrowBy(bob), 0);
+
+    assert.equal(await this.market2.supplyRate(0, 0, 0), 0);
+    assert.equal(await this.market2.supplyRate(1000, 1000, 0), 1 / 2 * (FACTOR / 2 / 1000 + FACTOR / 1000));
+    assert.equal(await this.market2.supplyRate(2000, 1000, 1000), 1 / 2 * (FACTOR / 2 / 1000 + FACTOR / 1000));
+
+    assert.equal(await this.market2.borrowRate(0, 0, 0), FACTOR / 1000);
+    assert.equal(await this.market2.borrowRate(1000, 1000, 0), FACTOR / 2 / 1000 + FACTOR / 1000);
+    assert.equal(await this.market2.borrowRate(2000, 1000, 1000), FACTOR / 2 / 1000 + FACTOR / 1000);
 
     assert.equal(await this.market2.utilizationRate(0, 0, 0), 0);
     assert.equal(await this.market2.utilizationRate(1000, 1000, 0), FACTOR / 2);
@@ -69,20 +112,55 @@ contract("Market", (accounts) => {
   });
 
   it("set controller", async () => {
+    // Controller 
     await this.controller.setCollateralFactor(1 * MANTISSA, { from: alice });
     await this.controller.setLiquidationFactor(MANTISSA / 2, { from: alice });
 
+    assert.equal(await this.controller.collateralFactor(), 1 * MANTISSA);
+    assert.equal(await this.controller.liquidationFactor(), MANTISSA / 2);
+
+    // Controllable
     await this.market.setController(this.controller.address, { from: alice });
     await this.market2.setController(this.controller.address, { from: bob });
 
+    assert.equal(await this.market.controller(), this.controller.address);
+    assert.equal(await this.market2.controller(), this.controller.address);
+
+    // Controller
     await this.controller.addMarket(this.market.address, { from: alice });
     await this.controller.addMarket(this.market2.address, { from: alice });
 
+    assert.equal(await this.controller.size(), 2);
+
+    assert.equal(await this.controller.marketOf(this.token.address), this.market.address);
+    assert.equal(await this.controller.marketOf(this.token2.address), this.market2.address);
+
+    // ERC20Controller
     await this.controller.setPrice(this.market.address, 1, { from: alice });
     await this.controller.setPrice(this.market2.address, 2, { from: alice });
+
+    assert.equal(await this.controller.priceOf(this.market.address), 1);
+    assert.equal(await this.controller.priceOf(this.market2.address), 2);
   });
 
   it("check initial state of market", async () => {
+    // Market
+    assert.equal(await this.token.balanceOf(this.market.address), 0);
+
+    assert.equal(await this.market.totalSupply(), 0);
+    assert.equal(await this.market.totalBorrow(), 0);
+
+    // ERC20Market
+    assert.equal(await this.market.balance(), 0);
+
+    // ERC20MarketFloating
+    assert.equal(await this.market.supplyIndex(), FACTOR);
+    assert.equal(await this.market.borrowIndex(), FACTOR);
+
+    assert.equal(await this.market.baseBorrowRate(), FACTOR / 1000);
+    assert.equal(await this.market.borrowRatePerBlock(), FACTOR / 1000);
+    assert.equal(await this.market.supplyRatePerBlock(), 0);
+
     assert.equal(await this.market.supplyOf(alice), 0);
     assert.equal(await this.market.supplyOf(bob), 0);
     assert.equal(await this.market.supplyOf(charlie), 0);
@@ -91,32 +169,34 @@ contract("Market", (accounts) => {
     assert.equal(await this.market.borrowBy(bob), 0);
     assert.equal(await this.market.borrowBy(charlie), 0);
 
-    assert.equal(await this.token.balanceOf(this.market.address), 0);
-    assert.equal(await this.market.totalSupply(), 0);
-    assert.equal(await this.market.balance(), 0);
-
-    assert.equal(await this.market.supplyIndex(), FACTOR);
-    assert.equal(await this.market.borrowIndex(), FACTOR);
-
-    assert.equal(await this.market.baseBorrowRate(), FACTOR / 1000);
-    assert.equal(await this.market.borrowRatePerBlock(), FACTOR / 1000);
-    assert.equal(await this.market.supplyRatePerBlock(), 0);
-
     assert.ok((await this.market.accrualBlockNumber()) > 0);
-
-    assert.equal(await this.market.borrowBy(alice), 0);
-    assert.equal(await this.market.borrowBy(bob), 0);
-    assert.equal(await this.market.borrowBy(charlie), 0);
 
     assert.equal(await this.market.updatedBorrowBy(alice), 0);
     assert.equal(await this.market.updatedBorrowBy(bob), 0);
     assert.equal(await this.market.updatedBorrowBy(charlie), 0);
 
     console.log("accrual block number end", (await this.market.accrualBlockNumber()).toNumber());
-    console.log("current block number end", (await this.market.getCurrentBlockNumber()).toNumber());
+    console.log("current block number end", (await this.market.blockNumber()).toNumber());
   });
 
   it("check initial state of market 2", async () => {
+    // Market
+    assert.equal(await this.token2.balanceOf(this.market2.address), 0);
+
+    assert.equal(await this.market2.totalSupply(), 0);
+    assert.equal(await this.market2.totalBorrow(), 0);
+
+    // ERC20Market
+    assert.equal(await this.market2.balance(), 0);
+
+    // ERC20MarketFloating
+    assert.equal(await this.market2.supplyIndex(), FACTOR);
+    assert.equal(await this.market2.borrowIndex(), FACTOR);
+
+    assert.equal(await this.market2.baseBorrowRate(), FACTOR / 1000);
+    assert.equal(await this.market2.borrowRatePerBlock(), FACTOR / 1000);
+    assert.equal(await this.market2.supplyRatePerBlock(), 0);
+
     assert.equal(await this.market2.supplyOf(alice), 0);
     assert.equal(await this.market2.supplyOf(bob), 0);
     assert.equal(await this.market2.supplyOf(charlie), 0);
@@ -124,17 +204,6 @@ contract("Market", (accounts) => {
     assert.equal(await this.market2.borrowBy(alice), 0);
     assert.equal(await this.market2.borrowBy(bob), 0);
     assert.equal(await this.market2.borrowBy(charlie), 0);
-
-    assert.equal(await this.token2.balanceOf(this.market2.address), 0);
-    assert.equal(await this.market2.totalSupply(), 0);
-    assert.equal(await this.market2.balance(), 0);
-
-    assert.equal(await this.market2.supplyIndex(), FACTOR);
-    assert.equal(await this.market2.borrowIndex(), FACTOR);
-
-    assert.equal(await this.market2.baseBorrowRate(), FACTOR / 1000);
-    assert.equal(await this.market2.borrowRatePerBlock(), FACTOR / 1000);
-    assert.equal(await this.market2.supplyRatePerBlock(), 0);
 
     assert.ok((await this.market2.accrualBlockNumber()) > 0);
 
@@ -147,18 +216,18 @@ contract("Market", (accounts) => {
     assert.equal(await this.market2.updatedBorrowBy(charlie), 0);
 
     console.log("accrual block number end", (await this.market2.accrualBlockNumber()).toNumber());
-    console.log("current block number end", (await this.market2.getCurrentBlockNumber()).toNumber());
+    console.log("current block number end", (await this.market2.blockNumber()).toNumber());
   });
 
   it('alice supply 1000 token', async () => {
     console.log("accrual block number begin", (await this.market.accrualBlockNumber()).toNumber());
-    console.log("current block number begin", (await this.market.getCurrentBlockNumber()).toNumber());
+    console.log("current block number begin", (await this.market.blockNumber()).toNumber());
 
     await this.token.approve(this.market.address, 1000 * FACTOR, { from: alice });
 
 
     console.log("accrual block number before supply", (await this.market.accrualBlockNumber()).toNumber());
-    console.log("current block number before supply", (await this.market.getCurrentBlockNumber()).toNumber());
+    console.log("current block number before supply", (await this.market.blockNumber()).toNumber());
 
     const supplyResult = await this.market.supply(1000 * FACTOR, { from: alice });
 
@@ -172,7 +241,7 @@ contract("Market", (accounts) => {
     assert.equal(supplyResult.logs[0].args.amount, 1000 * FACTOR);
 
     console.log("accrual block number after supply", (await this.market.accrualBlockNumber()).toNumber());
-    console.log("current block number after supply", (await this.market.getCurrentBlockNumber()).toNumber());
+    console.log("current block number after supply", (await this.market.blockNumber()).toNumber());
 
 
     balance = await this.token.balanceOf(alice);
@@ -196,12 +265,12 @@ contract("Market", (accounts) => {
     assert.equal(balance, 1000 * FACTOR);
 
     console.log("accrual block number end", (await this.market.accrualBlockNumber()).toNumber());
-    console.log("current block number end", (await this.market.getCurrentBlockNumber()).toNumber());
+    console.log("current block number end", (await this.market.blockNumber()).toNumber());
   });
 
   it('alice redeem 500 token', async () => {
     console.log("accrual block number begin", (await this.market.accrualBlockNumber()).toNumber());
-    console.log("current block number begin", (await this.market.getCurrentBlockNumber()).toNumber());
+    console.log("current block number begin", (await this.market.blockNumber()).toNumber());
 
     const redeemResult = await this.market.redeem(500 * FACTOR, { from: alice });
 
@@ -214,7 +283,7 @@ contract("Market", (accounts) => {
     assert.equal(redeemResult.logs[0].args.amount, 500 * FACTOR);
 
     console.log("accrual block number after redeem", (await this.market.accrualBlockNumber()).toNumber());
-    console.log("current block number after redeem", (await this.market.getCurrentBlockNumber()).toNumber());
+    console.log("current block number after redeem", (await this.market.blockNumber()).toNumber());
 
 
     balance = await this.token.balanceOf(alice);
@@ -238,18 +307,18 @@ contract("Market", (accounts) => {
     assert.equal(balance, (1000 - 500) * FACTOR);
 
     console.log("accrual block number end", (await this.market.accrualBlockNumber()).toNumber());
-    console.log("current block number end", (await this.market.getCurrentBlockNumber()).toNumber());
+    console.log("current block number end", (await this.market.blockNumber()).toNumber());
   });
 
   it('bob supply 1000 token2', async () => {
     console.log("accrual block number begin", (await this.market2.accrualBlockNumber()).toNumber());
-    console.log("current block number begin", (await this.market2.getCurrentBlockNumber()).toNumber());
+    console.log("current block number begin", (await this.market2.blockNumber()).toNumber());
 
     await this.token2.approve(this.market2.address, 1000 * FACTOR, { from: bob });
 
 
     console.log("accrual block number before supply", (await this.market2.accrualBlockNumber()).toNumber());
-    console.log("current block number before supply", (await this.market2.getCurrentBlockNumber()).toNumber());
+    console.log("current block number before supply", (await this.market2.blockNumber()).toNumber());
 
     const supplyResult = await this.market2.supply(1000 * FACTOR, { from: bob });
 
@@ -262,7 +331,7 @@ contract("Market", (accounts) => {
     assert.equal(supplyResult.logs[0].args.amount, 1000 * FACTOR);
 
     console.log("accrual block number after supply", (await this.market2.accrualBlockNumber()).toNumber());
-    console.log("current block number after supply", (await this.market2.getCurrentBlockNumber()).toNumber());
+    console.log("current block number after supply", (await this.market2.blockNumber()).toNumber());
 
 
     balance = await this.token2.balanceOf(bob);
@@ -286,12 +355,12 @@ contract("Market", (accounts) => {
     assert.equal(balance, 1000 * FACTOR);
 
     console.log("accrual block number end" + (await this.market2.accrualBlockNumber()).toNumber());
-    console.log("current block number end", (await this.market2.getCurrentBlockNumber()).toNumber());
+    console.log("current block number end", (await this.market2.blockNumber()).toNumber());
   });
 
   it('bob redeem 300 token2', async () => {
     console.log("accrual block number begin", (await this.market2.accrualBlockNumber()).toNumber());
-    console.log("current block number begin", (await this.market2.getCurrentBlockNumber()).toNumber());
+    console.log("current block number begin", (await this.market2.blockNumber()).toNumber());
 
     const redeemResult = await this.market2.redeem(300 * FACTOR, { from: bob });
 
@@ -304,7 +373,7 @@ contract("Market", (accounts) => {
     assert.equal(redeemResult.logs[0].args.amount, 300 * FACTOR);
 
     console.log("accrual block number after redeem", (await this.market2.accrualBlockNumber()).toNumber());
-    console.log("current block number after redeem", (await this.market2.getCurrentBlockNumber()).toNumber());
+    console.log("current block number after redeem", (await this.market2.blockNumber()).toNumber());
 
 
     balance = await this.token2.balanceOf(bob);
@@ -328,12 +397,12 @@ contract("Market", (accounts) => {
     assert.equal(balance, (1000 - 300) * FACTOR);
 
     console.log("accrual block number end", (await this.market2.accrualBlockNumber()).toNumber());
-    console.log("current block number end", (await this.market2.getCurrentBlockNumber()).toNumber());
+    console.log("current block number end", (await this.market2.blockNumber()).toNumber());
   });
 
   it('alice borrow 100 token2', async () => {
     console.log("accrual block number begin", (await this.market2.accrualBlockNumber()).toNumber());
-    console.log("current block number begin", (await this.market2.getCurrentBlockNumber()).toNumber());
+    console.log("current block number begin", (await this.market2.blockNumber()).toNumber());
 
     const borrowResult = await this.market2.borrow(100 * FACTOR, { from: alice });
 
@@ -346,7 +415,7 @@ contract("Market", (accounts) => {
     assert.equal(borrowResult.logs[0].args.amount, 100 * FACTOR);
 
     console.log("accrual block number after borrow" + (await this.market2.accrualBlockNumber()).toNumber());
-    console.log("current block number after borrow", (await this.market2.getCurrentBlockNumber()).toNumber());
+    console.log("current block number after borrow", (await this.market2.blockNumber()).toNumber());
 
 
     const totalBorrow = await this.market2.totalBorrow();
@@ -381,18 +450,18 @@ contract("Market", (accounts) => {
     assert.equal(updatedSupply, (1000 - 300) * FACTOR);
 
     console.log("accrual block number end", (await this.market2.accrualBlockNumber()).toNumber());
-    console.log("current block number end", (await this.market2.getCurrentBlockNumber()).toNumber());
+    console.log("current block number end", (await this.market2.blockNumber()).toNumber());
   });
 
   it('alice pay borrow 50 token2', async () => {
     console.log("accrual block number begin", (await this.market2.accrualBlockNumber()).toNumber());
-    console.log("current block number begin", (await this.market2.getCurrentBlockNumber()).toNumber());
+    console.log("current block number begin", (await this.market2.blockNumber()).toNumber());
 
     await this.token2.approve(this.market2.address, 100 * FACTOR, { from: alice });
 
 
     console.log("accrual block number before payBorrow", (await this.market2.accrualBlockNumber()).toNumber());
-    console.log("current block number before payBorrow", (await this.market2.getCurrentBlockNumber()).toNumber());
+    console.log("current block number before payBorrow", (await this.market2.blockNumber()).toNumber());
 
     const result = await this.market2.payBorrow(50 * FACTOR, { from: alice });
 
@@ -405,7 +474,7 @@ contract("Market", (accounts) => {
     assert.equal(result.logs[0].args.amount, 50 * FACTOR);
 
     console.log("accrual block number after payBorrow", (await this.market2.accrualBlockNumber()).toNumber());
-    console.log("current block number after payBorrow", (await this.market2.getCurrentBlockNumber()).toNumber());
+    console.log("current block number after payBorrow", (await this.market2.blockNumber()).toNumber());
 
 
     const totalBorrow = await this.market2.totalBorrow();
@@ -433,7 +502,7 @@ contract("Market", (accounts) => {
     // assert.ok(balance > (100 - 50) * FACTOR);
 
     console.log("accrual block number end", (await this.market2.accrualBlockNumber()).toNumber());
-    console.log("current block number end", (await this.market2.getCurrentBlockNumber()).toNumber());
+    console.log("current block number end", (await this.market2.blockNumber()).toNumber());
   });
 
   it('accrue interest in market', async () => {
@@ -441,12 +510,12 @@ contract("Market", (accounts) => {
     console.log("borrow index: " + (await this.market.borrowIndex()).toNumber() / FACTOR);
     console.log("borrow rate: " + (await this.market.borrowRatePerBlock()).toNumber() / FACTOR);
 
-    console.log("current block number before", (await this.market.getCurrentBlockNumber()).toNumber());
-    console.log("accrual block number before", (await this.market.accrualBlockNumber()).toNumber());
+    console.log("current block number before", (await this.market.blockNumber()).toNumber());
+    console.log("accrual block number before", (await this.market.blockNumber()).toNumber());
 
     await this.market.accrueInterest();
 
-    console.log("current block number after", (await this.market.getCurrentBlockNumber()).toNumber());
+    console.log("current block number after", (await this.market.blockNumber()).toNumber());
     console.log("accrual block number after", (await this.market.accrualBlockNumber()).toNumber());
 
     console.log("total borrow: ", (await this.market.totalBorrow()).toNumber() / FACTOR);
@@ -465,12 +534,12 @@ contract("Market", (accounts) => {
     console.log("borrow index: ", (await this.market2.borrowIndex()).toNumber() / FACTOR);
     console.log("borrow rate: ", (await this.market2.borrowRatePerBlock()).toNumber() / FACTOR);
 
-    console.log("current block number before", (await this.market2.getCurrentBlockNumber()).toNumber());
+    console.log("current block number before", (await this.market2.blockNumber()).toNumber());
     console.log("accrual block number before", (await this.market2.accrualBlockNumber()).toNumber());
 
     await this.market2.accrueInterest();
 
-    console.log("current block number after", (await this.market2.getCurrentBlockNumber()).toNumber());
+    console.log("current block number after", (await this.market2.blockNumber()).toNumber());
     console.log("accrual block number after", (await this.market2.accrualBlockNumber()).toNumber());
 
     console.log("total borrow: ", (await this.market2.totalBorrow()).toNumber() / FACTOR);
