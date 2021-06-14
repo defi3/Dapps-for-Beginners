@@ -98,4 +98,8 @@ contract Controller is IController, Ownable {
     function marketOf(address token) external view returns (address) {
         return _tokenToMarket[token];
     }
+    
+    function include(address market_) external returns (bool) {
+        return _markets.include(market_);
+    }
 }

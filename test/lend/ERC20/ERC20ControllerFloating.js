@@ -7,72 +7,54 @@
  * 
  */
 
-const Token = artifacts.require("./token/FaucetToken.sol");
-const Market = artifacts.require("./lend/Market.sol");
-const Controller = artifacts.require('./lend/Controller.sol');
+const Token = artifacts.require("./token/ERC20/ERC20Faucet.sol");
+const Market = artifacts.require("./lend/ERC20/ERC20MarketFloating.sol");
+const Controller = artifacts.require('./lend/ERC20/ERC20ControllerFloating.sol');
 
-contract("Controller", (accounts) => {
+contract("ERC20ControllerFloating", (accounts) => {
   const alice = accounts[0];
   const bob = accounts[1];
   const charlie = accounts[2];
 
+  const DECIMALS = 6;
   const MANTISSA = 1e6;
   const FACTOR = 1e6;
+  const INIT_AMOUNT = 1e6;
+
   const BLOCKS_PER_YEAR = 1e6;
   const ANNUAL_RATE = 1e9;			// FACTOR / 1000 * BLOCKS_PER_YEAR = 1e9
   const UTILIZATION_RATE_FRACTION = 1e9;	// FACTOR / 1000 * BLOCKS_PER_YEAR = 1e9
 
   it("deploy contracts", async () => {
-    this.token = await Token.new("DAI", "DAI", 1e6 * FACTOR, 6, { from: alice });
-    this.market = await Market.new(this.token.address, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: alice });
+    this.token = await Token.new("DAI", "DAI", INIT_AMOUNT * MANTISSA, DECIMALS, { from: alice });
+    this.market = await Market.new(this.token.address, 0, 2000 * MANTISSA, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: alice });
 
-    this.token2 = await Token.new("BAT", "BAT", 1e6 * FACTOR, 6, { from: bob });
-    this.market2 = await Market.new(this.token2.address, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: bob });
+    this.token2 = await Token.new("BAT", "BAT", INIT_AMOUNT * MANTISSA, DECIMALS, { from: bob });
+    this.market2 = await Market.new(this.token2.address, 0, 2000 * MANTISSA, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: bob });
 
     this.controller = await Controller.new({ from: alice });
   });
 
   it("check original state", async () => {
-    assert.equal(await this.controller.MANTISSA(), MANTISSA);
+    // Controller
+    assert.equal(await this.controller.owner(), alice);
+
     assert.equal(await this.controller.collateralFactor(), 0);
     assert.equal(await this.controller.liquidationFactor(), 0);
 
-    const owner = await this.controller.owner();
-    // console.log(owner);
-    assert.equal(owner, alice);
+    assert.equal(await this.controller.size(), 0);
+    assert.equal(await this.controller.marketOf(this.token.address), 0);
+    assert.equal(await this.controller.marketOf(this.token2.address), 0);
 
-    const size = (await this.controller.marketListSize()).toNumber();
-    // console.log(size);
-    assert.equal(size, 0);
+    // console.log(await this.controller.include(this.market.address));
+    // assert.equal((await this.controller.include(this.market.address)).toBool(), false);
+    // assert.equal((await this.controller.include(this.market2.address)).toBool(), false);
 
+    // ERC20Controller
+    assert.equal(await this.controller.MANTISSA(), MANTISSA);
 
-    const added = await this.controller.markets(this.market.address);
-    // console.log(added);
-    assert.ok(!added);
-
-    const added2 = await this.controller.markets(this.market2.address);
-    assert.ok(!added2);
-
-
-    const marketAddress = await this.controller.marketsByToken(this.token.address);
-    assert.equal(marketAddress, 0);
-
-    const marketAddress2 = await this.controller.marketsByToken(this.token2.address);
-    assert.equal(marketAddress2, 0);
-
-
-    const price = await this.controller.prices(this.token.address);
-    assert.equal(price, 0);
-
-    const price2 = await this.controller.prices(this.token2.address);
-    assert.equal(price2, 0);
-
-
-    const controller = await this.market.controller();
-    assert.equal(controller, 0);
-
-    const controller2 = await this.market2.controller();
-    assert.equal(controller2, 0);
+    assert.equal(await this.controller.priceOf(this.market.address), 0);
+    assert.equal(await this.controller.priceOf(this.market2.address), 0);
   });
 
   it("initialize controller", async () => {
@@ -140,12 +122,12 @@ contract("Controller", (accounts) => {
 
     await this.controller.addMarket(this.market.address, { from: alice });
 
-    size = (await this.controller.marketListSize()).toNumber();
+    size = (await this.controller.size()).toNumber();
     assert.equal(size, 1);
 
     await this.controller.addMarket(this.market2.address, { from: alice });
 
-    size = (await this.controller.marketListSize()).toNumber();
+    size = (await this.controller.size()).toNumber();
     assert.equal(size, 2);
 
 
@@ -157,7 +139,7 @@ contract("Controller", (accounts) => {
 
     await this.controller.setPrice(this.market.address, 1, { from: alice });
 
-    const price = (await this.controller.prices(this.market.address)).toNumber();
+    const price = (await this.controller.priceOf(this.market.address)).toNumber();
     // console.log(price);
     assert.equal(price, 1);
 
@@ -170,25 +152,33 @@ contract("Controller", (accounts) => {
 
     await this.controller.setPrice(this.market2.address, 2);
 
-    const price2 = (await this.controller.prices(this.market2.address)).toNumber();
+    const price2 = (await this.controller.priceOf(this.market2.address)).toNumber();
     // console.log(price2);
     assert.equal(price2, 2);
   });
 
   it("check initial accounts", async () => {
-    values = await this.controller.getAccountValues(alice);
+    values = await this.controller.accountValues(alice);
     assert.equal(values.supplyValue, 0);
     assert.equal(values.borrowValue, 0);
 
-    values2 = await this.controller.getAccountValues(bob);
+    values2 = await this.controller.accountValues(bob);
     assert.equal(values2.supplyValue, 0);
     assert.equal(values2.borrowValue, 0);
 
-    assert.equal(await this.controller.getAccountHealth(alice), 0);
-    assert.equal(await this.controller.getAccountHealth(bob), 0);
+    res = await this.controller.accountHealth(alice);
+    console.log("alice's health status: " + res.status + "\talice's health index: " + res.index);
+    // assert.equal(await this.controller.accountHealth(alice), 0);
 
-    assert.equal(await this.controller.getAccountLiquidity(alice), 0);
-    assert.equal(await this.controller.getAccountLiquidity(bob), 0);
+    res = await this.controller.accountHealth(bob);
+    console.log("bob's health status: " + res.status + "\tbob's health index: " + res.index);
+    // assert.equal(await this.controller.accountHealth(bob), 0);
+
+    res = await this.controller.accountLiquidity(alice, this.market.address, 0);
+    console.log("alice's liquidity status: " + res.status + "\talice's liquidity: " + res.liquidity_);
+    
+    res = await this.controller.accountLiquidity(bob, this.market2.address, 0);
+    console.log("bob's liquidity status: " + res.status + "\tbob's liquidity: " + res.liquidity_);
   });
 
   it("check accounts after supply and borrow", async () => {
@@ -200,27 +190,29 @@ contract("Controller", (accounts) => {
 
     await this.market2.borrow(10 * FACTOR, { from: alice });
 
-    values = await this.controller.getAccountValues(alice);
+    values = await this.controller.accountValues(alice);
     console.log("alice's supply value: " + values.supplyValue.toNumber() + "\tborrowValue: " + values.borrowValue.toNumber());
     // assert.equal(values.supplyValue, 0);
     // assert.equal(values.borrowValue, 0);
 
-    values2 = await this.controller.getAccountValues(bob);
+    values2 = await this.controller.accountValues(bob);
     console.log("bob's supply value: " + values2.supplyValue.toNumber() + "\tborrowValue: " + values2.borrowValue.toNumber());
     // assert.equal(values2.supplyValue, 0);
     // assert.equal(values2.borrowValue, 0);
 
-    console.log("alice's health: " + (await this.controller.getAccountHealth(alice)).toNumber());
-    // assert.equal(await this.controller.getAccountHealth(alice), 0);
+    res = await this.controller.accountHealth(alice);
+    console.log("alice's health status: " + res.status + "\talice's health index: " + res.index);
+    // assert.equal(await this.controller.accountHealth(alice), 0);
 
-    console.log("bob's health: " + (await this.controller.getAccountHealth(bob)).toNumber());
-    // assert.equal(await this.controller.getAccountHealth(bob), 0);
+    res = await this.controller.accountHealth(bob);
+    console.log("bob's health status: " + res.status + "\tbob's health index: " + res.index);
+    // assert.equal(await this.controller.accountHealth(bob), 0);
 
-    console.log("alice's liquidity: " + (await this.controller.getAccountLiquidity(alice)).toNumber());
-    // assert.equal(await this.controller.getAccountLiquidity(alice), 0);
-
-    console.log("bob's liquidity: " + (await this.controller.getAccountLiquidity(bob)).toNumber());
-    // assert.equal(await this.controller.getAccountLiquidity(bob), 0);
+    res = await this.controller.accountLiquidity(alice, this.market.address, 0);
+    console.log("alice's liquidity status: " + res.status + "\talice's liquidity: " + res.liquidity_);
+    
+    res = await this.controller.accountLiquidity(bob, this.market2.address, 0);
+    console.log("bob's liquidity status: " + res.status + "\tbob's liquidity: " + res.liquidity_);
   });
 });
 

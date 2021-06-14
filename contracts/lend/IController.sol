@@ -18,6 +18,7 @@ interface IController {
     function removeMarket(address market) external returns (bool);
     function size() external view returns (uint);
     function marketOf(address token) external view returns (address);
+    function include(address market_) external returns (bool);
 
     function accountValues(address account) external view returns (uint supplyValue, uint borrowValue);
     function accountHealth(address account) external view returns (bool status, uint index);
