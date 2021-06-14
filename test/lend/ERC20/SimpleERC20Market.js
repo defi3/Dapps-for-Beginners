@@ -32,16 +32,21 @@ contract("SimpleERC20Market", (accounts) => {
   });
 
   it("check original state of market", async () => {
+    // Controllable
     assert.equal(await this.market.owner(), alice);
     assert.equal(await this.market.controller(), 0);
 
+    // Market
     assert.equal(await this.market.token(), this.token.address);
     assert.equal(await this.token.balanceOf(this.market.address), 0);
 
     assert.equal(await this.market.totalSupply(), 0);
     assert.equal(await this.market.totalBorrow(), 0);
+
+    // ERC20Market
     assert.equal(await this.market.balance(), 0);
 
+    // SimpleERC20Market
     assert.equal(await this.market.supplyOf(alice), 0);
     assert.equal(await this.market.borrowBy(alice), 0);
 
@@ -50,16 +55,21 @@ contract("SimpleERC20Market", (accounts) => {
   });
 
   it("check original state of market2", async () => {
+    // Controllable
     assert.equal(await this.market2.owner(), bob);
     assert.equal(await this.market2.controller(), 0);
 
+    // Market
     assert.equal(await this.market2.token(), this.token2.address);
     assert.equal(await this.token2.balanceOf(this.market2.address), 0);
 
     assert.equal(await this.market2.totalSupply(), 0);
     assert.equal(await this.market2.totalBorrow(), 0);
+
+    // ERC20Market
     assert.equal(await this.market2.balance(), 0);
 
+    // SimpleERC20Market
     assert.equal(await this.market2.supplyOf(alice), 0);
     assert.equal(await this.market2.borrowBy(alice), 0);
 
@@ -68,29 +78,48 @@ contract("SimpleERC20Market", (accounts) => {
   });
 
   it("set controller", async () => {
+    // Controller 
     await this.controller.setCollateralFactor(1 * MANTISSA, { from: alice });
     await this.controller.setLiquidationFactor(MANTISSA / 2, { from: alice });
 
+    assert.equal(await this.controller.collateralFactor(), 1 * MANTISSA);
+    assert.equal(await this.controller.liquidationFactor(), MANTISSA / 2);
+
+    // Controllable
     await this.market.setController(this.controller.address, { from: alice });
     await this.market2.setController(this.controller.address, { from: bob });
 
+    assert.equal(await this.market.controller(), this.controller.address);
+    assert.equal(await this.market2.controller(), this.controller.address);
+
+    // Controller
     await this.controller.addMarket(this.market.address, { from: alice });
     await this.controller.addMarket(this.market2.address, { from: alice });
 
+    assert.equal(await this.controller.size(), 2);
+
+    assert.equal(await this.controller.marketOf(this.token.address), this.market.address);
+    assert.equal(await this.controller.marketOf(this.token2.address), this.market2.address);
+
+    // ERC20Controller
     await this.controller.setPrice(this.market.address, 1, { from: alice });
     await this.controller.setPrice(this.market2.address, 2, { from: alice });
 
-    assert.equal(await this.market.controller(), this.controller.address);
-    assert.equal(await this.market2.controller(), this.controller.address);
+    assert.equal(await this.controller.priceOf(this.market.address), 1);
+    assert.equal(await this.controller.priceOf(this.market2.address), 2);
   });
 
   it("check initial state of market", async () => {
+    // Market
     assert.equal(await this.token.balanceOf(this.market.address), 0);
 
     assert.equal(await this.market.totalSupply(), 0);
     assert.equal(await this.market.totalBorrow(), 0);
+
+    // ERC20Market
     assert.equal(await this.market.balance(), 0);
 
+    // SimpleERC20Market
     assert.equal(await this.market.supplyOf(alice), 0);
     assert.equal(await this.market.borrowBy(alice), 0);
 
@@ -99,12 +128,16 @@ contract("SimpleERC20Market", (accounts) => {
   });
 
   it("check initial state of market 2", async () => {
+    // Market
     assert.equal(await this.token2.balanceOf(this.market2.address), 0);
 
     assert.equal(await this.market2.totalSupply(), 0);
     assert.equal(await this.market2.totalBorrow(), 0);
+
+    // ERC20Market
     assert.equal(await this.market2.balance(), 0);
 
+    // SimpleERC20Market
     assert.equal(await this.market2.supplyOf(alice), 0);
     assert.equal(await this.market2.borrowBy(alice), 0);
 
