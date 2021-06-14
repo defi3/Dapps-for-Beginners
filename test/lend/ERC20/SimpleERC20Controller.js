@@ -32,9 +32,10 @@ contract("SimpleERC20Controller", (accounts) => {
   });
 
   it("check original state", async () => {
-    assert.equal(await this.controller.MANTISSA(), MANTISSA);
-
+    // Controller
     assert.equal(await this.controller.owner(), alice);
+
+    assert.equal(await this.controller.MANTISSA(), MANTISSA);
 
     assert.equal(await this.controller.collateralFactor(), 0);
     assert.equal(await this.controller.liquidationFactor(), 0);
@@ -43,14 +44,17 @@ contract("SimpleERC20Controller", (accounts) => {
     assert.equal(await this.controller.marketOf(this.token.address), 0);
     assert.equal(await this.controller.marketOf(this.token2.address), 0);
 
+    // ERC20Controller
     assert.equal(await this.controller.priceOf(this.market.address), 0);
     assert.equal(await this.controller.priceOf(this.market2.address), 0);
 
+    // Controllable
     assert.equal(await this.market.controller(), 0);
     assert.equal(await this.market2.controller(), 0);
   });
 
   it("initialize controller", async () => {
+    // Controller
     try {
       await this.controller.setCollateralFactor(1 * MANTISSA, { from: bob });
     } catch (err) {
@@ -74,6 +78,7 @@ contract("SimpleERC20Controller", (accounts) => {
   });
 
   it("set controller", async () => {
+    // Market
     try {
       await this.market.setController(this.controller.address, { from: bob });
     } catch (err) {
@@ -96,6 +101,7 @@ contract("SimpleERC20Controller", (accounts) => {
   });
 
   it("add market", async () => {
+    // Controller
     try {
       await this.controller.addMarket(this.market.address, { from: bob });
     } catch (err) {
@@ -140,6 +146,7 @@ contract("SimpleERC20Controller", (accounts) => {
     assert.equal(await this.controller.size(), 2);
 
 
+    // ERC20Controller
     try {
       await this.controller.setPrice(this.market.address, 1, { from: bob });
     } catch (err) {
