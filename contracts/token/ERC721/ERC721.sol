@@ -1,21 +1,25 @@
 /**
- *   Reference 1: https://github.com/loomnetwork/cryptozombie-lessons/blob/master/en/5/06-erc721-6.md
+ *  SPDX-License-Identifier: MIT
  * 
- *   Reference 2: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/ERC721.sol
+ *  Reference 1: https://github.com/loomnetwork/cryptozombie-lessons/blob/master/en/5/06-erc721-6.md
  * 
- *   @Author defi3
+ *  Reference 2: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/ERC721.sol
+ * 
+ *  @Author defi3
+ * 
+ * 
+ *  Creation, 2021-06
+ * 
+ *  Main Update 1, 2021-06-17, migrate to ^0.8.0
  * 
  */
-pragma solidity >=0.5.0 <0.6.0;
+pragma solidity ^0.8.0;
 
 import "./IERC721.sol";
 import "./IERC721Metadata.sol";
 import "../../utils/Ownable.sol";
-import "../../utils/SafeMath.sol";
 
-contract ERC721 is Ownable, IERC721, IERC721Metadata {
-    using SafeMath for uint256;
-    
+abstract contract ERC721 is Ownable, IERC721, IERC721Metadata {
     string internal _name;
     string internal _symbol;
     
@@ -26,7 +30,7 @@ contract ERC721 is Ownable, IERC721, IERC721Metadata {
     mapping (uint => address) internal _allowances;
     
     
-    constructor(string memory name_, string memory symbol_) Ownable() public {
+    constructor(string memory name_, string memory symbol_) Ownable() {
         _name = name_;
         _symbol = symbol_;
     }
@@ -35,14 +39,14 @@ contract ERC721 is Ownable, IERC721, IERC721Metadata {
     /**
      * @dev See {IERC721Metadata-name}.
      */
-    function name() public view returns (string memory) {
+    function name() public view override returns (string memory) {
         return _name;
     }
     
     /**
      * @dev See {IERC721Metadata-symbol}.
      */
-    function symbol() public view returns (string memory) {
+    function symbol() public view override returns (string memory) {
         return _symbol;
     }
 
@@ -105,7 +109,7 @@ contract ERC721 is Ownable, IERC721, IERC721Metadata {
         return _owners[tokenId_] != address(0);
     }
     
-    function balanceOf(address owner_) external view returns (uint256) {
+    function balanceOf(address owner_) external view override returns (uint256) {
         require(owner_ != address(0), "ERC721: balance query for the zero address");
         
         return _balances[owner_];
@@ -115,7 +119,7 @@ contract ERC721 is Ownable, IERC721, IERC721Metadata {
     /**
      * @dev See {IERC721-balanceOf}.
      */
-    function ownerOf(uint256 tokenId_) external view returns (address) {
+    function ownerOf(uint256 tokenId_) external view override returns (address) {
         address owner = _owners[tokenId_];
         
         require(owner != address(0), "ERC721: owner query for nonexistent token");
@@ -126,13 +130,13 @@ contract ERC721 is Ownable, IERC721, IERC721Metadata {
     /**
      * @dev See {IERC721-transferFrom}.
      */
-    function transferFrom(address from, address to, uint256 tokenId_) external {
+    function transferFrom(address from, address to, uint256 tokenId_) external override {
         require (_owners[tokenId_] == msg.sender || _allowances[tokenId_] == msg.sender, "ERC721: transfer caller is not owner nor approved");
         
         require(to != address(0), "ERC721: transfer to the zero address");
         
-        _balances[to] = _balances[to].add(1);
-        _balances[from] = _balances[from].sub(1);
+        _balances[to] += 1;
+        _balances[from] -= 1;
         
         _owners[tokenId_] = to;
          _allowances[tokenId_] = address(0);
@@ -144,7 +148,7 @@ contract ERC721 is Ownable, IERC721, IERC721Metadata {
     /**
      * @dev See {IERC721-approve}.
      */
-    function approve(address to, uint256 tokenId_) external {
+    function approve(address to, uint256 tokenId_) external override {
         address owner = _owners[tokenId_];
         
         require(to != owner, "ERC721: approval to current owner");

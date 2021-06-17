@@ -1,4 +1,6 @@
 /**
+ *  SPDX-License-Identifier: MIT
+ * 
  *  Reference: https://github.com/ajlopez/DeFiProt/blob/master/contracts/MarketInterface.sol
  * 
  *  @Authoer defi3
@@ -10,12 +12,14 @@
  * 
  *  Main Update 2, 2021-06-06, add owner(), totalSupply(), totalBorrow()
  * 
+ *  Main Update 3, 2021-06-17, migrate to ^0.8.0
+ * 
  */
-pragma solidity >=0.5.0 <0.6.0;
+pragma solidity ^0.8.0;
 
 import "../IMarket.sol";
 
-contract IERC20Market is IMarket {
+interface IERC20Market is IMarket {
     event Supply(address user, uint amount);
     event Redeem(address user, uint amount);
     event Borrow(address user, uint amount);

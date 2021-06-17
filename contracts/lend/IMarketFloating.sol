@@ -1,12 +1,17 @@
 /**
+ *  SPDX-License-Identifier: MIT
+ * 
  *  Reference: https://github.com/ajlopez/DeFiProt/blob/master/contracts/MarketInterface.sol
  * 
  *  @Authoer defi3
  * 
  *  Support Floating Interest Rate
  * 
+ * 
+ *  Main Update 1, 2021-06-17, migrate to ^0.8.0
+ * 
  */
-pragma solidity >=0.5.0 <0.6.0;
+pragma solidity ^0.8.0;
 
 interface IMarketFloating {
     function utilizationRate(uint balance_, uint totalBorrow_, uint reserve_) external pure returns (uint);

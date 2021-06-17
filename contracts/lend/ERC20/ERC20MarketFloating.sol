@@ -1,4 +1,6 @@
 /**
+ *  SPDX-License-Identifier: MIT
+ * 
  *  Reference: https://github.com/ajlopez/DeFiProt/blob/master/contracts/Market.sol
  * 
  *  @Authoer defi3
@@ -16,18 +18,17 @@
  * 
  *  Main Update 6, 2021-06-13, add Extremal
  * 
+ *  Main Update 7, 2021-06-17, migrate to ^0.8.0
+ * 
  */
-pragma solidity >=0.5.0 <0.6.0;
+pragma solidity ^0.8.0;
 
 import "../IMarketFloating.sol";
 import "./ERC20Market.sol";
 import "./ERC20Controller.sol";
 import "../../token/ERC20/IERC20.sol";
-import "../../utils/SafeMath.sol";
 
 contract ERC20MarketFloating is ERC20Market, IMarketFloating {
-    using SafeMath for uint256;
-    
     uint public constant FACTOR = 1e6;
     
     struct SupplySnapshot {
@@ -53,13 +54,13 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
     mapping (address => BorrowSnapshot) internal _borrows;
 
 
-    constructor(address token_, uint256 min_, uint256 max_, uint baseBorrowAnnualRate_, uint blocksPerYear_, uint utilizationRateFraction_) ERC20Market(token_, min_, max_) public {
+    constructor(address token_, uint256 min_, uint256 max_, uint baseBorrowAnnualRate_, uint blocksPerYear_, uint utilizationRateFraction_) ERC20Market(token_, min_, max_) {
         _borrowIndex = FACTOR;
         _supplyIndex = FACTOR;
         _blocksPerYear = blocksPerYear_;
-        _baseBorrowRate = baseBorrowAnnualRate_.div(blocksPerYear_);
+        _baseBorrowRate = baseBorrowAnnualRate_ / blocksPerYear_;
         _accrualBlockNumber = block.number;
-        _utilizationRateFraction = utilizationRateFraction_.div(blocksPerYear_);
+        _utilizationRateFraction = utilizationRateFraction_ / blocksPerYear_;
     }
     
     
@@ -76,44 +77,44 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
     }
     
     
-    function supplyOf(address account) external view returns (uint) {
+    function supplyOf(address account) external view override returns (uint) {
         return _supplies[account].supply;
     }
 
-    function borrowBy(address account) external view returns (uint) {
+    function borrowBy(address account) external view override returns (uint) {
         return _borrows[account].principal;
     }
 
 
-    function utilizationRate(uint balance_, uint totalBorrow_, uint reserve_) public pure returns (uint) {
+    function utilizationRate(uint balance_, uint totalBorrow_, uint reserve_) public pure override returns (uint) {
         if (totalBorrow_ == 0)
             return 0;
 
-        return totalBorrow_.mul(FACTOR).div(balance_.add(totalBorrow_).sub(reserve_));
+        return totalBorrow_ * FACTOR / (balance_ + totalBorrow_) / reserve_;
     }
 
-    function borrowRate(uint balance_, uint totalBorrow_, uint reserve_) public view returns (uint) {
+    function borrowRate(uint balance_, uint totalBorrow_, uint reserve_) public view override returns (uint) {
         uint ur = utilizationRate(balance_, totalBorrow_, reserve_);
 
-        return ur.mul(_utilizationRateFraction).div(FACTOR).add(_baseBorrowRate);
+        return ur * _utilizationRateFraction / FACTOR + _baseBorrowRate;
     }
 
-    function supplyRate(uint balance_, uint totalBorrow_, uint reserve_) public view returns (uint) {
+    function supplyRate(uint balance_, uint totalBorrow_, uint reserve_) public view override returns (uint) {
         uint borrowRate__ = borrowRate(balance_, totalBorrow_, reserve_);
 
-        return utilizationRate(balance_, totalBorrow_, reserve_).mul(borrowRate__).div(FACTOR);
+        return utilizationRate(balance_, totalBorrow_, reserve_) * borrowRate__ / FACTOR;
     }
 
-    function borrowRatePerBlock() public view returns (uint) {
+    function borrowRatePerBlock() public view override returns (uint) {
         return borrowRate(balance(), _totalBorrow, 0);
     }
 
-    function supplyRatePerBlock() public view returns (uint) {
+    function supplyRatePerBlock() public view override returns (uint) {
         return supplyRate(balance(), _totalBorrow, 0);
     }
     
 
-    function updatedBorrowBy(address account) public view returns (uint) {
+    function updatedBorrowBy(address account) public view override returns (uint) {
         BorrowSnapshot storage snapshot = _borrows[account];
 
         if (snapshot.principal == 0)
@@ -124,10 +125,10 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
 
         (newTotalBorrows, newBorrowIndex) = calculateBorrowDataAtBlock(block.number);
 
-        return snapshot.principal.mul(newBorrowIndex).div(snapshot.interestIndex);
+        return snapshot.principal * newBorrowIndex / snapshot.interestIndex;
     }
 
-    function updatedSupplyOf(address account) public view returns (uint) {
+    function updatedSupplyOf(address account) public view override returns (uint) {
         SupplySnapshot storage snapshot = _supplies[account];
 
         if (snapshot.supply == 0)
@@ -138,20 +139,20 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
 
         (newTotalSupply, newSupplyIndex) = calculateSupplyDataAtBlock(block.number);
 
-        return snapshot.supply.mul(newSupplyIndex).div(snapshot.interestIndex);
+        return snapshot.supply * newSupplyIndex / snapshot.interestIndex;
     }
 
-    function _supply(address supplier, uint amount) internal {
+    function _supply(address supplier, uint amount) internal override {
         accrueInterest();
 
         SupplySnapshot storage supplySnapshot = _supplies[supplier];
 
         supplySnapshot.supply = updatedSupplyOf(supplier);
-        _supplies[supplier].supply = _supplies[supplier].supply.add(amount);
+        _supplies[supplier].supply += amount;
         _supplies[supplier].interestIndex = _supplyIndex;
     }
 
-    function _redeem(address supplier, uint amount) internal {
+    function _redeem(address supplier, uint amount) internal override {
         accrueInterest();
 
         SupplySnapshot storage supplySnapshot = _supplies[supplier];
@@ -161,7 +162,7 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
 
         require(supplySnapshot.supply >= amount);
 
-        supplySnapshot.supply = supplySnapshot.supply.sub(amount);
+        supplySnapshot.supply -= amount;
         
         ERC20Controller ctr = ERC20Controller(_controller);
         
@@ -173,15 +174,15 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
         require(status);
     }
 
-    function _borrow(address borrower, uint amount) internal {
+    function _borrow(address borrower, uint amount) internal override {
         accrueInterest();
 
         BorrowSnapshot storage borrowSnapshot = _borrows[borrower];
 
         if (borrowSnapshot.principal > 0) {
-            uint interest = borrowSnapshot.principal.mul(_borrowIndex).div(borrowSnapshot.interestIndex).sub(borrowSnapshot.principal);
+            uint interest = borrowSnapshot.principal * _borrowIndex / borrowSnapshot.interestIndex - borrowSnapshot.principal;
 
-            borrowSnapshot.principal = borrowSnapshot.principal.add(interest);
+            borrowSnapshot.principal += interest;
             borrowSnapshot.interestIndex = _borrowIndex;
         }
         
@@ -194,12 +195,12 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
 
         require(status, "Not enough account liquidity");
 
-        borrowSnapshot.principal = borrowSnapshot.principal.add(amount);
+        borrowSnapshot.principal += amount;
         borrowSnapshot.interestIndex = _borrowIndex;
     }
     
     
-    function blockNumber() external view returns (uint) {
+    function blockNumber() external view override returns (uint) {
         return block.number;
     }
     
@@ -207,7 +208,7 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
         return _accrualBlockNumber;
     }
 
-    function accrueInterest() public {
+    function accrueInterest() public override {
         uint currentBlockNumber = block.number;
         
         if (currentBlockNumber > _accrualBlockNumber) {
@@ -224,11 +225,11 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
 
         uint blockDelta = newBlockNumber - _accrualBlockNumber;
 
-        uint simpleInterestFactor = borrowRatePerBlock().mul(blockDelta);
-        uint interestAccumulated = simpleInterestFactor.mul(_totalBorrow).div(FACTOR);
+        uint simpleInterestFactor = borrowRatePerBlock() * blockDelta;
+        uint interestAccumulated = simpleInterestFactor * _totalBorrow / FACTOR;
 
-        newBorrowIndex = simpleInterestFactor.mul(_borrowIndex).div(FACTOR).add(_borrowIndex);
-        newTotalBorrows = interestAccumulated.add(_totalBorrow);
+        newBorrowIndex = simpleInterestFactor * _borrowIndex / FACTOR + _borrowIndex;
+        newTotalBorrows = interestAccumulated + _totalBorrow;
     }
 
     function calculateSupplyDataAtBlock(uint newBlockNumber) internal view returns (uint newTotalSupply, uint newSupplyIndex) {
@@ -237,11 +238,11 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
 
         uint blockDelta = newBlockNumber - _accrualBlockNumber;
 
-        uint simpleInterestFactor = supplyRatePerBlock().mul(blockDelta);
-        uint interestAccumulated = simpleInterestFactor.mul(_totalSupply).div(FACTOR);
+        uint simpleInterestFactor = supplyRatePerBlock() * blockDelta;
+        uint interestAccumulated = simpleInterestFactor * _totalSupply / FACTOR;
 
-        newSupplyIndex = simpleInterestFactor.mul(_supplyIndex).div(FACTOR).add(_supplyIndex);
-        newTotalSupply = interestAccumulated.add(_totalSupply);
+        newSupplyIndex = simpleInterestFactor * _supplyIndex / FACTOR + _supplyIndex;
+        newTotalSupply = interestAccumulated + _totalSupply;
     }
 
     function getUpdatedTotalBorrows() internal view returns (uint) {
@@ -262,26 +263,26 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
         return newTotalSupply;
     }
 
-    function _payBorrow(address payer, address borrower, uint amount) internal returns (uint paid, uint additional_) {
+    function _payBorrow(address payer, address borrower, uint amount) internal override returns (uint paid, uint additional_) {
         accrueInterest();
 
         BorrowSnapshot storage snapshot = _borrows[borrower];
 
         require(snapshot.principal > 0);
 
-        uint interest = snapshot.principal.mul(_borrowIndex).div(snapshot.interestIndex).sub(snapshot.principal);
+        uint interest = snapshot.principal * _borrowIndex / snapshot.interestIndex - snapshot.principal;
 
-        snapshot.principal = snapshot.principal.add(interest);
+        snapshot.principal = snapshot.principal + interest;
         snapshot.interestIndex = _borrowIndex;
 
         uint additional;
 
         if (snapshot.principal < amount) {
-            additional = amount.sub(snapshot.principal);
+            additional = amount - snapshot.principal;
             amount = snapshot.principal;
         }
 
-        snapshot.principal = snapshot.principal.sub(amount);
+        snapshot.principal -= amount;
 
         if (additional > 0)
             _supply(payer, additional);
@@ -290,7 +291,7 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
     }
     
     
-    function liquidateBorrow(address borrower, uint amount, address collateral) external extremum(amount) {
+    function liquidateBorrow(address borrower, uint amount, address collateral) external override extremum(amount) {
         require(borrower != msg.sender);
         
         ERC20MarketFloating collateralMarket = ERC20MarketFloating(collateral);

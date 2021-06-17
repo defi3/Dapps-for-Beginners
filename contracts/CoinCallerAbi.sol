@@ -1,15 +1,20 @@
 /**
- * Reference: https://medium.com/@houzier.saurav/calling-functions-of-other-contracts-on-solidity-9c80eed05e0f
+ *  SPDX-License-Identifier: MIT
+ * 
+ *  Reference: https://medium.com/@houzier.saurav/calling-functions-of-other-contracts-on-solidity-9c80eed05e0f
  * 
  *  @Author defi3
  * 
+ * 
+ *  Main Update 1, 2021-06-17, migrate to ^0.8.0
+ * 
  */
-pragma solidity >=0.5.0 <0.9.0;
+pragma solidity ^0.8.0;
 
 contract CoinCallerAbi {
     address internal mc;
     
-    constructor(address _address) public {
+    constructor(address _address) {
         mc = _address;
     }
     

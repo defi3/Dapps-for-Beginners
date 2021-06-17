@@ -1,12 +1,17 @@
 /**
- *   Reference 1: https://github.com/ajlopez/DeFiProt/blob/master/contracts/test/FaucetToken.sol
+ *  SPDX-License-Identifier: MIT
  * 
- *   Reference 2: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol
+ *  Reference 1: https://github.com/ajlopez/DeFiProt/blob/master/contracts/test/FaucetToken.sol
  * 
- *   @Author defi3
+ *  Reference 2: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol
+ * 
+ *  @Author defi3
+ * 
+ * 
+ *  Main Update 1, 2021-06-17, migrate to ^0.8.0
  * 
  */
-pragma solidity >=0.5.0 <0.9.0;
+pragma solidity ^0.8.0;
 
 import "./ERC20Standard.sol";
 import "../../utils/Ownable.sol";
@@ -21,7 +26,7 @@ contract ERC20Faucet is ERC20Standard, Ownable {
     string internal _symbol;
     uint8 internal _decimals;
 
-    constructor(string memory name_, string memory symbol_, uint256 amount_, uint8 decimals_) public {
+    constructor(string memory name_, string memory symbol_, uint256 amount_, uint8 decimals_) {
         _name = name_;
         _symbol = symbol_;
         

@@ -1,4 +1,6 @@
 /**
+ *  SPDX-License-Identifier: MIT
+ * 
  *  Reference: https://github.com/ajlopez/DeFiProt/blob/master/contracts/Controller.sol
  * 
  *  @Authoer defi3
@@ -16,18 +18,17 @@
  * 
  *  Main Update 6, 2021-06-12, use AddressArray, remove _markets and rename _marketList to _markets
  * 
+ *  Main Update 7, 2021-06-17, migrate to ^0.8.0
+ * 
  */
-pragma solidity >=0.5.0 <0.6.0;
+pragma solidity ^0.8.0;
 
 import "./IController.sol";
 import "./IMarket.sol";
 import "../utils/Ownable.sol";
 import "../utils/AddressArray.sol";
-import "../utils/SafeMath.sol";
 
-contract Controller is IController, Ownable {
-    using SafeMath for uint256;
-    
+abstract contract Controller is IController, Ownable {
     using AddressArray for address[];
     
     // uint public constant MANTISSA = 1e6;
@@ -39,7 +40,7 @@ contract Controller is IController, Ownable {
     address[] internal _markets;
 
 
-    constructor() Ownable() public {
+    constructor() Ownable() {
     }
 
 
@@ -49,24 +50,24 @@ contract Controller is IController, Ownable {
     }
     
     
-    function collateralFactor() external view returns (uint) {
+    function collateralFactor() external view override returns (uint) {
         return _collateralFactor;
     }
     
-    function setCollateralFactor(uint factor) external onlyOwner {
+    function setCollateralFactor(uint factor) external override onlyOwner {
         _collateralFactor = factor;
     }
 
-    function liquidationFactor() external view returns (uint) {
+    function liquidationFactor() external view override returns (uint) {
         return _liquidationFactor;
     }
     
-    function setLiquidationFactor(uint factor) external onlyOwner {
+    function setLiquidationFactor(uint factor) external override onlyOwner {
         _liquidationFactor = factor;
     }
     
 
-    function addMarket(address market) external onlyOwner {
+    function addMarket(address market) external override onlyOwner {
         address token = IMarket(market).token();
         
         require(_tokenToMarket[token] == address(0));
@@ -75,7 +76,7 @@ contract Controller is IController, Ownable {
         _markets.push(market);
     }
     
-    function removeMarket(address market_) external onlyOwner returns (bool) {
+    function removeMarket(address market_) external override onlyOwner returns (bool status) {
         IMarket market = IMarket(market_);
         
         require(market.balance() == 0);
@@ -89,17 +90,19 @@ contract Controller is IController, Ownable {
         
         delete _tokenToMarket[token];
         _markets.removeByValue(market_);
+        
+        return true;
     }
     
-    function size() external view returns (uint) {
+    function size() external view override returns (uint) {
       return _markets.length;
     }
     
-    function marketOf(address token) external view returns (address) {
+    function marketOf(address token) external view override returns (address) {
         return _tokenToMarket[token];
     }
     
-    function include(address market_) external returns (bool) {
+    function include(address market_) external view override returns (bool included) {
         return _markets.include(market_);
     }
 }

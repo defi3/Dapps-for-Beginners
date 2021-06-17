@@ -1,15 +1,20 @@
 /**
+ *  SPDX-License-Identifier: MIT
+ * 
  *  Reference: https://jeancvllr.medium.com/solidity-tutorial-all-about-modifiers-a86cf81c14cb
  * 
  *  @Authoer defi3
  * 
+ * 
+ *  Main Update 1, 2021-06-17, migrate to ^0.8.0
+ * 
  */
-pragma solidity >=0.5.0 <0.6.0;
+pragma solidity ^0.8.0;
 
-contract Minimal {
+abstract contract Minimal {
     uint256 internal _min;
 
-    constructor(uint256 min_) internal {
+    constructor(uint256 min_) {
         _min = min_;
     }
 

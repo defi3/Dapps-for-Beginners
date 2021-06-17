@@ -1,4 +1,6 @@
 /**
+ *  SPDX-License-Identifier: MIT
+ * 
  *  Reference 1: https://github.com/ajlopez/DeFiProt/blob/master/contracts/Market.sol
  * 
  *  Reference 2: https://blog.openzeppelin.com/onward-with-ethereum-smart-contract-security-97a827e47702/
@@ -22,75 +24,73 @@
  * 
  *  Main Update 8, 2021-06-13, add Extremal
  * 
+ *  Main Update 9, 2021-06-17, migrate to ^0.8.0
+ * 
  */
-pragma solidity >=0.5.0 <0.6.0;
+pragma solidity ^0.8.0;
 
 import "../Market.sol";
 import "./IERC20Market.sol";
 import "../../token/ERC20/IERC20.sol";
 import "../../utils/Extremal.sol";
-import "../../utils/SafeMath.sol";
 
-
-contract ERC20Market is Market, IERC20Market, Extremal {
-    using SafeMath for uint256;
+abstract contract ERC20Market is Market, IERC20Market, Extremal {
     
-
-    constructor(address token_, uint256 min_, uint256 max_) Market(token_) Extremal(min_, max_) public {
+    constructor(address token_, uint256 min_, uint256 max_) Market(token_) Extremal(min_, max_) {
     }
 
 
-    function balance() public view returns (uint) {
+    function balance() public view override returns (uint) {
         return IERC20(_token).balanceOf(address(this));
     }
 
 
-    function supply(uint amount) external extremum(amount) {
+    function supply(uint amount) external override extremum(amount) {
         require(IERC20(_token).balanceOf(msg.sender) >= amount, "ERC20Market::supply: msg.sender does not have enough tokens");
         
         _supply(msg.sender, amount);
         
-        _totalSupply = _totalSupply.add(amount);
+        _totalSupply += amount;
         
         require(IERC20(_token).transferFrom(msg.sender, address(this), amount), "ERC20Market::supply: not able to do transferFrom");
 
         emit Supply(msg.sender, amount);
     }
 
-    function _supply(address supplier, uint amount) internal;
+    function _supply(address supplier, uint amount) internal virtual;
     
     
-    function borrow(uint amount) external extremum(amount) {
+    function borrow(uint amount) external override extremum(amount) {
         require(IERC20(_token).balanceOf(address(this)) >= amount, "ERC20Market::borrow: market does not have enough tokens");
         
         _borrow(msg.sender, amount);
 
-        _totalBorrow = _totalBorrow.add(amount);
+        _totalBorrow += amount;
         
         require(IERC20(_token).transfer(msg.sender, amount), "ERC20Market::borrow: not able to do transfer");
         
         emit Borrow(msg.sender, amount);
     }
  
-    function _borrow(address borrower, uint amount) internal;
+    function _borrow(address borrower, uint amount) internal virtual;
 
 
-    function redeem(uint amount) external extremum(amount) {
+    function redeem(uint amount) external override extremum(amount) {
         require(IERC20(_token).balanceOf(address(this)) >= amount, "ERC20Market::redeem: market does not have enough tokens");
         
         _redeem(msg.sender, amount);
         
-        _totalSupply = _totalSupply.sub(amount);
+        _totalSupply -= amount;
         
         require(IERC20(_token).transfer(msg.sender, amount), "ERC20Market::redeem: not able to do transfer");
 
         emit Redeem(msg.sender, amount);
     }
 
-    function _redeem(address supplier, uint amount) internal; 
+    function _redeem(address supplier, uint amount) internal virtual; 
 
 
-    function payBorrow(uint amount) external extremum(amount) {
+    function payBorrow(uint amount) external override extremum(amount) {
         require(IERC20(_token).balanceOf(msg.sender) >= amount, "ERC20Market::payBorrow: msg.sender does not have enough tokens");
         
         uint paid;
@@ -98,7 +98,7 @@ contract ERC20Market is Market, IERC20Market, Extremal {
         
         (paid, additional) = _payBorrow(msg.sender, msg.sender, amount);
         
-        _totalBorrow = _totalBorrow.sub(paid);
+        _totalBorrow -= paid;
         
         require(IERC20(_token).transferFrom(msg.sender, address(this), amount), "ERC20Market::payBorrow: not able to do transferFrom");
         
@@ -108,15 +108,15 @@ contract ERC20Market is Market, IERC20Market, Extremal {
             emit Supply(msg.sender, additional);
     }
     
-    function _payBorrow(address payer, address borrower, uint amount) internal returns (uint paid, uint additional);
+    function _payBorrow(address payer, address borrower, uint amount) internal virtual returns (uint paid, uint additional);
 
  
-    function redeemFor(address supplier, address receiver, uint amount) external onlyController extremum(amount) {
+    function redeemFor(address supplier, address receiver, uint amount) external override onlyController extremum(amount) {
         require(IERC20(_token).balanceOf(address(this)) >= amount, "ERC20Market::redeemFor: market does not have enough tokens");
         
         _redeem(supplier, amount);
         
-        _totalSupply = _totalSupply.sub(amount);
+        _totalSupply -= amount;
         
         require(IERC20(_token).transfer(receiver, amount), "ERC20Market::redeemFor: not able to do transfer");
     }

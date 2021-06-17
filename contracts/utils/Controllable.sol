@@ -1,19 +1,25 @@
 /**
+ *  SPDX-License-Identifier: MIT
+ * 
  *  @Authoer defi3
  * 
+ * 
+ *  Creation, 2021-06
+ * 
+ *  Main Update 1, 2021-06-17, migrate to ^0.8.0
+ * 
  */
-pragma solidity >=0.5.0 <0.6.0;
+pragma solidity ^0.8.0;
 
 import "./Ownable.sol";
 
-
-contract Controllable is Ownable {
+abstract contract Controllable is Ownable {
     address internal _controller;
 
     /**
      * @dev The Controllable constructor sets the original `owner` of the contract to the sender account.
      */
-    constructor() Ownable() internal {
+    constructor() Ownable() {
     }
 
     /**

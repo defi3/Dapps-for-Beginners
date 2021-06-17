@@ -1,4 +1,6 @@
 /**
+ *  SPDX-License-Identifier: MIT
+ * 
  *  Reference: https://github.com/ajlopez/DeFiProt/blob/master/contracts/Market.sol
  * 
  *  @Authoer defi3
@@ -14,42 +16,41 @@
  * 
  *  Main Update 4, 2021-06-13, add Extremal
  * 
+ *  Main Update 5, 2021-06-17, migrate to ^0.8.0
+ * 
  */
-pragma solidity >=0.5.0 <0.6.0;
+pragma solidity ^0.8.0;
 
 import "./ERC20Market.sol";
 import "./ERC20Controller.sol";
 import "../../token/ERC20/IERC20.sol";
-import "../../utils/SafeMath.sol";
 
 contract SimpleERC20Market is ERC20Market {
-    using SafeMath for uint256;
-
     mapping (address => uint) internal _supplies;
     mapping (address => uint) internal _borrows;
 
 
-    constructor(address token_, uint256 min_, uint256 max_) ERC20Market(token_, min_, max_) public {
+    constructor(address token_, uint256 min_, uint256 max_) ERC20Market(token_, min_, max_) {
     }
 
 
-    function supplyOf(address account) external view returns (uint) {
+    function supplyOf(address account) external view override returns (uint) {
         return _supplies[account];
     }
     
-    function borrowBy(address account) external view returns (uint) {
+    function borrowBy(address account) external view override returns (uint) {
         return _borrows[account];
     }
 
 
-    function _supply(address supplier, uint amount) internal {
-        _supplies[supplier] = _supplies[supplier].add(amount);
+    function _supply(address supplier, uint amount) internal override {
+        _supplies[supplier] += amount;
     }
 
-    function _redeem(address supplier, uint amount) internal {
+    function _redeem(address supplier, uint amount) internal override {
         require(_supplies[supplier] >= amount);
 
-        _supplies[supplier] = _supplies[supplier].sub(amount);
+        _supplies[supplier] -= amount;
         
         ERC20Controller ctr = ERC20Controller(_controller);
         
@@ -61,7 +62,7 @@ contract SimpleERC20Market is ERC20Market {
         require(status);
     }
 
-    function _borrow(address borrower, uint amount) internal {
+    function _borrow(address borrower, uint amount) internal override {
         ERC20Controller ctr = ERC20Controller(_controller); 
         
         bool status;
@@ -71,20 +72,20 @@ contract SimpleERC20Market is ERC20Market {
 
         require(status, "SimpleERC20Market::_borrow: Not enough account liquidity");
 
-        _borrows[borrower] = _borrows[borrower].add(amount);
+        _borrows[borrower] += amount;
     }
 
-    function _payBorrow(address payer, address borrower, uint amount) internal returns (uint paid, uint additional_) {
+    function _payBorrow(address payer, address borrower, uint amount) internal override returns (uint paid, uint additional_) {
         require(_borrows[borrower] > 0);
         
         uint additional;
         
         if (amount > _borrows[borrower]) {
-            additional = amount.sub(_borrows[borrower]);
+            additional = amount - _borrows[borrower];
             amount = _borrows[borrower];
         }
 
-        _borrows[borrower] = _borrows[borrower].sub(amount);
+        _borrows[borrower] -= amount;
         
         if (additional > 0)
             _supply(payer, additional);
@@ -93,7 +94,7 @@ contract SimpleERC20Market is ERC20Market {
     }
     
     
-    function liquidateBorrow(address borrower, uint amount, address collateral) public extremum(amount) {
+    function liquidateBorrow(address borrower, uint amount, address collateral) public override extremum(amount) {
         require(borrower != msg.sender);
         
         require(IERC20(_token).balanceOf(msg.sender) >= amount);

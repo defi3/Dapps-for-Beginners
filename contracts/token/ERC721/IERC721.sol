@@ -1,8 +1,10 @@
 /**
- *   Source: https://github.com/loomnetwork/cryptozombie-lessons/blob/master/en/5/02-erc721-2.md
+ *  SPDX-License-Identifier: MIT
+ * 
+ *  Source: https://github.com/loomnetwork/cryptozombie-lessons/blob/master/en/5/02-erc721-2.md
  * 
  */
-pragma solidity >=0.5.0 <0.6.0;
+pragma solidity ^0.8.0;
 
 interface IERC721 {
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId_);

@@ -1,4 +1,6 @@
 /**
+ *  SPDX-License-Identifier: MIT
+ * 
  *  Reference: https://github.com/ajlopez/DeFiProt/blob/master/contracts/Controller.sol
  * 
  *  @Authoer defi3
@@ -10,12 +12,14 @@
  * 
  *  Main Update 3, 2021-06-12, add IController
  * 
+ *  Main Update 4, 2021-06-17, migrate to ^0.8.0
+ * 
  */
-pragma solidity >=0.5.0 <0.6.0;
+pragma solidity ^0.8.0;
 
 import "../IController.sol";
 
-contract IERC20Controller is IController{
+interface IERC20Controller is IController{
     function setPrice(address market, uint price) external;
     function priceOf(address market) external view returns (uint);
 

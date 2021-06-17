@@ -1,4 +1,6 @@
 /**
+ *  SPDX-License-Identifier: MIT
+ * 
  *  Reference: https://github.com/ajlopez/DeFiProt/blob/master/contracts/Controller.sol
  * 
  *  @Authoer defi3
@@ -12,50 +14,51 @@
  * 
  *  Main Update 4, 2021-06-12, add Controller for inheritance
  * 
+ *  Main Update 5, 2021-06-17, migrate to ^0.8.0
+ * 
  */
-pragma solidity >=0.5.0 <0.6.0;
+pragma solidity ^0.8.0;
 
 import "../Controller.sol";
 import "./IERC20Controller.sol";
 import "./ERC20Market.sol";
-import "../../utils/SafeMath.sol";
 
-contract ERC20Controller is Controller, IERC20Controller {
-    using SafeMath for uint256;
+abstract contract ERC20Controller is Controller, IERC20Controller {
+    using AddressArray for address[];
     
     uint public constant MANTISSA = 1e6;
 
     mapping (address => uint) internal _prices;
 
 
-    constructor() Controller() public {
+    constructor() Controller() {
     }
     
 
-    function setPrice(address market, uint price) external onlyOwner {
+    function setPrice(address market, uint price) external override onlyOwner {
         require(_markets.include(market), "ERC20Controller::setPrice: market is not added");
 
         _prices[market] = price;
     }
     
-    function priceOf(address market) external view returns (uint) {
+    function priceOf(address market) external view override returns (uint) {
         return _prices[market];
     }
     
     
     // for testing and UI
-    function accountValues(address account) public view returns (uint supplyValue, uint borrowValue) {
+    function accountValues(address account) public view override returns (uint supplyValue, uint borrowValue) {
         return _accountValues(account);
     }
     
-    function _accountValues(address account) internal view returns (uint supplyValue, uint borrowValue);
+    function _accountValues(address account) internal view virtual returns (uint supplyValue, uint borrowValue);
 
    
     // called by _borrow() in Market 
-    function accountLiquidity(address account, address market, uint amount) external view returns (bool status, uint liquidity_) {
+    function accountLiquidity(address account, address market, uint amount) external view override returns (bool status, uint liquidity_) {
         uint liquidity = _accountLiquidity(account);
         
-        return (liquidity >= _prices[market].mul(amount).mul(2), liquidity);
+        return (liquidity >= _prices[market] * amount * 2, liquidity);
     }
     
     function _accountLiquidity(address account) internal view returns (uint) {
@@ -66,37 +69,37 @@ contract ERC20Controller is Controller, IERC20Controller {
 
         (supplyValue, borrowValue) = _accountValues(account);
 
-        borrowValue = borrowValue.mul(_collateralFactor.add(MANTISSA));
-        borrowValue = borrowValue.div(MANTISSA);
+        borrowValue = borrowValue * (_collateralFactor + MANTISSA);
+        borrowValue = borrowValue / MANTISSA;
 
         if (borrowValue < supplyValue)
-            liquidity = supplyValue.sub(borrowValue);
+            liquidity = supplyValue - borrowValue;
 
         return liquidity;
     }
     
     
-    function accountHealth(address account) external view returns (bool status, uint index) {
+    function accountHealth(address account) external view override returns (bool status, uint index) {
         uint supplyValue;
         uint borrowValue;
 
         (supplyValue, borrowValue) = _accountValues(account);
 
-        return (supplyValue >= borrowValue.mul(MANTISSA.add(_collateralFactor).div(MANTISSA)), calculateHealthIndex(supplyValue, borrowValue));
+        return (supplyValue >= borrowValue * (MANTISSA + _collateralFactor) / MANTISSA, calculateHealthIndex(supplyValue, borrowValue));
     }
     
     function calculateHealthIndex(uint supplyValue, uint borrowValue) internal view returns (uint) {
         if (supplyValue == 0 || borrowValue == 0)
             return 0;
 
-        borrowValue = borrowValue.mul(_liquidationFactor.add(MANTISSA));
-        borrowValue = borrowValue.div(MANTISSA);
+        borrowValue = borrowValue * (_liquidationFactor + MANTISSA);
+        borrowValue = borrowValue / MANTISSA;
         
-        return supplyValue.mul(MANTISSA).div(borrowValue);
+        return supplyValue * MANTISSA / borrowValue;
     }
     
     
-    function liquidateCollateral(address borrower, address liquidator, uint amount, address collateral) external onlyMarket returns (uint collateralAmount)  {
+    function liquidateCollateral(address borrower, address liquidator, uint amount, address collateral) external override onlyMarket returns (uint collateralAmount)  {
         uint price = _prices[msg.sender];        
         require(price > 0);
 
@@ -113,11 +116,11 @@ contract ERC20Controller is Controller, IERC20Controller {
         
         require(healthIndex <= MANTISSA);
         
-        uint liquidationValue = amount.mul(price);
-        uint liquidationPercentage = liquidationValue.mul(MANTISSA).div(borrowValue);
-        uint collateralValue = supplyValue.mul(liquidationPercentage).div(MANTISSA);
+        uint liquidationValue = amount * price;
+        uint liquidationPercentage = liquidationValue * MANTISSA / borrowValue;
+        uint collateralValue = supplyValue * liquidationPercentage / MANTISSA;
         
-        collateralAmount = collateralValue.div(collateralPrice);
+        collateralAmount = collateralValue / collateralPrice;
         
         ERC20Market collateralMarket = ERC20Market(collateral);
         collateralMarket.redeemFor(borrower, liquidator, collateralAmount);

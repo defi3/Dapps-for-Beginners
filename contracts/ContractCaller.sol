@@ -1,4 +1,5 @@
 /**
+ *  SPDX-License-Identifier: MIT
  * 
  *  Reference 1: https://medium.com/@blockchain101/calling-the-function-of-another-contract-in-solidity-f9edfa921f4c
  * 
@@ -6,8 +7,11 @@
  * 
  *  @Author defi3
  * 
+ * 
+ *  Main Update 1, 2021-06-17, migrate to ^0.8.0
+ * 
  */
-pragma solidity >=0.5.0 <0.9.0;
+pragma solidity ^0.8.0;
 
 contract DeployedContract {
     
@@ -35,7 +39,7 @@ contract ContractCaller  {
     
     DeployedContract dc;
     
-    constructor(address _t) public {
+    constructor(address _t) {
         dc = DeployedContract(_t);
     }
     
@@ -67,7 +71,7 @@ contract ContractCallerAbi  {
     
     address dc;
     
-    constructor(address _t) public {
+    constructor(address _t) {
         dc = _t;
     }
     

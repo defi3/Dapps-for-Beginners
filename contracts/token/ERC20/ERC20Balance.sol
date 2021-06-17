@@ -1,20 +1,21 @@
 /**
- *   Source: https://docs.soliditylang.org/en/v0.8.0/solidity-by-example.html#modular-contracts
+ *  SPDX-License-Identifier: MIT
  * 
- *   Reference: https://medium.com/coinmonks/math-in-solidity-part-2-overflow-3cd7283714b4
+ *  Source: https://docs.soliditylang.org/en/v0.8.0/solidity-by-example.html#modular-contracts
  * 
- *   @Author defi3
+ *  Reference: https://medium.com/coinmonks/math-in-solidity-part-2-overflow-3cd7283714b4
  * 
- *   Main Update 1, 2021-05-31, add error messages for require functions
+ *  @Author defi3
+ * 
+ * 
+ *  Main Update 1, 2021-05-31, add error messages for require functions
+ * 
+ *  Main Update 2, 2021-06-17, migrate to ^0.8.0
  * 
  */
-pragma solidity >=0.5.0 <0.9.0;
-
-import "../../utils/SafeMath.sol";
+pragma solidity ^0.8.0;
 
 library ERC20Balances {
-    using SafeMath for uint256;
-    
     function move(mapping(address => uint256) storage balances, address from, address to, uint amount) internal {
         require(to != address(0), "Balances::move: do not transfer money to address 0.");
         
@@ -22,8 +23,8 @@ library ERC20Balances {
         
         require(balances[to] + amount >= balances[to], "Balances::move: overflow is possible in address to.");
         
-        balances[from] = balances[from].sub(amount);
+        balances[from] -= amount;
         
-        balances[to] = balances[to].add(amount);
+        balances[to] += amount;
     }
 }

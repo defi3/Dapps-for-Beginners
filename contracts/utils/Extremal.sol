@@ -1,18 +1,22 @@
 /**
+ *  SPDX-License-Identifier: MIT
+ * 
  *  Reference: https://jeancvllr.medium.com/solidity-tutorial-all-about-modifiers-a86cf81c14cb
  * 
  *  @Authoer defi3
  * 
+ * 
+ *  Main Update 1, 2021-06-17, migrate to ^0.8.0
+ * 
  */
- 
 import "./Minimal.sol";
 import "./Maximal.sol";
 
-pragma solidity >=0.5.0 <0.6.0;
+pragma solidity ^0.8.0;
 
-contract Extremal is Minimal, Maximal {
+abstract contract Extremal is Minimal, Maximal {
 
-    constructor(uint256 min_, uint256 max_) Minimal(min_) Maximal(max_) internal {
+    constructor(uint256 min_, uint256 max_) Minimal(min_) Maximal(max_) {
     }
     
     modifier extremum(uint256 amount) {

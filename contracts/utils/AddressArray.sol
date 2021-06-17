@@ -1,10 +1,15 @@
-/**
- *   Reference: https://github.com/raineorshine/solidity-by-example/blob/master/remove-from-array.sol
+/**  
+ *  SPDX-License-Identifier: MIT
  * 
- *   @Author defi3
+ *  Reference: https://github.com/raineorshine/solidity-by-example/blob/master/remove-from-array.sol
+ * 
+ *  @Author defi3
+ * 
+ * 
+ *  Main Update 1, 2021-06-17, migrate to ^0.8.0
  * 
  */
-pragma solidity >=0.5.0 <0.9.0;
+pragma solidity ^0.8.0;
 
 library AddressArray {
     function find(address[] storage arr, address a) internal view returns(uint) {
@@ -32,7 +37,7 @@ library AddressArray {
             i++;
         }
         
-        arr.length--;
+        arr.pop();
     }
     
     function removeByValue(address[] storage arr, address a) internal {
