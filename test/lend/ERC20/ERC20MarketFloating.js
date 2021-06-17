@@ -25,7 +25,7 @@ contract("ERC20MarketFloating", (accounts) => {
   const ANNUAL_RATE = 1e9;			// FACTOR / 1000 * BLOCKS_PER_YEAR = 1e9
   const UTILIZATION_RATE_FRACTION = 1e9;	// FACTOR / 1000 * BLOCKS_PER_YEAR = 1e9
 
-  it("deploy contracts", async () => {
+  before(async () => {
     this.token = await Token.new("DAI", "DAI", INIT_AMOUNT * MANTISSA, DECIMALS, { from: alice });
     this.market = await Market.new(this.token.address, 0, 2000 * MANTISSA, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: alice });
 
@@ -33,6 +33,16 @@ contract("ERC20MarketFloating", (accounts) => {
     this.market2 = await Market.new(this.token2.address, 0, 2000 * MANTISSA, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: bob });
 
     this.controller = await Controller.new({ from: alice });
+  });
+
+  after(async () => {
+    await this.controller.terminate({ from: alice });
+
+    await this.market.terminate({ from: alice });
+    await this.token.terminate({ from: alice });
+
+    await this.market2.terminate({ from: bob });
+    await this.token2.terminate({ from: bob });
   });
 
   it("check original state of market", async () => {
@@ -555,16 +565,6 @@ contract("ERC20MarketFloating", (accounts) => {
 
   it("alice liquidate bob's borrow", async () => {
     // TO-DO
-  });
-
-  it("cleanup", async () => {
-    await this.controller.terminate({ from: alice });
-
-    await this.market.terminate({ from: alice });
-    await this.token.terminate({ from: alice });
-
-    await this.market2.terminate({ from: bob });
-    await this.token2.terminate({ from: bob });
   });
 });
 

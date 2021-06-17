@@ -21,7 +21,7 @@ contract("SimpleERC20Controller", (accounts) => {
   const FACTOR = 1e6;
   const INIT_AMOUNT = 1e6;
 
-  it("deploy contracts", async () => {
+  before(async () => {
     this.token = await Token.new("DAI", "DAI", INIT_AMOUNT * MANTISSA, DECIMALS, { from: alice });
     this.market = await Market.new(this.token.address, 0, 2000 * MANTISSA, { from: alice });
 
@@ -29,6 +29,16 @@ contract("SimpleERC20Controller", (accounts) => {
     this.market2 = await Market.new(this.token2.address, 0, 2000 * MANTISSA, { from: bob });
 
     this.controller = await Controller.new({ from: alice });
+  });
+
+  after(async () => {
+    await this.controller.terminate({ from: alice });
+
+    await this.market.terminate({ from: alice });
+    await this.token.terminate({ from: alice });
+
+    await this.market2.terminate({ from: bob });
+    await this.token2.terminate({ from: bob });
   });
 
   it("check original state", async () => {
@@ -233,16 +243,6 @@ contract("SimpleERC20Controller", (accounts) => {
     console.log("bob's liquidity status: " + liquidityOfBob.status + "\tliquidity: " + liquidityOfBob.liquidity_ / MANTISSA);
     // assert.equal(liquidityOfBob.status, true);
     // assert.equal(liquidityOfBob.liquidity_, 0);
-  });
-
-  it("cleanup", async () => {
-    await this.controller.terminate({ from: alice });
-
-    await this.market.terminate({ from: alice });
-    await this.token.terminate({ from: alice });
-
-    await this.market2.terminate({ from: bob });
-    await this.token2.terminate({ from: bob });
   });
 });
 
