@@ -356,6 +356,16 @@ contract("SimpleERC20Market", (accounts) => {
 
     assert.equal(balanceOfBob / MANTISSA + balanceOfMarket2 / MANTISSA + balanceOfAlice / MANTISSA, INIT_AMOUNT);
   });
+
+  it("cleanup", async () => {
+    await this.controller.terminate({ from: alice });
+
+    await this.market.terminate({ from: alice });
+    await this.token.terminate({ from: alice });
+
+    await this.market2.terminate({ from: bob });
+    await this.token2.terminate({ from: bob });
+  });
 });
 
 

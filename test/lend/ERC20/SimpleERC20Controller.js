@@ -234,6 +234,16 @@ contract("SimpleERC20Controller", (accounts) => {
     // assert.equal(liquidityOfBob.status, true);
     // assert.equal(liquidityOfBob.liquidity_, 0);
   });
+
+  it("cleanup", async () => {
+    await this.controller.terminate({ from: alice });
+
+    await this.market.terminate({ from: alice });
+    await this.token.terminate({ from: alice });
+
+    await this.market2.terminate({ from: bob });
+    await this.token2.terminate({ from: bob });
+  });
 });
 
 

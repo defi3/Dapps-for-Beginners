@@ -40,4 +40,11 @@ contract Ownable {
     function isOwner() public view returns(bool) {
         return msg.sender == _owner;
     }
+    
+    /**
+     * terminate the contract and release any outstanding funds back to the contract owner.
+     */
+    function terminate() public onlyOwner {
+        selfdestruct(msg.sender);
+    }
 }

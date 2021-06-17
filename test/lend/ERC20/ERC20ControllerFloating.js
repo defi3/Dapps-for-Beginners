@@ -214,6 +214,16 @@ contract("ERC20ControllerFloating", (accounts) => {
     res = await this.controller.accountLiquidity(bob, this.market2.address, 0);
     console.log("bob's liquidity status: " + res.status + "\tbob's liquidity: " + res.liquidity_);
   });
+
+  it("cleanup", async () => {
+    await this.controller.terminate({ from: alice });
+
+    await this.market.terminate({ from: alice });
+    await this.token.terminate({ from: alice });
+
+    await this.market2.terminate({ from: bob });
+    await this.token2.terminate({ from: bob });
+  });
 });
 
 
