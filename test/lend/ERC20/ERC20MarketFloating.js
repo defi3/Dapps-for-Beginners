@@ -30,7 +30,7 @@ contract("ERC20MarketFloating", (accounts) => {
     this.market = await Market.new(this.token.address, 0, 2000 * MANTISSA, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: alice });
 
     this.token2 = await Token.new("BAT", "BAT", INIT_AMOUNT * MANTISSA, DECIMALS, { from: bob });
-    this.market2 = await Market.new(this.token2.address, 0, 2000 * MANTISSA, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: bob });
+    this.market2 = await Market.new(this.token2.address, 0, 2000 * MANTISSA, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: alice });
 
     this.controller = await Controller.new({ from: alice });
   });
@@ -41,7 +41,7 @@ contract("ERC20MarketFloating", (accounts) => {
     await this.market.terminate({ from: alice });
     await this.token.terminate({ from: alice });
 
-    await this.market2.terminate({ from: bob });
+    await this.market2.terminate({ from: alice });
     await this.token2.terminate({ from: bob });
   });
 
@@ -61,6 +61,7 @@ contract("ERC20MarketFloating", (accounts) => {
     assert.equal(await this.market.totalBorrow(), 0);
 
     // ERC20Market
+    assert.equal(await this.market.price(), 0);
     assert.equal(await this.market.balance(), 0);
 
     // ERC20MarketFloating
@@ -88,7 +89,7 @@ contract("ERC20MarketFloating", (accounts) => {
     assert.equal(await this.market2.FACTOR(), FACTOR);
 
     // Controllable
-    assert.equal(await this.market2.owner(), bob);
+    assert.equal(await this.market2.owner(), alice);
     assert.equal(await this.market2.controller(), 0);
 
     // Market
@@ -99,6 +100,7 @@ contract("ERC20MarketFloating", (accounts) => {
     assert.equal(await this.market2.totalBorrow(), 0);
 
     // ERC20Market
+    assert.equal(await this.market2.price(), 0);
     assert.equal(await this.market2.balance(), 0);
 
     // ERC20MarketFloating
@@ -132,7 +134,7 @@ contract("ERC20MarketFloating", (accounts) => {
 
     // Controllable
     await this.market.setController(this.controller.address, { from: alice });
-    await this.market2.setController(this.controller.address, { from: bob });
+    await this.market2.setController(this.controller.address, { from: alice });
 
     assert.equal(await this.market.controller(), this.controller.address);
     assert.equal(await this.market2.controller(), this.controller.address);
@@ -146,12 +148,22 @@ contract("ERC20MarketFloating", (accounts) => {
     assert.equal(await this.controller.marketOf(this.token.address), this.market.address);
     assert.equal(await this.controller.marketOf(this.token2.address), this.market2.address);
 
-    // ERC20Controller
-    await this.controller.setPrice(this.market.address, 1, { from: alice });
-    await this.controller.setPrice(this.market2.address, 2, { from: alice });
+    // ERC20Market
+    try {
+      await this.market.setPrice(1, { from: bob });
+    } catch (err) {
+      console.log("only owner can set price");
+    }
 
-    assert.equal(await this.controller.priceOf(this.market.address), 1);
-    assert.equal(await this.controller.priceOf(this.market2.address), 2);
+    await this.market.setPrice(1, { from: alice });
+
+    try {
+      await this.market2.setPrice(2, { from: bob });
+    } catch (err) {
+      console.log("only owner can set price");
+    }
+
+    await this.market2.setPrice(2, { from: alice });
   });
 
   it("check initial state of market", async () => {
@@ -162,6 +174,7 @@ contract("ERC20MarketFloating", (accounts) => {
     assert.equal(await this.market.totalBorrow(), 0);
 
     // ERC20Market
+    assert.equal(await this.market.price(), 1);
     assert.equal(await this.market.balance(), 0);
 
     // ERC20MarketFloating
@@ -198,6 +211,7 @@ contract("ERC20MarketFloating", (accounts) => {
     assert.equal(await this.market2.totalBorrow(), 0);
 
     // ERC20Market
+    assert.equal(await this.market2.price(), 2);
     assert.equal(await this.market2.balance(), 0);
 
     // ERC20MarketFloating
