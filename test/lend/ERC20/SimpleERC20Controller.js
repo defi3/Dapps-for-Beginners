@@ -157,25 +157,10 @@ contract("SimpleERC20Controller", (accounts) => {
 
 
     // ERC20Market
-    try {
-      await this.market.setPrice(1, { from: bob });
-    } catch (err) {
-      console.log("only owner can set price");
-    }
-
     await this.market.setPrice(1, { from: alice });
-
     assert.equal(await this.market.price(), 1);
 
-
-    try {
-      await this.market2.setPrice(2, { from: bob });
-    } catch (err) {
-      console.log("only owner can set price");
-    }
-
     await this.market2.setPrice(2, { from: alice });
-
     assert.equal(await this.market2.price(), 2);
   });
 
