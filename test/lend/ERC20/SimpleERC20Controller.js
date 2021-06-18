@@ -26,7 +26,7 @@ contract("SimpleERC20Controller", (accounts) => {
     this.market = await Market.new(this.token.address, 0, 2000 * MANTISSA, { from: alice });
 
     this.token2 = await Token.new("BAT", "BAT", INIT_AMOUNT * MANTISSA, DECIMALS, { from: bob });
-    this.market2 = await Market.new(this.token2.address, 0, 2000 * MANTISSA, { from: bob });
+    this.market2 = await Market.new(this.token2.address, 0, 2000 * MANTISSA, { from: alice });
 
     this.controller = await Controller.new({ from: alice });
   });
@@ -37,7 +37,7 @@ contract("SimpleERC20Controller", (accounts) => {
     await this.market.terminate({ from: alice });
     await this.token.terminate({ from: alice });
 
-    await this.market2.terminate({ from: bob });
+    await this.market2.terminate({ from: alice });
     await this.token2.terminate({ from: bob });
   });
 
@@ -96,7 +96,7 @@ contract("SimpleERC20Controller", (accounts) => {
     }
 
     try {
-      await this.market2.setController(this.controller.address, { from: alice });
+      await this.market2.setController(this.controller.address, { from: bob });
     } catch (err) {
       console.log("only owner can set controller");
     }
@@ -105,7 +105,7 @@ contract("SimpleERC20Controller", (accounts) => {
 
     assert.equal(await this.market.controller(), this.controller.address);
 
-    await this.market2.setController(this.controller.address, { from: bob });
+    await this.market2.setController(this.controller.address, { from: alice });
 
     assert.equal(await this.market2.controller(), this.controller.address);
   });
