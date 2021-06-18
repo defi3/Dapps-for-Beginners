@@ -30,7 +30,7 @@ contract("ERC20ControllerFloating", (accounts) => {
     this.market = await Market.new(this.token.address, 0, 2000 * MANTISSA, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: alice });
 
     this.token2 = await Token.new("BAT", "BAT", INIT_AMOUNT * MANTISSA, DECIMALS, { from: bob });
-    this.market2 = await Market.new(this.token2.address, 0, 2000 * MANTISSA, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: bob });
+    this.market2 = await Market.new(this.token2.address, 0, 2000 * MANTISSA, ANNUAL_RATE, BLOCKS_PER_YEAR, UTILIZATION_RATE_FRACTION, { from: alice });
 
     this.controller = await Controller.new({ from: alice });
   });
@@ -41,7 +41,7 @@ contract("ERC20ControllerFloating", (accounts) => {
     await this.market.terminate({ from: alice });
     await this.token.terminate({ from: alice });
 
-    await this.market2.terminate({ from: bob });
+    await this.market2.terminate({ from: alice });
     await this.token2.terminate({ from: bob });
   });
 
@@ -63,8 +63,13 @@ contract("ERC20ControllerFloating", (accounts) => {
     // ERC20Controller
     assert.equal(await this.controller.MANTISSA(), MANTISSA);
 
-    assert.equal(await this.controller.priceOf(this.market.address), 0);
-    assert.equal(await this.controller.priceOf(this.market2.address), 0);
+    // Controllable
+    assert.equal(await this.market.controller(), 0);
+    assert.equal(await this.market2.controller(), 0);
+
+    // ERC20Market
+    assert.equal(await this.market.price(), 0);
+    assert.equal(await this.market2.price(), 0);
   });
 
   it("initialize controller", async () => {
@@ -76,8 +81,7 @@ contract("ERC20ControllerFloating", (accounts) => {
 
     await this.controller.setCollateralFactor(1 * MANTISSA, { from: alice });
 
-    factor = await this.controller.collateralFactor();
-    assert.equal(factor, 1 * MANTISSA);
+    assert.equal(await this.controller.collateralFactor(), 1 * MANTISSA);
 
 
     try {
@@ -88,8 +92,7 @@ contract("ERC20ControllerFloating", (accounts) => {
 
     await this.controller.setLiquidationFactor(MANTISSA / 2, { from: alice });
 
-    factor = await this.controller.liquidationFactor();
-    assert.equal(factor, MANTISSA / 2);
+    assert.equal(await this.controller.liquidationFactor(), MANTISSA / 2);
   });
 
   it("set controller", async () => {
@@ -100,20 +103,18 @@ contract("ERC20ControllerFloating", (accounts) => {
     }
 
     try {
-      await this.market2.setController(this.controller.address, { from: alice });
+      await this.market2.setController(this.controller.address, { from: bob });
     } catch (err) {
       console.log("only owner can set controller");
     }
 
     await this.market.setController(this.controller.address, { from: alice });
 
-    const controller = await this.market.controller();
-    assert.equal(controller, this.controller.address);
+    assert.equal(await this.market.controller(), this.controller.address);
 
-    await this.market2.setController(this.controller.address, { from: bob });
+    await this.market2.setController(this.controller.address, { from: alice });
 
-    const controller2 = await this.market2.controller();
-    assert.equal(controller2, this.controller.address);
+    assert.equal(await this.market2.controller(), this.controller.address);
   });
 
   it("add market", async () => {
@@ -132,39 +133,41 @@ contract("ERC20ControllerFloating", (accounts) => {
 
     await this.controller.addMarket(this.market.address, { from: alice });
 
-    size = (await this.controller.size()).toNumber();
-    assert.equal(size, 1);
+    assert.equal(await this.controller.size(), 1);
 
     await this.controller.addMarket(this.market2.address, { from: alice });
 
-    size = (await this.controller.size()).toNumber();
-    assert.equal(size, 2);
+    assert.equal(await this.controller.size(), 2);
 
 
     try {
-      await this.controller.setPrice(this.market.address, 1, { from: bob });
+      await this.controller.removeMarket(this.market.address, { from: bob });
     } catch (err) {
-      console.log("only owner can set price");
+      console.log("only owner can remove market");
     }
-
-    await this.controller.setPrice(this.market.address, 1, { from: alice });
-
-    const price = (await this.controller.priceOf(this.market.address)).toNumber();
-    // console.log(price);
-    assert.equal(price, 1);
-
 
     try {
-      await this.controller.setPrice(this.market2.address, 2, { from: bob });
+      await this.controller.removeMarket(this.market2.address, { from: bob });
     } catch (err) {
-      console.log("only owner can set price");
+      console.log("only owner can remove market 2");
     }
 
-    await this.controller.setPrice(this.market2.address, 2);
+    
+    await this.controller.removeMarket(this.market2.address, { from: alice });
 
-    const price2 = (await this.controller.priceOf(this.market2.address)).toNumber();
-    // console.log(price2);
-    assert.equal(price2, 2);
+    assert.equal(await this.controller.size(), 1);
+
+    await this.controller.addMarket(this.market2.address, { from: alice });
+
+    assert.equal(await this.controller.size(), 2);
+
+
+    // ERC20Market
+    await this.market.setPrice(1, { from: alice });
+    assert.equal(await this.market.price(), 1);
+
+    await this.market2.setPrice(2, { from: alice });
+    assert.equal(await this.market2.price(), 2);
   });
 
   it("check initial accounts", async () => {
