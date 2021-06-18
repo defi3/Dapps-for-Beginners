@@ -29,6 +29,9 @@ interface IERC20Market is IMarket {
     
     event LiquidateBorrow(address borrower, uint amount, address liquidator, address collateral, uint collateralAmount);
     
+    function setPrice(uint256 price_) external;
+    function price() external view returns (uint256);
+    
     function supplyOf(address account) external view returns (uint);
     function borrowBy(address account) external view returns (uint);
     

@@ -54,13 +54,13 @@ contract("SimpleERC20Controller", (accounts) => {
     assert.equal(await this.controller.marketOf(this.token.address), 0);
     assert.equal(await this.controller.marketOf(this.token2.address), 0);
 
-    // ERC20Controller
-    assert.equal(await this.controller.priceOf(this.market.address), 0);
-    assert.equal(await this.controller.priceOf(this.market2.address), 0);
-
     // Controllable
     assert.equal(await this.market.controller(), 0);
     assert.equal(await this.market2.controller(), 0);
+
+    // ERC20Market
+    assert.equal(await this.market.price(), 0);
+    assert.equal(await this.market2.price(), 0);
   });
 
   it("initialize controller", async () => {
@@ -156,27 +156,27 @@ contract("SimpleERC20Controller", (accounts) => {
     assert.equal(await this.controller.size(), 2);
 
 
-    // ERC20Controller
+    // ERC20Market
     try {
-      await this.controller.setPrice(this.market.address, 1, { from: bob });
+      await this.market.setPrice(1, { from: bob });
     } catch (err) {
       console.log("only owner can set price");
     }
 
-    await this.controller.setPrice(this.market.address, 1, { from: alice });
+    await this.market.setPrice(1, { from: alice });
 
-    assert.equal(await this.controller.priceOf(this.market.address), 1);
+    assert.equal(await this.market.price(), 1);
 
 
     try {
-      await this.controller.setPrice(this.market2.address, 2, { from: bob });
+      await this.market2.setPrice(2, { from: bob });
     } catch (err) {
       console.log("only owner can set price");
     }
 
-    await this.controller.setPrice(this.market2.address, 2);
+    await this.market2.setPrice(2, { from: alice });
 
-    assert.equal(await this.controller.priceOf(this.market2.address), 2);
+    assert.equal(await this.market2.price(), 2);
   });
 
   it("check initial accounts", async () => {
