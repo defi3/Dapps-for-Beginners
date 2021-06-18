@@ -70,17 +70,17 @@ contract("ERC20MarketFloating", (accounts) => {
     assert.equal(await this.market.supplyOf(bob), 0);
     assert.equal(await this.market.borrowBy(bob), 0);
 
-    assert.equal(await this.market.supplyRate(0, 0, 0), 0);
-    assert.equal(await this.market.supplyRate(1000, 1000, 0), 1 / 2 * (FACTOR / 2 / 1000 + FACTOR / 1000));
-    assert.equal(await this.market.supplyRate(2000, 1000, 1000), 1 / 2 * (FACTOR / 2 / 1000 + FACTOR / 1000));
+    assert.equal(await this.market.utilizationRate(0, 0, 0), 0);
+    assert.equal(await this.market.utilizationRate(1000, 1000, 0), FACTOR / 2);
+    assert.equal(await this.market.utilizationRate(2000, 1000, 1000), FACTOR / 2);
 
     assert.equal(await this.market.borrowRate(0, 0, 0), FACTOR / 1000);
     assert.equal(await this.market.borrowRate(1000, 1000, 0), FACTOR / 2 / 1000 + FACTOR / 1000);
     assert.equal(await this.market.borrowRate(2000, 1000, 1000), FACTOR / 2 / 1000 + FACTOR / 1000);
 
-    assert.equal(await this.market.utilizationRate(0, 0, 0), 0);
-    assert.equal(await this.market.utilizationRate(1000, 1000, 0), FACTOR / 2);
-    assert.equal(await this.market.utilizationRate(2000, 1000, 1000), FACTOR / 2);
+    assert.equal(await this.market.supplyRate(0, 0, 0), 0);
+    assert.equal(await this.market.supplyRate(1000, 1000, 0), 1 / 2 * (FACTOR / 2 / 1000 + FACTOR / 1000));
+    assert.equal(await this.market.supplyRate(2000, 1000, 1000), 1 / 2 * (FACTOR / 2 / 1000 + FACTOR / 1000));
   });
 
   it("check original state of market 2", async () => {
@@ -108,17 +108,18 @@ contract("ERC20MarketFloating", (accounts) => {
     assert.equal(await this.market2.supplyOf(bob), 0);
     assert.equal(await this.market2.borrowBy(bob), 0);
 
-    assert.equal(await this.market2.supplyRate(0, 0, 0), 0);
-    assert.equal(await this.market2.supplyRate(1000, 1000, 0), 1 / 2 * (FACTOR / 2 / 1000 + FACTOR / 1000));
-    assert.equal(await this.market2.supplyRate(2000, 1000, 1000), 1 / 2 * (FACTOR / 2 / 1000 + FACTOR / 1000));
+    assert.equal(await this.market2.utilizationRate(0, 0, 0), 0);
+    assert.equal(await this.market2.utilizationRate(1000, 1000, 0), FACTOR / 2);
+    assert.equal(await this.market2.utilizationRate(2000, 1000, 1000), FACTOR / 2);
 
     assert.equal(await this.market2.borrowRate(0, 0, 0), FACTOR / 1000);
     assert.equal(await this.market2.borrowRate(1000, 1000, 0), FACTOR / 2 / 1000 + FACTOR / 1000);
     assert.equal(await this.market2.borrowRate(2000, 1000, 1000), FACTOR / 2 / 1000 + FACTOR / 1000);
 
-    assert.equal(await this.market2.utilizationRate(0, 0, 0), 0);
-    assert.equal(await this.market2.utilizationRate(1000, 1000, 0), FACTOR / 2);
-    assert.equal(await this.market2.utilizationRate(2000, 1000, 1000), FACTOR / 2);
+
+    assert.equal(await this.market2.supplyRate(0, 0, 0), 0);
+    assert.equal(await this.market2.supplyRate(1000, 1000, 0), 1 / 2 * (FACTOR / 2 / 1000 + FACTOR / 1000));
+    assert.equal(await this.market2.supplyRate(2000, 1000, 1000), 1 / 2 * (FACTOR / 2 / 1000 + FACTOR / 1000));
   });
 
   it("set controller", async () => {

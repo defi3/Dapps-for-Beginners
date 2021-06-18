@@ -92,7 +92,7 @@ contract ERC20MarketFloating is ERC20Market, IMarketFloating {
         if (totalBorrow_ == 0)
             return 0;
 
-        return totalBorrow_ * FACTOR / (balance_ + totalBorrow_) / reserve_;
+        return totalBorrow_ * FACTOR / (balance_ + totalBorrow_ -  reserve_);
     }
 
     function borrowRate(uint balance_, uint totalBorrow_, uint reserve_) public view override returns (uint) {
