@@ -1,9 +1,11 @@
 /**
  *  SPDX-License-Identifier: MIT
  * 
+ * 
  *  Reference 1: https://github.com/loomnetwork/cryptozombie-lessons/blob/master/en/5/06-erc721-6.md
  * 
  *  Reference 2: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/ERC721.sol
+ * 
  * 
  *  @Author defi3
  * 

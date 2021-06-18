@@ -1,10 +1,14 @@
 /**
  *  SPDX-License-Identifier: MIT
  * 
+ * 
  *  Reference: https://github.com/ajlopez/DeFiProt/blob/master/contracts/test/BasicToken.sol
+ * 
  * 
  *  @Author defi3
  * 
+ * 
+ *  Creation, 2021-05
  * 
  *  Main Update 1, 2021-06-17, migrate to ^0.8.0
  * 
@@ -13,7 +17,6 @@ pragma solidity ^0.8.0;
 
 import "./IERC20Basic.sol";
 import "./ERC20Balance.sol";
-
 
 /**
  * @title Basic token

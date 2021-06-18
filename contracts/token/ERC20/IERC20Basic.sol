@@ -1,10 +1,14 @@
 /**
  *  SPDX-License-Identifier: MIT
  * 
+ * 
  *  Reference: https://github.com/ajlopez/DeFiProt/blob/master/contracts/test/ERC20Basic.sol
+ * 
  * 
  *  @Author defi3
  * 
+ * 
+ *  Creation, 2021-05
  * 
  *  Main Update 1, 2021-06-17, migrate to ^0.8.0
  * 

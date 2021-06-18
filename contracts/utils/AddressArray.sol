@@ -1,10 +1,14 @@
 /**  
  *  SPDX-License-Identifier: MIT
  * 
+ * 
  *  Reference: https://github.com/raineorshine/solidity-by-example/blob/master/remove-from-array.sol
+ * 
  * 
  *  @Author defi3
  * 
+ * 
+ *  Creation, 2021-06
  * 
  *  Main Update 1, 2021-06-17, migrate to ^0.8.0
  * 

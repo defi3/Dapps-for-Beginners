@@ -1,12 +1,16 @@
 /**
  *  SPDX-License-Identifier: MIT
+ *
  * 
  *  Reference 1: https://github.com/ajlopez/DeFiProt/blob/master/contracts/test/FaucetToken.sol
  * 
  *  Reference 2: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol
+ *
  * 
  *  @Author defi3
  * 
+ *
+ *  Creation, 2021-05
  * 
  *  Main Update 1, 2021-06-17, migrate to ^0.8.0
  * 

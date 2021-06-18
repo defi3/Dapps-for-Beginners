@@ -1,7 +1,14 @@
 /**
  *  SPDX-License-Identifier: MIT
+ *
  * 
  *  Source: https://github.com/loomnetwork/cryptozombie-lessons/blob/master/en/5/02-erc721-2.md
+ * 
+ * 
+ *  @Author defi3
+ * 
+ * 
+ *  Creation, 2021-06
  * 
  */
 pragma solidity ^0.8.0;

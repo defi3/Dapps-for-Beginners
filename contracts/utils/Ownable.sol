@@ -1,10 +1,14 @@
 /**
  *  SPDX-License-Identifier: MIT
  * 
+ * 
  *  Reference: https://github.com/loomnetwork/cryptozombie-lessons/blob/master/en/5/06-erc721-6.md
+ * 
  * 
  *  @ Author defi3
  * 
+ * 
+ *  Creation, 2021-05
  * 
  *  Main Update 1, 2021-06-12, simplification
  * 

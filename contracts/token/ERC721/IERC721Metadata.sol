@@ -1,7 +1,14 @@
 /**
  *  SPDX-License-Identifier: MIT
  * 
+ * 
  *  Source: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/extensions/IERC721Metadata.sol
+ * 
+ * 
+ *  @Author defi3
+ *
+ * 
+ *  Creation, 2021-06
  * 
  */
 pragma solidity ^0.8.0;

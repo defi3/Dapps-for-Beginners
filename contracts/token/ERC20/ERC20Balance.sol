@@ -1,12 +1,16 @@
 /**
  *  SPDX-License-Identifier: MIT
  * 
+ * 
  *  Source: https://docs.soliditylang.org/en/v0.8.0/solidity-by-example.html#modular-contracts
  * 
  *  Reference: https://medium.com/coinmonks/math-in-solidity-part-2-overflow-3cd7283714b4
  * 
+ * 
  *  @Author defi3
  * 
+ *  
+ *  Creation, 2021-06
  * 
  *  Main Update 1, 2021-05-31, add error messages for require functions
  * 

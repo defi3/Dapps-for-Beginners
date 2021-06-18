@@ -1,10 +1,14 @@
 /**
  *  SPDX-License-Identifier: MIT
  * 
+ * 
  *  Reference: https://jeancvllr.medium.com/solidity-tutorial-all-about-modifiers-a86cf81c14cb
+ * 
  * 
  *  @Authoer defi3
  * 
+ * 
+ *  Creation, 2021-06
  * 
  *  Main Update 1, 2021-06-17, migrate to ^0.8.0
  * 

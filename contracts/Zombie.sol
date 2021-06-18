@@ -3,6 +3,9 @@
  * 
  *  Source: https://github.com/loomnetwork/cryptozombie-lessons/blob/master/en/5/06-erc721-6.md
  * 
+ *  
+ *  Creation, 2021-06
+ * 
  */
 pragma solidity ^0.8.0;
 
