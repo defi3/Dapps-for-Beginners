@@ -16,7 +16,7 @@
  * 
  *  Main Update 2, 2021-06-17, migrate to ^0.8.0
  * 
- *  Main Update 3, 2021-06-19, add code and comments from Reference 2
+ *  Main Update 3, 2021-06-19, follow style of Ownable from OpenZeppelin
  * 
  */
 pragma solidity ^0.8.0;

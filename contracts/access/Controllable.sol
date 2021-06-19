@@ -9,13 +9,15 @@
  * 
  *  Main Update 1, 2021-06-17, migrate to ^0.8.0
  * 
+ *  Main Update 2, 2021-06-19, follow style of Ownable from OpenZeppelin
+ * 
  */
 pragma solidity ^0.8.0;
 
 import "./Ownable.sol";
 
 abstract contract Controllable is Ownable {
-    address internal _controller;
+    address private _controller;
 
     /**
      * @dev The Controllable constructor sets the original `owner` of the contract to the sender account.
@@ -30,22 +32,22 @@ abstract contract Controllable is Ownable {
         return _controller;
     }
     
+    function _isController() internal view returns(bool) {
+        return _msgSender() == _controller;
+    }
+    
     function setController(address controller_) external onlyOwner {
         _controller = controller_;
     }
     
-    function isController() public view returns(bool) {
-        return msg.sender == _controller;
-    }
-    
 
     modifier onlyController() {
-        require(isController(), "Controllable::_: only controller can call it");
+        require(_isController(), "Controllable::_: only controller can call it");
         _;
     }
     
     modifier onlyOwnerOrController() {
-        require(_isOwner() || isController(), "Controllable::_: only owner or controller can call it");
+        require(_isOwner() || _isController(), "Controllable::_: only owner or controller can call it");
         _;
     }
 }
