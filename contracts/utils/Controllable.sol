@@ -33,6 +33,11 @@ abstract contract Controllable is Ownable {
     function setController(address controller_) external onlyOwner {
         _controller = controller_;
     }
+    
+    function isController() public view returns(bool) {
+        return msg.sender == _controller;
+    }
+    
 
     modifier onlyController() {
         require(isController(), "Controllable::_: only controller can call it");
@@ -40,11 +45,7 @@ abstract contract Controllable is Ownable {
     }
     
     modifier onlyOwnerOrController() {
-        require((msg.sender == _owner) || (msg.sender == _controller), "Controllable::_: only owner or controller can call it");
+        require(_isOwner() || isController(), "Controllable::_: only owner or controller can call it");
         _;
-    }
-
-    function isController() public view returns(bool) {
-        return msg.sender == _controller;
     }
 }
