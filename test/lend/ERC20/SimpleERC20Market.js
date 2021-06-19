@@ -98,8 +98,8 @@ contract("SimpleERC20Market", (accounts) => {
     assert.equal(await this.controller.liquidationFactor(), MANTISSA / 2);
 
     // Controllable
-    await this.market.setController(this.controller.address, { from: alice });
-    await this.market2.setController(this.controller.address, { from: alice });
+    await this.market.transferControllership(this.controller.address, { from: alice });
+    await this.market2.transferControllership(this.controller.address, { from: alice });
 
     assert.equal(await this.market.controller(), this.controller.address);
     assert.equal(await this.market2.controller(), this.controller.address);

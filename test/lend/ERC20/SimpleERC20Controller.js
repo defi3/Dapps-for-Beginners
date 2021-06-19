@@ -90,22 +90,22 @@ contract("SimpleERC20Controller", (accounts) => {
   it("set controller", async () => {
     // Market
     try {
-      await this.market.setController(this.controller.address, { from: bob });
+      await this.market.transferControllership(this.controller.address, { from: bob });
     } catch (err) {
       console.log("only owner can set controller");
     }
 
     try {
-      await this.market2.setController(this.controller.address, { from: bob });
+      await this.market2.transferControllership(this.controller.address, { from: bob });
     } catch (err) {
       console.log("only owner can set controller");
     }
 
-    await this.market.setController(this.controller.address, { from: alice });
+    await this.market.transferControllership(this.controller.address, { from: alice });
 
     assert.equal(await this.market.controller(), this.controller.address);
 
-    await this.market2.setController(this.controller.address, { from: alice });
+    await this.market2.transferControllership(this.controller.address, { from: alice });
 
     assert.equal(await this.market2.controller(), this.controller.address);
   });

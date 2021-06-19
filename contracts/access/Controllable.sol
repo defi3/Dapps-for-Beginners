@@ -18,6 +18,8 @@ import "./Ownable.sol";
 
 abstract contract Controllable is Ownable {
     address private _controller;
+    
+    event ControllershipTransferred(address indexed previousController, address indexed newController);
 
     /**
      * @dev The Controllable constructor sets the original `owner` of the contract to the sender account.
@@ -28,16 +30,12 @@ abstract contract Controllable is Ownable {
     /**
      * @return the address of the controller.
      */
-    function controller() public view returns(address) {
+    function controller() public view virtual returns(address) {
         return _controller;
     }
     
     function _isController() internal view returns(bool) {
         return _msgSender() == _controller;
-    }
-    
-    function setController(address controller_) external onlyOwner {
-        _controller = controller_;
     }
     
 
@@ -49,5 +47,35 @@ abstract contract Controllable is Ownable {
     modifier onlyOwnerOrController() {
         require(_isOwner() || _isController(), "Controllable::_: only owner or controller can call it");
         _;
+    }
+    
+    
+    /**
+     * @dev Leaves the contract without controller. It will not be possible to call
+     * `onlyController` functions anymore. Can only be called by the current controller.
+     *
+     * NOTE: Renouncing controllership will leave the contract without an controller,
+     * thereby removing any functionality that is only available to the controller.
+     */
+    function renounceControllership() public virtual onlyOwner {
+        _setController(address(0));
+    }
+    
+    /**
+     * @dev Transfers Controllership of the contract to a new account (`newController`).
+     * Can only be called by the current controller.
+     */
+    function transferControllership(address newController) public virtual onlyOwner {
+        require(newController != address(0), "Controllable: new controller is the zero address");
+        
+        _setController(newController);
+    }
+    
+    function _setController(address newController) private {
+        address oldController = _controller;
+        
+        _controller = newController;
+        
+        emit ControllershipTransferred(oldController, newController);
     }
 }
