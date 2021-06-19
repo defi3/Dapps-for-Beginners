@@ -18,7 +18,7 @@
 pragma solidity ^0.8.0;
 
 import "./ERC20Standard.sol";
-import "../../utils/Ownable.sol";
+import "../../access/Ownable.sol";
 
 /**
   * @title The Compound Faucet Test Token
