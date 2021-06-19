@@ -28,6 +28,8 @@
  * 
  *  Main Update 9, 2021-06-17, migrate to ^0.8.0
  * 
+ *  Main Update 10, 2021-06-18, add _price, setPrice() and price()
+ * 
  */
 pragma solidity ^0.8.0;
 

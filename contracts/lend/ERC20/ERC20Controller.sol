@@ -18,6 +18,8 @@
  * 
  *  Main Update 5, 2021-06-17, migrate to ^0.8.0
  * 
+ *  Main Update 6, 2021-06-18, move price to ERC20Market
+ * 
  */
 pragma solidity ^0.8.0;
 
